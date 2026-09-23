@@ -30,8 +30,8 @@ FORTRESS Architecture: Weather Forecast  --->  [ FORTRESS Reliability Layer ]  -
 | **Phase 4** | Forecast Stress Lab + Forecast Failure Distance (FFD) | **COMPLETE** |
 | **Phase 5** | Failure Intelligence (Corridors & 6D Fingerprints) | **COMPLETE** |
 | **Phase 6** | Independent Evidence Layer (Analogues, Failure DNA, Ensemble, OOD) | **COMPLETE** |
-| **Phase 7** | AI Self-Audit + Trust Horizon + Breaking Point | **NEXT** |
-| **Phase 8** | Backend API + Dashboard + Reliability Passport | **PLANNED** |
+| **Phase 7** | AI Self-Audit + Trust Horizon + Breaking Point | **COMPLETE** |
+| **Phase 8** | Backend API + Dashboard + Reliability Passport | **NEXT** |
 | **Phase 9** | Decision-Support Extensions (Agriculture, Disaster, Urban) | **PLANNED** |
 | **Phase 10** | AI Assistant + Multilingual Voice Interface | **PLANNED** |
 | **Phase 11** | Multi-Region / Multi-Year Expansion | **PLANNED** |
@@ -50,23 +50,12 @@ FORTRESS Architecture: Weather Forecast  --->  [ FORTRESS Reliability Layer ]  -
 - **Forecast Initialization Dates**: 12 historical dates across 2019 monsoon & winter season
 - **Master Dataset Volume**: 38,760 forecast state rows (12 dates × 323 grid points × 10 lead days)
 
-### Forecast Predictor Inventory
-- **Ensemble Members (5)**: `c00` (control), `p01`, `p02`, `p03`, `p04` (perturbed)
-- **Implemented Atmospheric Variables**:
-  - `temp_2m_c`: 2m Temperature (°C)
-  - `specific_humidity_gkg`: 2m Specific Humidity (g/kg)
-  - `mslp_hpa`: Mean Sea Level Pressure (hPa)
-  - `pwat_mm`: Precipitable Water (mm liquid equivalent)
-  - `u10_mean_ms`, `v10_mean_ms`, `wind_speed_mean_ms`: 10m Wind Vector & Speed (m/s)
-- **Candidate Predictors (Planned Expansion)**:
-  - 850 hPa U/V Wind, 850 hPa Humidity, 500 hPa Geopotential Height, Vertical Velocity, CAPE, Moisture Convergence, Weather Regimes.
-
 ---
 
-## 4. Operational Pipeline Architecture (Phases 1–6)
+## 4. Operational Pipeline Architecture (Phases 1–7)
 
 1. **Feature Extraction (`scripts/batch_build_dates.py`)**:
-   - Extract ensemble rainfall accumulations (summing 4 non-overlapping 6-hour blocks for exact 24h totals) and 3-hourly atmospheric state statistics across D1-D10.
+   - Extract ensemble rainfall accumulations and 3-hourly atmospheric state statistics across D1-D10.
    - Saves: `data/processed/FORTRESS_GEFS_HISTORY.parquet`
 
 2. **Observed Error & Bust Labeling (`scripts/build_obs_and_bust_labels.py`)**:
@@ -89,12 +78,12 @@ FORTRESS Architecture: Weather Forecast  --->  [ FORTRESS Reliability Layer ]  -
    - Saves: `data/processed/FORTRESS_FAILURE_CORRIDORS.parquet`, `FORTRESS_FAILURE_FINGERPRINTS.parquet`, `FORTRESS_FAILURE_INTELLIGENCE.parquet`
 
 6. **Independent Evidence Layer (`scripts/build_independent_evidence.py`)**:
-   - Decoupled 4-stream verification without data leakage:
-     - **Historical Analogues**: Strict leak-free prior KNN search ($T_{prior} < T$) saving `FORTRESS_HISTORICAL_ANALOGUES.parquet`.
-     - **Failure DNA**: 6D fingerprint cosine similarity against verified prior busts (`failure_dna_risk_flag`).
-     - **Ensemble Evidence**: Lead-wise spread and range percentile ranks (`ensemble_disagreement_score`).
-     - **OOD / Novelty Detection**: Leak-free `IsolationForest` trained on training dates saving `models/fortress_ood_model.pkl`.
-   - Saves: `data/processed/FORTRESS_INDEPENDENT_EVIDENCE.parquet` (38,760 rows, 87 columns, 0 missing values).
+   - Decoupled 4-stream verification without data leakage (Analogues, Failure DNA, Ensemble Disagreement, OOD Novelty).
+   - Saves: `data/processed/FORTRESS_HISTORICAL_ANALOGUES.parquet`, `models/fortress_ood_model.pkl`, `data/processed/FORTRESS_INDEPENDENT_EVIDENCE.parquet`.
+
+7. **AI Self-Audit & Trust Horizon (`scripts/build_self_audit.py`)**:
+   - Integrates Bust AI and 4 independent evidence streams into explainable self-audit status, diagnostic `trust_index` (0–100), reliability bands (GREEN/YELLOW/RED), grid-level & regional D1-D10 `trust_horizon_day` and sustained `breaking_point_day`.
+   - Saves: `data/processed/FORTRESS_SELF_AUDIT.parquet` (38,760 rows, 101 columns) and `data/processed/FORTRESS_TRUST_HORIZON.parquet` (120 regional summary rows).
 
 ---
 
@@ -104,21 +93,16 @@ Run the automated Phase 1–6 audit suite:
 ```bash
 python scripts/validate_fortress_phase1_to_phase6.py
 ```
-All 14 scientific and data invariant checks pass with zero duplicate keys, zero missing values, and zero temporal leakage.
+Run the Phase 7 Self-Audit pipeline:
+```bash
+python scripts/build_self_audit.py
+```
+All invariant checks pass with zero duplicate keys, zero missing values, and zero temporal leakage.
 
 ---
 
 ## 6. Project Status Summary
 
-- **Implementation**: COMPLETE (Phases 1–6)
+- **Implementation**: COMPLETE (Phases 1–7)
 - **Technical Validation**: VERIFIED & REPRODUCIBLE
 - **Scientific Validation Status**: Prototype Implemented / Multi-Year Operational Validation Pending
-
----
-
-## 7. Known Prototype Limitations
-
-1. **Pilot Scope**: 12 initialization dates over Eastern UP pilot box (multi-year, multi-region expansion planned for Phase 11).
-2. **Q95 Threshold Definition**: prototype quantile error cutoff; operational deployment will use climatological historical baselines.
-3. **Cosine Similarity Heuristics**: Failure DNA similarity threshold (0.85) is an empirical heuristic on positive rank vectors.
-4. **Ensemble Size**: 5 GEFS reforecast members (`c00`, `p01`-`p04`); operational 31-member GEFS expansion planned.

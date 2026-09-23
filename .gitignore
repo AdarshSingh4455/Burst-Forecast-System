@@ -1,0 +1,32 @@
+# Raw / large weather data
+data/raw/
+data/interim/
+
+# Weather data formats
+*.grib
+*.grib2
+*.grb2
+*.nc
+*.zarr
+
+# Python cache
+__pycache__/
+*.pyc
+
+# Conda / virtual environments
+.venv/
+venv/
+
+# Jupyter
+.ipynb_checkpoints/
+
+# Environment / secrets
+.env
+
+# VS Code / IDE
+.vscode/
+.idea/
+
+# Windows / Mac junk
+Thumbs.db
+.DS_Store

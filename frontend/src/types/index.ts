@@ -564,5 +564,121 @@ export interface DisasterScenarioResponse {
   data_mode: string;
 }
 
+// Phase 9D Renewable Energy / Grid Decision Support Interfaces
+export interface RenewableSummary {
+  scenario_id: string;
+  name: string;
+  latitude: number;
+  longitude: number;
+  district_label: string;
+  state: string;
+  data_mode: string;
+  technology_type: string;
+  planning_mode: string;
+  variability_sensitivity: string;
+  grid_sensitivity: string;
+  installed_capacity_mode: string;
+  installed_capacity_mw: number;
+  solar_irradiance_available: boolean;
+  coverage_available: boolean;
+  in_pilot_coverage: boolean;
+}
+
+export interface RenewableLeadContext {
+  lead_day: number;
+  wind_speed_10m_ms: number;
+  wind_change_ms: number;
+  rainfall_mm: number;
+  temperature_c: number;
+  humidity_gkg: number;
+  bust_probability: number;
+  ffd: number;
+  ffd_failure_found: boolean;
+  fragility_category: string;
+  trust_index: number;
+  reliability_band: string;
+  self_audit_status: string;
+  attention_status?: ('NORMAL_MONITORING' | 'GENERATION_VARIABILITY_REVIEW' | 'GRID_PREPAREDNESS_REVIEW' | 'HIGH_UNCERTAINTY_EXPERT_REVIEW') | null;
+}
+
+export interface RenewableForecastContextResponse {
+  scenario_id: string;
+  scenario_name: string;
+  forecast_init: string;
+  data_mode: string;
+  coverage_available: boolean;
+  in_pilot_coverage: boolean;
+  context_mode: string;
+  reason?: string | null;
+  forecast_context?: string | null;
+  lead_contexts?: RenewableLeadContext[] | null;
+}
+
+export interface RenewableDecisionSupportResponse {
+  scenario_id: string;
+  scenario_name: string;
+  data_mode: string;
+  forecast_init: string;
+  lead_day: number;
+  latitude: number;
+  longitude: number;
+  coverage_available: boolean;
+  in_pilot_coverage: boolean;
+  context_mode: string;
+  technology_type: string;
+  planning_mode: string;
+  variability_sensitivity: string;
+  grid_sensitivity: string;
+  installed_capacity_mode: string;
+  installed_capacity_mw: number;
+  solar_diagnostic_available: boolean;
+  solar_message: string;
+  forecast_context?: any;
+  decision_support?: any;
+  wind_speed_10m_ms?: number | null;
+  wind_change_ms?: number | null;
+  wind_range_d1_d3_ms?: number | null;
+  rainfall_mm?: number | null;
+  temperature_c?: number | null;
+  humidity_gkg?: number | null;
+  bust_probability?: number | null;
+  ffd?: number | null;
+  ffd_failure_found?: boolean | null;
+  fragility_category?: string | null;
+  ensemble_disagreement_category?: string | null;
+  ood_category?: string | null;
+  self_audit_status?: string | null;
+  self_audit_reason?: string | null;
+  trust_index?: number | null;
+  reliability_band?: ('GREEN' | 'YELLOW' | 'RED') | null;
+  trust_horizon_day?: number | null;
+  breaking_point_day?: number | null;
+  is_what_if_override?: boolean;
+  wind_speed_ms_override?: number | null;
+  attention_status?: ('NORMAL_MONITORING' | 'GENERATION_VARIABILITY_REVIEW' | 'GRID_PREPAREDNESS_REVIEW' | 'HIGH_UNCERTAINTY_EXPERT_REVIEW') | null;
+  weather_flags: string[];
+  reasons: string[];
+  limitations: string[];
+  disclaimer: string;
+}
+
+export interface RenewableScenarioResponse {
+  scenario_id: string;
+  scenario_name: string;
+  technology_type: string;
+  planning_mode: string;
+  variability_sensitivity: string;
+  grid_sensitivity: string;
+  coverage_available: boolean;
+  is_what_if_override?: boolean;
+  actual_wind_speed_10m_ms?: number | null;
+  wind_speed_ms_override?: number | null;
+  attention_status?: ('NORMAL_MONITORING' | 'GENERATION_VARIABILITY_REVIEW' | 'GRID_PREPAREDNESS_REVIEW' | 'HIGH_UNCERTAINTY_EXPERT_REVIEW') | null;
+  weather_flags: string[];
+  reasons: string[];
+  data_mode: string;
+}
+
+
 
 

@@ -17,7 +17,11 @@ import {
   fetchDisasterScenarios,
   fetchDisasterForecastContext,
   fetchDisasterDecisionSupport,
-  postDisasterScenario
+  postDisasterScenario,
+  fetchRenewableScenarios,
+  fetchRenewableForecastContext,
+  fetchRenewableDecisionSupport,
+  postRenewableScenario
 } from '../lib/api';
 import { 
   ReservoirSummary, 
@@ -31,7 +35,11 @@ import {
   DisasterSummary,
   DisasterForecastContextResponse,
   DisasterDecisionSupportResponse,
-  DisasterScenarioResponse
+  DisasterScenarioResponse,
+  RenewableSummary,
+  RenewableForecastContextResponse,
+  RenewableDecisionSupportResponse,
+  RenewableScenarioResponse
 } from '../types';
 
 interface DecisionSupportViewProps {
@@ -88,6 +96,18 @@ export const DecisionSupportView: React.FC<DecisionSupportViewProps> = ({
   const [disasterForecastContext, setDisasterForecastContext] = useState<DisasterForecastContextResponse | null>(null);
   const [whatIfDisasterResult, setWhatIfDisasterResult] = useState<DisasterScenarioResponse | null>(null);
 
+  // State for Renewable Energy / Grid Decision Support (Phase 9D)
+  const [renewableScenarios, setRenewableScenarios] = useState<RenewableSummary[]>([]);
+  const [selectedRenewableId, setSelectedRenewableId] = useState<string>('RENEW_EUP_01');
+  const [renewableTech, setRenewableTech] = useState<string>('WIND');
+  const [renewableMode, setRenewableMode] = useState<string>('GENERATION_PLANNING_REVIEW');
+  const [renewableVSens, setRenewableVSens] = useState<string>('HIGH');
+  const [renewableGSens, setRenewableGSens] = useState<string>('HIGH');
+  const [whatIfRenewableWindOverride, setWhatIfRenewableWindOverride] = useState<number | undefined>(undefined);
+  const [renewableDecisionSupport, setRenewableDecisionSupport] = useState<RenewableDecisionSupportResponse | null>(null);
+  const [renewableForecastContext, setRenewableForecastContext] = useState<RenewableForecastContextResponse | null>(null);
+  const [whatIfRenewableResult, setWhatIfRenewableResult] = useState<RenewableScenarioResponse | null>(null);
+
   // Global UI states
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
@@ -101,15 +121,17 @@ export const DecisionSupportView: React.FC<DecisionSupportViewProps> = ({
     async function initData() {
       try {
         setLoading(true);
-        const [resList, agriList, disList, runs] = await Promise.all([
+        const [resList, agriList, disList, renewList, runs] = await Promise.all([
           fetchReservoirs(),
           fetchAgricultureScenarios(),
           fetchDisasterScenarios(),
+          fetchRenewableScenarios(),
           fetchForecastRuns()
         ]);
         setReservoirs(resList);
         setAgricultureScenarios(agriList);
         setDisasterScenarios(disList);
+        setRenewableScenarios(renewList);
         setForecastRuns(runs);
 
         if (resList.length > 0) {
@@ -131,6 +153,14 @@ export const DecisionSupportView: React.FC<DecisionSupportViewProps> = ({
           setDisasterMode(disList[0].preparedness_mode);
           setDisasterVuln(disList[0].vulnerability_level);
           setDisasterExp(disList[0].exposure_level);
+        }
+
+        if (renewList.length > 0) {
+          setSelectedRenewableId(renewList[0].scenario_id);
+          setRenewableTech(renewList[0].technology_type);
+          setRenewableMode(renewList[0].planning_mode);
+          setRenewableVSens(renewList[0].variability_sensitivity);
+          setRenewableGSens(renewList[0].grid_sensitivity);
         }
 
         if (runs.length > 0) {
@@ -235,6 +265,35 @@ export const DecisionSupportView: React.FC<DecisionSupportViewProps> = ({
     loadDisasterData();
   }, [activeSector, selectedDisasterId, forecastInit, leadDay]);
 
+  // Fetch Renewable Data
+  useEffect(() => {
+    if (activeSector !== 'grid' || !selectedRenewableId || !forecastInit) return;
+
+    async function loadRenewableData() {
+      try {
+        setLoading(true);
+        setError(null);
+        const [dsData, ctxData] = await Promise.all([
+          fetchRenewableDecisionSupport(selectedRenewableId, forecastInit, leadDay),
+          fetchRenewableForecastContext(selectedRenewableId, forecastInit)
+        ]);
+        setRenewableDecisionSupport(dsData);
+        setRenewableForecastContext(ctxData);
+        setRenewableTech(dsData.technology_type);
+        setRenewableMode(dsData.planning_mode);
+        setRenewableVSens(dsData.variability_sensitivity);
+        setRenewableGSens(dsData.grid_sensitivity);
+        setWhatIfRenewableWindOverride(undefined);
+        setWhatIfRenewableResult(null);
+      } catch (err: any) {
+        setError(err.message || 'Failed to load renewable decision support data.');
+      } finally {
+        setLoading(false);
+      }
+    }
+    loadRenewableData();
+  }, [activeSector, selectedRenewableId, forecastInit, leadDay]);
+
   // Dam What-If Simulation
   const handleRunDamWhatIf = async () => {
     if (!selectedReservoirId || !forecastInit) return;
@@ -338,9 +397,45 @@ export const DecisionSupportView: React.FC<DecisionSupportViewProps> = ({
     setWhatIfDisasterResult(null);
   };
 
+  // Renewable What-If Simulation
+  const handleRunRenewableWhatIf = async () => {
+    if (!selectedRenewableId || !forecastInit) return;
+    try {
+      setSimulating(true);
+      const res = await postRenewableScenario(
+        selectedRenewableId,
+        forecastInit,
+        leadDay,
+        renewableTech,
+        renewableMode,
+        renewableVSens,
+        renewableGSens,
+        whatIfRenewableWindOverride,
+        `What-If ${renewableTech} (${renewableMode}) (DEMO WHAT-IF OVERRIDE)`
+      );
+      setWhatIfRenewableResult(res);
+    } catch (err: any) {
+      alert(`Simulation error: ${err.message}`);
+    } finally {
+      setSimulating(false);
+    }
+  };
+
+  const handleResetRenewableWhatIf = () => {
+    if (renewableDecisionSupport) {
+      setRenewableTech(renewableDecisionSupport.technology_type);
+      setRenewableMode(renewableDecisionSupport.planning_mode);
+      setRenewableVSens(renewableDecisionSupport.variability_sensitivity);
+      setRenewableGSens(renewableDecisionSupport.grid_sensitivity);
+      setWhatIfRenewableWindOverride(undefined);
+    }
+    setWhatIfRenewableResult(null);
+  };
+
   const activeReservoir = reservoirs.find(r => r.reservoir_id === selectedReservoirId);
   const activeAgri = agricultureScenarios.find(a => a.agri_id === selectedAgriId);
   const activeDisaster = disasterScenarios.find(d => d.scenario_id === selectedDisasterId);
+  const activeRenewable = renewableScenarios.find(r => r.scenario_id === selectedRenewableId);
 
   // Status Badge Helper
   const renderStatusBadge = (status: string | null | undefined) => {
@@ -363,6 +458,7 @@ export const DecisionSupportView: React.FC<DecisionSupportViewProps> = ({
       case 'HEIGHTENED_MONITORING':
       case 'FARM_ADVISORY_REVIEW':
       case 'PREPAREDNESS_REVIEW':
+      case 'GENERATION_VARIABILITY_REVIEW':
         return (
           <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-extrabold bg-amber-100 text-amber-900 border border-amber-300">
             <AlertCircle className="w-3.5 h-3.5 text-amber-600" />
@@ -372,6 +468,7 @@ export const DecisionSupportView: React.FC<DecisionSupportViewProps> = ({
       case 'OPERATOR_REVIEW_ADVISED':
       case 'WEATHER_SENSITIVE_WINDOW':
       case 'HEIGHTENED_PREPAREDNESS':
+      case 'GRID_PREPAREDNESS_REVIEW':
         return (
           <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-extrabold bg-rose-100 text-rose-900 border border-rose-300">
             <AlertTriangle className="w-3.5 h-3.5 text-rose-600" />
@@ -407,7 +504,7 @@ export const DecisionSupportView: React.FC<DecisionSupportViewProps> = ({
             </span>
             <span className="bg-emerald-100 border border-emerald-300 text-emerald-800 text-[10px] font-bold px-2 py-0.5 rounded-full flex items-center gap-1">
               <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
-              {activeSector === 'dam' ? 'DEMO SCENARIO DATA' : activeSector === 'agri' ? 'DEMO AGRICULTURE SCENARIO' : activeSector === 'disaster' ? 'DEMO DISASTER SCENARIO' : 'PLANNED SHELL'}
+              {activeSector === 'dam' ? 'DEMO SCENARIO DATA' : activeSector === 'agri' ? 'DEMO AGRICULTURE SCENARIO' : activeSector === 'disaster' ? 'DEMO DISASTER SCENARIO' : 'DEMO RENEWABLE SCENARIO'}
             </span>
           </div>
           <h1 className="text-xl font-extrabold text-[#044E3A] mt-0.5 tracking-tight flex items-center gap-2">
@@ -479,33 +576,622 @@ export const DecisionSupportView: React.FC<DecisionSupportViewProps> = ({
           }`}
         >
           <Zap className="w-4 h-4" />
-          <span>Renewable Grid (Phase 9 Shell)</span>
+          <span>Renewable Grid (Phase 9D Active)</span>
         </button>
       </div>
 
       {/* Main Content Area */}
       {activeSector === 'grid' ? (
-        /* Renewable Grid Shell (Phase 9D) */
-        <div className="bg-white border border-[#C8EAD9] rounded-b-xl p-6 shadow-xs space-y-4">
-          <div className="flex items-center justify-between border-b border-[#C8EAD9] pb-3">
-            <h3 className="font-extrabold text-[#044E3A] text-base capitalize flex items-center gap-2">
-              <Zap className="w-5 h-5 text-amber-600" />
-              <span>Renewable Energy Grid Dispatch & Backup Allocation</span>
-            </h3>
-            <span className="text-xs bg-amber-100 text-amber-900 font-extrabold px-2.5 py-1 rounded-md border border-amber-200">
-              Planned Phase 9 module — not implemented in current build.
-            </span>
-          </div>
+        /* PHASE 9D — RENEWABLE ENERGY / GRID DECISION SUPPORT VIEW */
+        <div className="space-y-4">
+          {loading ? (
+            <div className="bg-white border border-[#C8EAD9] rounded-xl p-8 text-center text-xs font-bold text-[#044E3A]">
+              Loading Phase 9D Renewable Grid Decision Support Data...
+            </div>
+          ) : error ? (
+            <div className="bg-rose-50 border border-rose-200 text-rose-800 rounded-xl p-6 text-xs font-bold">
+              Error loading renewable decision support: {error}
+            </div>
+          ) : renewableDecisionSupport ? (
+            <div className="space-y-4">
+              {/* TOP CONTROLS */}
+              <div className="bg-white border border-[#C8EAD9] rounded-xl p-4 shadow-xs space-y-3">
+                <div className="grid grid-cols-1 md:grid-cols-5 gap-3 text-xs font-bold text-[#044E3A]">
+                  {/* Scenario Selector */}
+                  <div>
+                    <label className="block mb-1">Renewable Scenario</label>
+                    <select
+                      value={selectedRenewableId}
+                      onChange={(e) => {
+                        const id = e.target.value;
+                        setSelectedRenewableId(id);
+                        const scen = renewableScenarios.find(s => s.scenario_id === id);
+                        if (scen) {
+                          setRenewableTech(scen.technology_type);
+                          setRenewableMode(scen.planning_mode);
+                          setRenewableVSens(scen.variability_sensitivity);
+                          setRenewableGSens(scen.grid_sensitivity);
+                        }
+                      }}
+                      className="w-full bg-[#F4FAF6] border border-[#C8EAD9] p-2 rounded-lg text-xs font-bold text-[#033A2B]"
+                    >
+                      {renewableScenarios.map((s) => (
+                        <option key={s.scenario_id} value={s.scenario_id}>
+                          {s.name} ({s.technology_type}) {s.in_pilot_coverage ? '' : '[OUTSIDE PILOT]'}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
 
-          <div className="bg-amber-50 border border-amber-200 p-4 rounded-xl text-xs text-amber-950 space-y-2">
-            <p className="font-extrabold text-amber-900 text-sm flex items-center gap-2">
-              <Info className="w-4 h-4 text-amber-600" />
-              <span>Planned Phase 9 module — not implemented in current build.</span>
-            </p>
-            <p className="text-amber-800 leading-relaxed">
-              The decision support engine for <strong>Renewable Grid</strong> is scheduled for future Phase 9 extensions. No fake metrics or automated recommendations are generated.
-            </p>
-          </div>
+                  {/* Technology Type */}
+                  <div>
+                    <label className="block mb-1">Technology Type</label>
+                    <select
+                      value={renewableTech}
+                      onChange={(e) => setRenewableTech(e.target.value)}
+                      className="w-full bg-[#F4FAF6] border border-[#C8EAD9] p-2 rounded-lg text-xs font-bold text-[#033A2B]"
+                    >
+                      <option value="WIND">WIND (10m Wind Diagnostic)</option>
+                      <option value="SOLAR">SOLAR (Planning Context)</option>
+                      <option value="HYBRID">HYBRID (Wind + Solar Context)</option>
+                    </select>
+                  </div>
+
+                  {/* Planning Mode */}
+                  <div>
+                    <label className="block mb-1">Grid Planning Mode</label>
+                    <select
+                      value={renewableMode}
+                      onChange={(e) => setRenewableMode(e.target.value)}
+                      className="w-full bg-[#F4FAF6] border border-[#C8EAD9] p-2 rounded-lg text-xs font-bold text-[#033A2B]"
+                    >
+                      <option value="GENERAL_MONITORING">General Monitoring</option>
+                      <option value="GENERATION_PLANNING_REVIEW">Generation Planning Review</option>
+                      <option value="VARIABILITY_MONITORING">Variability Monitoring</option>
+                      <option value="GRID_BALANCING_REVIEW">Grid Balancing Review</option>
+                      <option value="EXPERT_OPERATIONAL_REVIEW">Expert Operational Review</option>
+                    </select>
+                  </div>
+
+                  {/* Forecast Init Run */}
+                  <div>
+                    <label className="block mb-1">Forecast Initialization</label>
+                    <select
+                      value={forecastInit}
+                      onChange={(e) => setForecastInit(e.target.value)}
+                      className="w-full bg-[#F4FAF6] border border-[#C8EAD9] p-2 rounded-lg text-xs font-bold text-[#033A2B]"
+                    >
+                      {forecastRuns.map((run) => (
+                        <option key={run} value={run}>
+                          {run}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+
+                  {/* Lead Day Selector */}
+                  <div>
+                    <label className="block mb-1">Lead Horizon (D1–D10)</label>
+                    <select
+                      value={leadDay}
+                      onChange={(e) => setLeadDay(parseInt(e.target.value))}
+                      className="w-full bg-[#F4FAF6] border border-[#C8EAD9] p-2 rounded-lg text-xs font-bold text-[#033A2B]"
+                    >
+                      {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((d) => (
+                        <option key={d} value={d}>
+                          Lead D{d}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                </div>
+
+                {/* Horizon Quick Chips */}
+                <div className="flex flex-wrap items-center gap-1.5 pt-1 border-t border-[#C8EAD9]">
+                  <span className="text-[11px] font-bold text-[#065F46] mr-2">Quick Horizon:</span>
+                  {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((d) => (
+                    <button
+                      key={d}
+                      onClick={() => setLeadDay(d)}
+                      className={`px-2.5 py-1 rounded-md text-xs font-extrabold transition-all ${
+                        leadDay === d
+                          ? 'bg-[#059669] text-white shadow-xs'
+                          : 'bg-[#F4FAF6] text-[#044E3A] border border-[#C8EAD9] hover:bg-[#EEF9F4]'
+                      }`}
+                    >
+                      D{d}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {/* DEMO SCENARIO WARNING BANNER */}
+              <div className="bg-[#F4FAF6] border-2 border-[#059669]/40 rounded-xl p-3 shadow-xs flex items-center justify-between gap-3 text-xs">
+                <div className="flex items-center gap-2 font-bold text-[#044E3A]">
+                  <span className="px-2 py-0.5 rounded bg-[#059669] text-white text-[10px] font-black uppercase">
+                    DEMO RENEWABLE SCENARIO
+                  </span>
+                  <span>{renewableDecisionSupport.scenario_name} — {renewableDecisionSupport.data_mode}</span>
+                </div>
+                <div className="text-[11px] font-semibold text-[#065F46]">
+                  Installed Capacity: <span className="font-extrabold">{renewableDecisionSupport.installed_capacity_mw} MW ({renewableDecisionSupport.installed_capacity_mode})</span> | Tech: <span className="font-extrabold">{renewableDecisionSupport.technology_type}</span>
+                </div>
+              </div>
+
+              {/* Outside Pilot Warning Banner */}
+              {!renewableDecisionSupport.coverage_available && (
+                <div className="bg-amber-50 border-2 border-amber-400 p-4 rounded-xl text-xs text-amber-950 space-y-1 shadow-xs">
+                  <div className="font-extrabold text-amber-900 flex items-center gap-2 text-sm uppercase tracking-wider">
+                    <AlertTriangle className="w-5 h-5 text-amber-600 flex-shrink-0" />
+                    <span>OUTSIDE SCIENTIFIC PILOT COVERAGE</span>
+                  </div>
+                  <p className="text-amber-900 leading-relaxed font-semibold">
+                    {renewableDecisionSupport.reasons[0] || 'FORTRESS reliability analysis is unavailable outside the current Eastern UP pilot coverage.'}
+                  </p>
+                </div>
+              )}
+
+              {/* SOLAR DIAGNOSTIC NOTICE BANNER */}
+              {renewableDecisionSupport.coverage_available && (renewableDecisionSupport.technology_type === 'SOLAR' || renewableDecisionSupport.technology_type === 'HYBRID') && (
+                <div className="bg-blue-50 border-2 border-blue-300 p-3.5 rounded-xl text-xs text-blue-950 space-y-1 shadow-xs">
+                  <div className="font-extrabold text-blue-900 flex items-center gap-2 text-xs uppercase tracking-wider">
+                    <Sun className="w-4 h-4 text-amber-500 flex-shrink-0" />
+                    <span>SOLAR DIAGNOSTIC NOTICE: {renewableDecisionSupport.solar_message}</span>
+                  </div>
+                  <p className="text-blue-900 leading-relaxed font-medium text-[11px]">
+                    Solar generation prediction requires validated surface solar irradiance inputs which are not integrated in the current prototype. General weather reliability context is displayed, but solar generation variability is NOT calculated.
+                  </p>
+                </div>
+              )}
+
+              {/* Top KPI Metric Cards */}
+              <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-3 text-xs">
+                <div className="bg-white border border-[#C8EAD9] p-3 rounded-xl shadow-xs">
+                  <span className="text-[10px] font-bold text-slate-500 block uppercase">10m Wind Speed</span>
+                  <span className="text-lg font-extrabold text-[#044E3A]">
+                    {renewableDecisionSupport.coverage_available && renewableDecisionSupport.wind_speed_10m_ms != null ? `${renewableDecisionSupport.wind_speed_10m_ms} m/s` : 'N/A'}
+                  </span>
+                  <span className="text-[10px] text-[#065F46] block font-semibold">GEFS 10m Wind</span>
+                </div>
+
+                <div className="bg-white border border-[#C8EAD9] p-3 rounded-xl shadow-xs">
+                  <span className="text-[10px] font-bold text-slate-500 block uppercase">Lead Wind Change</span>
+                  <span className="text-lg font-extrabold text-[#044E3A]">
+                    {renewableDecisionSupport.coverage_available && renewableDecisionSupport.wind_change_ms != null ? `${renewableDecisionSupport.wind_change_ms} m/s` : 'N/A'}
+                  </span>
+                  <span className="text-[10px] text-[#065F46] block font-semibold">Lead-to-Lead Delta</span>
+                </div>
+
+                <div className="bg-white border border-[#C8EAD9] p-3 rounded-xl shadow-xs">
+                  <span className="text-[10px] font-bold text-slate-500 block uppercase">D1-D3 Wind Span</span>
+                  <span className="text-lg font-extrabold text-[#044E3A]">
+                    {renewableDecisionSupport.coverage_available && renewableDecisionSupport.wind_range_d1_d3_ms != null ? `${renewableDecisionSupport.wind_range_d1_d3_ms} m/s` : 'N/A'}
+                  </span>
+                  <span className="text-[10px] text-[#065F46] block font-semibold">D1-D3 Range</span>
+                </div>
+
+                <div className="bg-white border border-[#C8EAD9] p-3 rounded-xl shadow-xs">
+                  <span className="text-[10px] font-bold text-slate-500 block uppercase">Bust Risk %</span>
+                  <span className={`text-lg font-extrabold ${
+                    (renewableDecisionSupport.bust_probability || 0) >= 0.4 ? 'text-rose-600' : 'text-[#044E3A]'
+                  }`}>
+                    {renewableDecisionSupport.coverage_available && renewableDecisionSupport.bust_probability != null ? `${(renewableDecisionSupport.bust_probability * 100).toFixed(1)}%` : 'N/A'}
+                  </span>
+                  <span className="text-[10px] text-[#065F46] block font-semibold">Baseline Model</span>
+                </div>
+
+                <div className="bg-white border border-[#C8EAD9] p-3 rounded-xl shadow-xs">
+                  <span className="text-[10px] font-bold text-slate-500 block uppercase">FFD Index</span>
+                  <span className="text-lg font-extrabold text-[#044E3A]">
+                    {renewableDecisionSupport.coverage_available && renewableDecisionSupport.ffd != null ? renewableDecisionSupport.ffd.toFixed(2) : 'N/A'}
+                  </span>
+                  <span className="text-[10px] text-[#065F46] block font-semibold">{renewableDecisionSupport.fragility_category || 'N/A'} Fragility</span>
+                </div>
+
+                <div className="bg-white border border-[#C8EAD9] p-3 rounded-xl shadow-xs">
+                  <span className="text-[10px] font-bold text-slate-500 block uppercase">Trust Index</span>
+                  <span className="text-lg font-extrabold text-[#044E3A]">
+                    {renewableDecisionSupport.coverage_available && renewableDecisionSupport.trust_index != null ? `${renewableDecisionSupport.trust_index.toFixed(1)}/100` : 'N/A'}
+                  </span>
+                  <span className="text-[10px] text-[#065F46] block font-semibold">{renewableDecisionSupport.reliability_band || 'N/A'} Band</span>
+                </div>
+
+                <div className="bg-white border border-[#C8EAD9] p-3 rounded-xl shadow-xs">
+                  <span className="text-[10px] font-bold text-slate-500 block uppercase">Tech Type</span>
+                  <span className="text-lg font-extrabold text-blue-700">
+                    {renewableDecisionSupport.technology_type}
+                  </span>
+                  <span className="text-[10px] text-slate-500 block font-bold">Technology</span>
+                </div>
+
+                <div className="bg-white border border-[#C8EAD9] p-3 rounded-xl shadow-xs flex flex-col justify-between">
+                  <span className="text-[10px] font-bold text-slate-500 block uppercase">Attention Status</span>
+                  {renderStatusBadge(renewableDecisionSupport.attention_status)}
+                </div>
+              </div>
+
+              {/* 3-DIMENSION SEPARATION CARD */}
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                {/* Dim 1: Weather Signal */}
+                <div className="bg-white border border-[#C8EAD9] rounded-xl p-4 shadow-xs space-y-2">
+                  <div className="flex items-center gap-2 border-b border-[#C8EAD9] pb-2 text-[#044E3A] font-extrabold text-xs">
+                    <Wind className="w-4 h-4 text-[#059669]" />
+                    <span>DIM 1: WEATHER & VARIABILITY SIGNAL</span>
+                  </div>
+                  {renewableDecisionSupport.coverage_available ? (
+                    <div className="space-y-1 text-xs text-[#065F46]">
+                      <div className="flex justify-between"><span>10m Wind Speed:</span> <span className="font-extrabold text-[#044E3A]">{renewableDecisionSupport.wind_speed_10m_ms} m/s</span></div>
+                      <div className="flex justify-between"><span>Lead Wind Change:</span> <span className="font-extrabold text-[#044E3A]">{renewableDecisionSupport.wind_change_ms} m/s</span></div>
+                      <div className="flex justify-between"><span>D1-D3 Wind Span:</span> <span className="font-extrabold text-[#044E3A]">{renewableDecisionSupport.wind_range_d1_d3_ms} m/s</span></div>
+                      <div className="flex justify-between"><span>Rainfall Forecast:</span> <span className="font-extrabold text-[#044E3A]">{renewableDecisionSupport.rainfall_mm} mm</span></div>
+                      <div className="flex justify-between"><span>Temperature:</span> <span className="font-extrabold text-[#044E3A]">{renewableDecisionSupport.temperature_c}°C</span></div>
+                      <div className="pt-1.5 flex flex-wrap gap-1">
+                        {renewableDecisionSupport.weather_flags.map((f, idx) => (
+                          <span key={idx} className="bg-[#EEF9F4] text-[#044E3A] border border-[#C8EAD9] px-1.5 py-0.5 rounded text-[10px] font-extrabold">
+                            {f}
+                          </span>
+                        ))}
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="text-xs text-slate-500 font-medium">Outside Eastern UP pilot — Weather signal suppressed.</div>
+                  )}
+                </div>
+
+                {/* Dim 2: Reliability Evidence */}
+                <div className="bg-white border border-[#C8EAD9] rounded-xl p-4 shadow-xs space-y-2">
+                  <div className="flex items-center gap-2 border-b border-[#C8EAD9] pb-2 text-[#044E3A] font-extrabold text-xs">
+                    <ShieldAlert className="w-4 h-4 text-[#059669]" />
+                    <span>DIM 2: FORECAST RELIABILITY EVIDENCE</span>
+                  </div>
+                  {renewableDecisionSupport.coverage_available ? (
+                    <div className="space-y-1 text-xs text-[#065F46]">
+                      <div className="flex justify-between"><span>Bust Risk Probability:</span> <span className="font-extrabold text-[#044E3A]">{((renewableDecisionSupport.bust_probability || 0) * 100).toFixed(1)}%</span></div>
+                      <div className="flex justify-between"><span>FFD Index:</span> <span className="font-extrabold text-[#044E3A]">{renewableDecisionSupport.ffd?.toFixed(2)} ({renewableDecisionSupport.fragility_category})</span></div>
+                      <div className="flex justify-between"><span>Self-Audit Status:</span> <span className="font-extrabold text-[#044E3A]">{renewableDecisionSupport.self_audit_status}</span></div>
+                      <div className="flex justify-between"><span>Trust Index:</span> <span className="font-extrabold text-[#044E3A]">{renewableDecisionSupport.trust_index?.toFixed(1)}/100 ({renewableDecisionSupport.reliability_band})</span></div>
+                      <div className="flex justify-between"><span>Trust Horizon:</span> <span className="font-extrabold text-[#044E3A]">D{renewableDecisionSupport.trust_horizon_day}</span></div>
+                      <div className="flex justify-between"><span>Breaking Point:</span> <span className="font-extrabold text-[#044E3A]">{renewableDecisionSupport.breaking_point_day ? `D${renewableDecisionSupport.breaking_point_day}` : 'None'}</span></div>
+                    </div>
+                  ) : (
+                    <div className="text-xs text-slate-500 font-medium">Outside Eastern UP pilot — Reliability evidence suppressed.</div>
+                  )}
+                </div>
+
+                {/* Dim 3: Renewable Sensitivity */}
+                <div className="bg-white border border-[#C8EAD9] rounded-xl p-4 shadow-xs space-y-2">
+                  <div className="flex items-center gap-2 border-b border-[#C8EAD9] pb-2 text-[#044E3A] font-extrabold text-xs">
+                    <Zap className="w-4 h-4 text-[#059669]" />
+                    <span>DIM 3: RENEWABLE / GRID SENSITIVITY</span>
+                  </div>
+                  <div className="space-y-1 text-xs text-[#065F46]">
+                    <div className="flex justify-between"><span>Technology:</span> <span className="font-extrabold text-[#044E3A]">{renewableDecisionSupport.technology_type}</span></div>
+                    <div className="flex justify-between"><span>Planning Mode:</span> <span className="font-extrabold text-[#044E3A]">{renewableDecisionSupport.planning_mode}</span></div>
+                    <div className="flex justify-between"><span>Variability Sensitivity:</span> <span className="font-extrabold text-[#044E3A]">{renewableDecisionSupport.variability_sensitivity}</span></div>
+                    <div className="flex justify-between"><span>Grid Sensitivity:</span> <span className="font-extrabold text-[#044E3A]">{renewableDecisionSupport.grid_sensitivity}</span></div>
+                    <div className="flex justify-between"><span>Installed Capacity:</span> <span className="font-extrabold text-[#044E3A]">{renewableDecisionSupport.installed_capacity_mw} MW ({renewableDecisionSupport.installed_capacity_mode})</span></div>
+                    <div className="flex justify-between"><span>Solar Irradiance:</span> <span className="font-extrabold text-amber-700">NOT INTEGRATED</span></div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Attention Status & WHY THIS STATUS Card */}
+              <div className="bg-white border-2 border-[#C8EAD9] rounded-xl p-5 shadow-xs space-y-3">
+                <div className="flex items-center justify-between border-b border-[#C8EAD9] pb-3">
+                  <div>
+                    <span className="text-[10px] font-extrabold text-[#059669] uppercase tracking-wider block">RENEWABLE GRID ATTENTION STATUS</span>
+                    <div className="mt-1">{renderStatusBadge(renewableDecisionSupport.attention_status)}</div>
+                  </div>
+                  {onOpenAssistant && (
+                    <button
+                      onClick={() => onOpenAssistant(`Explain renewable decision support for ${renewableDecisionSupport.scenario_name} (Status: ${renewableDecisionSupport.attention_status})`)}
+                      className="bg-[#059669] hover:bg-[#044E3A] text-white text-xs font-extrabold px-3 py-1.5 rounded-lg transition-colors flex items-center gap-1.5"
+                    >
+                      <HelpCircle className="w-3.5 h-3.5" />
+                      <span>Ask Explanation Assistant</span>
+                    </button>
+                  )}
+                </div>
+
+                <div className="space-y-2">
+                  <h4 className="text-xs font-extrabold text-[#044E3A] uppercase tracking-wider">WHY THIS STATUS? (SCIENTIFIC REASONING)</h4>
+                  <ul className="space-y-1.5 pl-1">
+                    {renewableDecisionSupport.reasons.map((r, idx) => (
+                      <li key={idx} className="text-xs text-[#065F46] font-medium flex items-start gap-2">
+                        <ArrowRight className="w-3.5 h-3.5 text-[#059669] flex-shrink-0 mt-0.5" />
+                        <span>{r}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              </div>
+
+              {/* D1-D10 Horizon Outlook Timeline Table */}
+              {renewableForecastContext && renewableForecastContext.lead_contexts && (
+                <div className="bg-white border border-[#C8EAD9] rounded-xl p-5 shadow-xs space-y-3">
+                  <h3 className="text-sm font-extrabold text-[#044E3A] flex items-center gap-2 border-b border-[#C8EAD9] pb-2">
+                    <FileText className="w-4 h-4 text-[#059669]" />
+                    <span>D1–D10 Lead Horizon Renewable Generation Planning Timeline</span>
+                  </h3>
+
+                  <div className="overflow-x-auto">
+                    <table className="w-full text-left text-xs">
+                      <thead>
+                        <tr className="bg-[#F4FAF6] border-b border-[#C8EAD9] text-[#044E3A] font-extrabold">
+                          <th className="p-2.5">Lead</th>
+                          <th className="p-2.5">10m Wind Speed</th>
+                          <th className="p-2.5">Wind Change</th>
+                          <th className="p-2.5">Rainfall</th>
+                          <th className="p-2.5">Bust Risk</th>
+                          <th className="p-2.5">FFD</th>
+                          <th className="p-2.5">Trust Index</th>
+                          <th className="p-2.5">Reliability</th>
+                          <th className="p-2.5">Self-Audit</th>
+                          <th className="p-2.5">Planning Status</th>
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-[#C8EAD9]">
+                        {renewableForecastContext.lead_contexts.map((ctx) => (
+                          <tr
+                            key={ctx.lead_day}
+                            onClick={() => setLeadDay(ctx.lead_day)}
+                            className={`cursor-pointer transition-colors ${
+                              leadDay === ctx.lead_day ? 'bg-[#EEF9F4] font-extrabold' : 'hover:bg-[#F4FAF6]'
+                            }`}
+                          >
+                            <td className="p-2.5 text-[#044E3A]">D{ctx.lead_day}</td>
+                            <td className="p-2.5">{ctx.wind_speed_10m_ms} m/s</td>
+                            <td className="p-2.5">{ctx.wind_change_ms} m/s</td>
+                            <td className="p-2.5">{ctx.rainfall_mm} mm</td>
+                            <td className="p-2.5">{(ctx.bust_probability * 100).toFixed(1)}%</td>
+                            <td className="p-2.5">{ctx.ffd}</td>
+                            <td className="p-2.5">{ctx.trust_index.toFixed(1)}</td>
+                            <td className="p-2.5">
+                              <span className={`px-2 py-0.5 rounded text-[10px] font-bold ${
+                                ctx.reliability_band === 'GREEN' ? 'bg-emerald-100 text-emerald-800' :
+                                ctx.reliability_band === 'YELLOW' ? 'bg-amber-100 text-amber-800' :
+                                'bg-rose-100 text-rose-800'
+                              }`}>
+                                {ctx.reliability_band}
+                              </span>
+                            </td>
+                            <td className="p-2.5 text-slate-700">{ctx.self_audit_status}</td>
+                            <td className="p-2.5">{renderStatusBadge(ctx.attention_status)}</td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              )}
+
+              {/* What-If Simulator & Map Grid */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {/* What-If Simulator */}
+                <div className="bg-white border border-[#C8EAD9] rounded-xl p-5 shadow-xs space-y-4">
+                  <div className="flex items-center justify-between border-b border-[#C8EAD9] pb-2">
+                    <h3 className="text-sm font-extrabold text-[#044E3A] flex items-center gap-2">
+                      <Sliders className="w-4 h-4 text-[#059669]" />
+                      <span>Renewable Grid What-If Simulator</span>
+                    </h3>
+                    <button
+                      onClick={handleResetRenewableWhatIf}
+                      className="text-[11px] text-[#059669] hover:underline flex items-center gap-1 font-bold"
+                    >
+                      <RefreshCw className="w-3 h-3" />
+                      <span>Reset</span>
+                    </button>
+                  </div>
+
+                  <div className="space-y-3 text-xs">
+                    <div className="grid grid-cols-2 gap-2">
+                      <div>
+                        <label className="block font-bold text-[#044E3A] mb-1">Simulated Tech:</label>
+                        <select
+                          value={renewableTech}
+                          onChange={(e) => setRenewableTech(e.target.value)}
+                          className="w-full bg-[#F4FAF6] border border-[#C8EAD9] p-2 rounded-lg font-bold text-[#033A2B]"
+                        >
+                          <option value="WIND">WIND</option>
+                          <option value="SOLAR">SOLAR</option>
+                          <option value="HYBRID">HYBRID</option>
+                        </select>
+                      </div>
+
+                      <div>
+                        <label className="block font-bold text-[#044E3A] mb-1">Simulated Mode:</label>
+                        <select
+                          value={renewableMode}
+                          onChange={(e) => setRenewableMode(e.target.value)}
+                          className="w-full bg-[#F4FAF6] border border-[#C8EAD9] p-2 rounded-lg font-bold text-[#033A2B]"
+                        >
+                          <option value="GENERAL_MONITORING">General Monitoring</option>
+                          <option value="GENERATION_PLANNING_REVIEW">Generation Planning Review</option>
+                          <option value="VARIABILITY_MONITORING">Variability Monitoring</option>
+                          <option value="GRID_BALANCING_REVIEW">Grid Balancing Review</option>
+                          <option value="EXPERT_OPERATIONAL_REVIEW">Expert Operational Review</option>
+                        </select>
+                      </div>
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-2">
+                      <div>
+                        <label className="block font-bold text-[#044E3A] mb-1">Variability Sensitivity:</label>
+                        <select
+                          value={renewableVSens}
+                          onChange={(e) => setRenewableVSens(e.target.value)}
+                          className="w-full bg-[#F4FAF6] border border-[#C8EAD9] p-2 rounded-lg font-bold text-[#033A2B]"
+                        >
+                          <option value="LOW">LOW</option>
+                          <option value="MEDIUM">MEDIUM</option>
+                          <option value="HIGH">HIGH</option>
+                        </select>
+                      </div>
+
+                      <div>
+                        <label className="block font-bold text-[#044E3A] mb-1">Grid Sensitivity:</label>
+                        <select
+                          value={renewableGSens}
+                          onChange={(e) => setRenewableGSens(e.target.value)}
+                          className="w-full bg-[#F4FAF6] border border-[#C8EAD9] p-2 rounded-lg font-bold text-[#033A2B]"
+                        >
+                          <option value="LOW">LOW</option>
+                          <option value="MEDIUM">MEDIUM</option>
+                          <option value="HIGH">HIGH</option>
+                        </select>
+                      </div>
+                    </div>
+
+                    <div className="bg-[#F4FAF6] border border-[#C8EAD9] p-2.5 rounded-lg space-y-2">
+                      <span className="text-[10px] font-extrabold text-[#059669] uppercase tracking-wider block">
+                        DEMO WEATHER WHAT-IF OVERRIDES (Optional)
+                      </span>
+                      <div>
+                        <label className="block text-[11px] font-bold text-[#044E3A]">10m Wind Speed Override (m/s):</label>
+                        <input
+                          type="number"
+                          placeholder={`Actual: ${renewableDecisionSupport?.wind_speed_10m_ms ?? 0} m/s`}
+                          value={whatIfRenewableWindOverride !== undefined ? whatIfRenewableWindOverride : ''}
+                          onChange={(e) => setWhatIfRenewableWindOverride(e.target.value !== '' ? parseFloat(e.target.value) : undefined)}
+                          className="w-full bg-white border border-[#C8EAD9] p-1.5 rounded font-bold text-[#033A2B] text-xs"
+                        />
+                      </div>
+                      <p className="text-[10px] text-slate-500 italic">
+                        Actual GEFS / FORTRESS forecast values remain read-only. Synthetic overrides apply to What-If simulation only.
+                      </p>
+                    </div>
+
+                    <button
+                      onClick={handleRunRenewableWhatIf}
+                      disabled={simulating}
+                      className="w-full bg-[#059669] hover:bg-[#044E3A] text-white font-extrabold py-2.5 rounded-lg transition-colors shadow-xs flex items-center justify-center gap-2"
+                    >
+                      {simulating ? 'Simulating...' : 'Recalculate Renewable Scenario'}
+                    </button>
+
+                    {whatIfRenewableResult && (
+                      <div className="bg-[#F4FAF6] border-2 border-[#059669] p-4 rounded-xl space-y-2.5 mt-2">
+                        <div className="flex justify-between items-center border-b border-[#C8EAD9] pb-2">
+                          <div className="flex items-center gap-2">
+                            <span className="text-[10px] font-extrabold text-[#059669] uppercase">SIMULATION RESULT</span>
+                            <span className="px-1.5 py-0.5 rounded text-[10px] font-black bg-[#059669] text-white">DEMO / WHAT-IF</span>
+                          </div>
+                          {renderStatusBadge(whatIfRenewableResult.attention_status)}
+                        </div>
+
+                        <div className="grid grid-cols-2 gap-2 text-[11px] bg-white p-2 rounded border border-[#C8EAD9]">
+                          <div>
+                            <span className="text-[10px] font-bold text-slate-500 block">ACTUAL GEFS FORECAST</span>
+                            <span className="font-extrabold text-slate-800">10m Wind: {renewableDecisionSupport?.wind_speed_10m_ms ?? 0} m/s</span>
+                          </div>
+                          <div>
+                            <span className="text-[10px] font-bold text-[#059669] block">DEMO WHAT-IF OVERRIDE</span>
+                            <span className="font-extrabold text-[#044E3A]">
+                              10m Wind: {whatIfRenewableResult.wind_speed_ms_override != null ? `${whatIfRenewableResult.wind_speed_ms_override} m/s` : 'None (Used Actual)'}
+                            </span>
+                          </div>
+                        </div>
+
+                        <ul className="text-xs text-[#065F46] space-y-1">
+                          {whatIfRenewableResult.reasons.map((r, i) => (
+                            <li key={i} className="flex items-start gap-1">
+                              <span className="text-[#059669] font-bold">•</span>
+                              <span>{r}</span>
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
+                    )}
+                  </div>
+                </div>
+
+                {/* Leaflet Map Card */}
+                <div className="bg-white border border-[#C8EAD9] rounded-xl p-5 shadow-xs space-y-3 flex flex-col justify-between">
+                  <div>
+                    <h3 className="text-sm font-extrabold text-[#044E3A] flex items-center gap-2 border-b border-[#C8EAD9] pb-2">
+                      <MapPin className="w-4 h-4 text-[#059669]" />
+                      <span>Renewable Scenario & Eastern UP Pilot Extent</span>
+                    </h3>
+
+                    <div className="h-[280px] w-full rounded-xl overflow-hidden border border-[#C8EAD9] mt-3">
+                      <MapContainer
+                        center={[renewableDecisionSupport.latitude, renewableDecisionSupport.longitude]}
+                        zoom={renewableDecisionSupport.coverage_available ? 7 : 6}
+                        scrollWheelZoom={false}
+                        className="h-full w-full"
+                      >
+                        <TileLayer
+                          attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
+                          url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+                        />
+                        <Rectangle
+                          bounds={pilotBounds}
+                          pathOptions={{ color: '#059669', weight: 2, fillOpacity: 0.05, dashArray: '4,4' }}
+                        >
+                          <Tooltip permanent direction="top">Eastern UP Scientific Pilot (24.5-28.5 N, 80.0-84.5 E)</Tooltip>
+                        </Rectangle>
+
+                        <CircleMarker
+                          center={[renewableDecisionSupport.latitude, renewableDecisionSupport.longitude]}
+                          radius={9}
+                          pathOptions={{
+                            color: renewableDecisionSupport.coverage_available ? '#059669' : '#D97706',
+                            fillColor: renewableDecisionSupport.coverage_available ? '#059669' : '#F59E0B',
+                            fillOpacity: 0.9
+                          }}
+                        >
+                          <Tooltip permanent>
+                            {renewableDecisionSupport.scenario_name} ({renewableDecisionSupport.technology_type})
+                          </Tooltip>
+                        </CircleMarker>
+                      </MapContainer>
+                    </div>
+                  </div>
+
+                  {activeRenewable && (
+                    <div className="bg-[#F4FAF6] border border-[#C8EAD9] p-3 rounded-lg text-xs space-y-1">
+                      <div className="font-extrabold text-[#044E3A] flex items-center justify-between">
+                        <span>{activeRenewable.name}</span>
+                        <span className="text-[10px] bg-[#059669] text-white px-2 py-0.5 rounded font-black">
+                          {activeRenewable.data_mode}
+                        </span>
+                      </div>
+                      <div className="text-[11px] text-[#065F46] font-medium">
+                        Installed Capacity: <span className="font-bold">{activeRenewable.installed_capacity_mw} MW ({activeRenewable.installed_capacity_mode})</span> | SCADA: <span className="font-bold">NOT INTEGRATED</span>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              {/* Data Provenance & Limitations */}
+              <div className="bg-white border border-[#C8EAD9] rounded-xl p-5 shadow-xs space-y-2 text-xs">
+                <h4 className="font-extrabold text-[#044E3A] uppercase tracking-wider text-[11px] flex items-center gap-1.5">
+                  <Info className="w-4 h-4 text-[#059669]" />
+                  <span>Data Provenance & System Limitations</span>
+                </h4>
+                <ul className="space-y-1 pl-2 text-[#065F46] font-medium">
+                  {renewableDecisionSupport.limitations.map((lim, idx) => (
+                    <li key={idx} className="flex items-start gap-2">
+                      <span className="w-1.5 h-1.5 rounded-full bg-[#059669] mt-1.5 flex-shrink-0"></span>
+                      <span>{lim}</span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+
+              {/* MANDATORY DISCLAIMER */}
+              <div className="bg-amber-50 border-2 border-amber-400 p-4 rounded-xl text-xs text-amber-950 space-y-1 shadow-xs">
+                <div className="font-extrabold text-amber-900 flex items-center gap-2 text-sm uppercase tracking-wider">
+                  <ShieldAlert className="w-5 h-5 text-amber-600 flex-shrink-0" />
+                  <span>MANDATORY OPERATIONAL DISCLAIMER</span>
+                </div>
+                <p className="text-amber-900 leading-relaxed font-semibold">
+                  {renewableDecisionSupport.disclaimer}
+                </p>
+              </div>
+            </div>
+          ) : null}
         </div>
       ) : activeSector === 'disaster' ? (
         /* PHASE 9C — DISASTER MANAGEMENT DECISION SUPPORT VIEW */

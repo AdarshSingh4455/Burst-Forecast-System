@@ -39,8 +39,12 @@ export const AIAssistantView: React.FC<AIAssistantViewProps> = ({ pointDetail })
     let replyText = 'FORTRESS Explanation Assistant — Prototype: Model explanation rule executed.';
 
     const qLower = q.toLowerCase();
-    if (qLower.includes('official') || qLower.includes('warning') || qLower.includes('flood warning') || qLower.includes('evacuation')) {
-      replyText = 'No. FORTRESS provides forecast-reliability and decision-support context. It does not issue official flood, evacuation, or emergency-management warnings. Official IMD/CWC/NDMA warnings remain authoritative.';
+    if (qLower.includes('mw') || qLower.includes('power generation') || qLower.includes('exact mw') || qLower.includes('generation forecast')) {
+      replyText = 'No. Phase 9D provides weather-reliability and planning context. It does not provide validated plant-level MW generation forecasts or automatic grid-dispatch instructions.';
+    } else if (qLower.includes('solar') || qLower.includes('irradiance') || qLower.includes('solar generation')) {
+      replyText = 'Solar generation diagnostic is unavailable because validated surface solar irradiance input is not integrated in the current prototype.';
+    } else if (qLower.includes('official') || qLower.includes('warning') || qLower.includes('flood warning') || qLower.includes('evacuation') || qLower.includes('dispatch')) {
+      replyText = 'No. FORTRESS provides forecast-reliability and decision-support context. It does not issue official flood, evacuation, emergency-management warnings, or grid-dispatch instructions. Official load-dispatch center (SLDC/RLDC) instructions remain authoritative.';
     } else if (qLower.includes('outside pilot') || qLower.includes('outside')) {
       replyText = 'FORTRESS reliability analysis is unavailable outside the current Eastern UP pilot coverage (24.5–28.5°N, 80.0–84.5°E). Grid snapping and reliability metrics are strictly suppressed for outside-pilot locations.';
     } else if (q.includes('risky')) {
@@ -53,7 +57,10 @@ export const AIAssistantView: React.FC<AIAssistantViewProps> = ({ pointDetail })
       replyText = `Forecast reliability remains usable up to Trust Horizon D${horizonDay}. Reliability deteriorates into sustained RED starting at Day ${breakingDay} (Breaking Point: D${breakingDay}).`;
     } else if (qLower.includes('disaster') || qLower.includes('preparedness')) {
       replyText = `Disaster preparedness context synthesizes weather forecast signals with local vulnerability/exposure attributes under 3-dimension separation. Prototype statuses include NORMAL_MONITORING, PREPAREDNESS_REVIEW, HEIGHTENED_PREPAREDNESS, and HIGH_UNCERTAINTY_EXPERT_REVIEW.`;
+    } else if (qLower.includes('renewable') || qLower.includes('grid')) {
+      replyText = `Renewable grid decision support evaluates 10m wind speed diagnostics and forecast reliability evidence for grid planning context. Prototype statuses include NORMAL_MONITORING, GENERATION_VARIABILITY_REVIEW, GRID_PREPAREDNESS_REVIEW, and HIGH_UNCERTAINTY_EXPERT_REVIEW.`;
     }
+
 
     const botMsg = { sender: 'bot' as const, text: replyText };
 

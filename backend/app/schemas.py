@@ -467,5 +467,131 @@ class DisasterScenarioResponse(BaseModel):
     reasons: List[str]
     data_mode: str
 
+# ============================================================
+# PHASE 9D — RENEWABLE ENERGY / GRID DECISION SUPPORT SCHEMAS
+# ============================================================
+
+class RenewableSummary(BaseModel):
+    scenario_id: str
+    name: str
+    latitude: float
+    longitude: float
+    district_label: str
+    state: str
+    data_mode: str
+    technology_type: str
+    planning_mode: str
+    variability_sensitivity: str
+    grid_sensitivity: str
+    installed_capacity_mode: str
+    installed_capacity_mw: float
+    solar_irradiance_available: bool = False
+    coverage_available: bool = True
+    in_pilot_coverage: bool = True
+
+class RenewableLeadContext(BaseModel):
+    lead_day: int
+    wind_speed_10m_ms: float
+    wind_change_ms: float
+    rainfall_mm: float
+    temperature_c: float
+    humidity_gkg: float
+    bust_probability: float
+    ffd: float
+    ffd_failure_found: bool
+    fragility_category: str
+    trust_index: float
+    reliability_band: str
+    self_audit_status: str
+    attention_status: Optional[str] = None
+
+class RenewableForecastContextResponse(BaseModel):
+    scenario_id: str
+    scenario_name: str
+    forecast_init: str
+    data_mode: str
+    coverage_available: bool = True
+    in_pilot_coverage: bool = True
+    context_mode: str
+    reason: Optional[str] = None
+    forecast_context: Optional[str] = None
+    lead_contexts: Optional[List[RenewableLeadContext]] = None
+
+class RenewableDecisionSupportResponse(BaseModel):
+    scenario_id: str
+    scenario_name: str
+    data_mode: str
+    forecast_init: str
+    lead_day: int
+    latitude: float
+    longitude: float
+    coverage_available: bool = True
+    in_pilot_coverage: bool = True
+    context_mode: str
+    
+    technology_type: str
+    planning_mode: str
+    variability_sensitivity: str
+    grid_sensitivity: str
+    installed_capacity_mode: str
+    installed_capacity_mw: float
+    solar_diagnostic_available: bool = False
+    solar_message: str = "SOLAR GENERATION DIAGNOSTIC NOT AVAILABLE IN PROTOTYPE"
+    
+    forecast_context: Optional[Any] = None
+    decision_support: Optional[Any] = None
+    wind_speed_10m_ms: Optional[float] = None
+    wind_change_ms: Optional[float] = None
+    wind_range_d1_d3_ms: Optional[float] = None
+    rainfall_mm: Optional[float] = None
+    temperature_c: Optional[float] = None
+    humidity_gkg: Optional[float] = None
+    bust_probability: Optional[float] = None
+    ffd: Optional[float] = None
+    ffd_failure_found: Optional[bool] = None
+    fragility_category: Optional[str] = None
+    ensemble_disagreement_category: Optional[str] = None
+    ood_category: Optional[str] = None
+    self_audit_status: Optional[str] = None
+    self_audit_reason: Optional[str] = None
+    trust_index: Optional[float] = None
+    reliability_band: Optional[str] = None
+    trust_horizon_day: Optional[int] = None
+    breaking_point_day: Optional[int] = None
+    
+    is_what_if_override: bool = False
+    wind_speed_ms_override: Optional[float] = None
+    
+    attention_status: Optional[str] = None
+    weather_flags: List[str]
+    reasons: List[str]
+    limitations: List[str]
+    disclaimer: str
+
+class RenewableScenarioRequest(BaseModel):
+    technology_type: Optional[str] = None
+    planning_mode: Optional[str] = None
+    variability_sensitivity: Optional[str] = None
+    grid_sensitivity: Optional[str] = None
+    wind_speed_ms_override: Optional[float] = None
+    scenario_name: Optional[str] = "Custom Renewable What-If Scenario"
+
+class RenewableScenarioResponse(BaseModel):
+    scenario_id: str
+    scenario_name: str
+    technology_type: str
+    planning_mode: str
+    variability_sensitivity: str
+    grid_sensitivity: str
+    coverage_available: bool = True
+    is_what_if_override: bool = True
+    actual_wind_speed_10m_ms: Optional[float] = None
+    wind_speed_ms_override: Optional[float] = None
+    attention_status: Optional[str] = None
+    weather_flags: List[str]
+    reasons: List[str]
+    data_mode: str
+
+
 
 

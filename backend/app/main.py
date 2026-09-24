@@ -6,7 +6,8 @@ from backend.app.data_service import data_service
 from backend.app.reservoir_service import reservoir_service
 from backend.app.agriculture_service import agriculture_service
 from backend.app.disaster_service import disaster_service
-from backend.app.schemas import ReservoirScenarioRequest, AgricultureScenarioRequest, DisasterScenarioRequest
+from backend.app.renewable_service import renewable_service
+from backend.app.schemas import ReservoirScenarioRequest, AgricultureScenarioRequest, DisasterScenarioRequest, RenewableScenarioRequest
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -15,6 +16,7 @@ async def lifespan(app: FastAPI):
     reservoir_service.load_data(base_dir)
     agriculture_service.load_data(base_dir)
     disaster_service.load_data(base_dir)
+    renewable_service.load_data(base_dir)
     yield
 
 app = FastAPI(
@@ -488,5 +490,64 @@ def post_disaster_scenario(
     if res is None:
         raise HTTPException(status_code=404, detail=f"Disaster scenario '{scenario_id}' not found.")
     return res
+
+# ============================================================
+# PHASE 9D — RENEWABLE ENERGY / GRID DECISION SUPPORT ENDPOINTS
+# ============================================================
+
+@app.get("/api/renewable")
+def get_renewable_scenarios():
+    return renewable_service.get_renewable_summary()
+
+@app.get("/api/renewable/{scenario_id}")
+def get_renewable_detail(scenario_id: str):
+    scen = renewable_service.get_renewable_detail(scenario_id)
+    if scen is None:
+        raise HTTPException(status_code=404, detail=f"Renewable scenario '{scenario_id}' not found.")
+    return scen
+
+@app.get("/api/renewable/{scenario_id}/forecast-context")
+def get_renewable_forecast_context(
+    scenario_id: str,
+    forecast_init: str = Query(...)
+):
+    ctx = renewable_service.get_forecast_context(scenario_id, forecast_init)
+    if ctx is None:
+        raise HTTPException(status_code=404, detail=f"Forecast context for renewable scenario '{scenario_id}' not found.")
+    return ctx
+
+@app.get("/api/renewable/{scenario_id}/decision-support")
+def get_renewable_decision_support(
+    scenario_id: str,
+    forecast_init: str = Query(...),
+    lead_day: int = Query(1, ge=1, le=10)
+):
+    ds = renewable_service.get_decision_support(scenario_id, forecast_init, lead_day)
+    if ds is None:
+        raise HTTPException(status_code=404, detail=f"Decision support for renewable scenario '{scenario_id}' not found.")
+    return ds
+
+@app.post("/api/renewable/{scenario_id}/scenario")
+def post_renewable_scenario(
+    scenario_id: str,
+    body: RenewableScenarioRequest,
+    forecast_init: str = Query(...),
+    lead_day: int = Query(1, ge=1, le=10)
+):
+    res = renewable_service.process_custom_scenario(
+        scenario_id,
+        technology_type=body.technology_type,
+        planning_mode=body.planning_mode,
+        variability_sensitivity=body.variability_sensitivity,
+        grid_sensitivity=body.grid_sensitivity,
+        wind_speed_ms_override=body.wind_speed_ms_override,
+        scenario_name=body.scenario_name or "Custom Renewable What-If Scenario",
+        forecast_init=forecast_init,
+        lead_day=lead_day
+    )
+    if res is None:
+        raise HTTPException(status_code=404, detail=f"Renewable scenario '{scenario_id}' not found.")
+    return res
+
 
 

@@ -24,7 +24,11 @@ import {
   DisasterSummary,
   DisasterForecastContextResponse,
   DisasterDecisionSupportResponse,
-  DisasterScenarioResponse
+  DisasterScenarioResponse,
+  RenewableSummary,
+  RenewableForecastContextResponse,
+  RenewableDecisionSupportResponse,
+  RenewableScenarioResponse
 } from '../types';
 
 const API_BASE = (((import.meta as any).env?.VITE_API_URL as string) || 'http://127.0.0.1:8000/api').replace(/\/$/, '');
@@ -363,5 +367,66 @@ export async function postDisasterScenario(
   }
   return res.json();
 }
+
+// Phase 9D Renewable Energy / Grid Decision Support API Functions
+export async function fetchRenewableScenarios(): Promise<RenewableSummary[]> {
+  return apiFetch<RenewableSummary[]>('/renewable');
+}
+
+export async function fetchRenewableDetail(scenarioId: string): Promise<RenewableSummary> {
+  return apiFetch<RenewableSummary>(`/renewable/${scenarioId}`);
+}
+
+export async function fetchRenewableForecastContext(scenarioId: string, forecastInit: string): Promise<RenewableForecastContextResponse> {
+  return apiFetch<RenewableForecastContextResponse>(`/renewable/${scenarioId}/forecast-context`, {
+    forecast_init: forecastInit
+  });
+}
+
+export async function fetchRenewableDecisionSupport(
+  scenarioId: string,
+  forecastInit: string,
+  leadDay: number = 1
+): Promise<RenewableDecisionSupportResponse> {
+  return apiFetch<RenewableDecisionSupportResponse>(`/renewable/${scenarioId}/decision-support`, {
+    forecast_init: forecastInit,
+    lead_day: leadDay.toString()
+  });
+}
+
+export async function postRenewableScenario(
+  scenarioId: string,
+  forecastInit: string,
+  leadDay: number = 1,
+  technologyType?: string,
+  planningMode?: string,
+  variabilitySensitivity?: string,
+  gridSensitivity?: string,
+  windSpeedMsOverride?: number,
+  scenarioName?: string
+): Promise<RenewableScenarioResponse> {
+  const url = new URL(`${API_BASE}/renewable/${scenarioId}/scenario`);
+  url.searchParams.append('forecast_init', forecastInit);
+  url.searchParams.append('lead_day', leadDay.toString());
+
+  const res = await fetch(url.toString(), {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      technology_type: technologyType,
+      planning_mode: planningMode,
+      variability_sensitivity: variabilitySensitivity,
+      grid_sensitivity: gridSensitivity,
+      wind_speed_ms_override: windSpeedMsOverride,
+      scenario_name: scenarioName || 'Custom Renewable What-If Scenario'
+    })
+  });
+  if (!res.ok) {
+    const text = await res.text();
+    throw new Error(`API Error (${res.status}): ${text || res.statusText}`);
+  }
+  return res.json();
+}
+
 
 

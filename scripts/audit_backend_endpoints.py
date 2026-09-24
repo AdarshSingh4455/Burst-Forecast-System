@@ -105,3 +105,15 @@ check_ep(f'/disaster/{disaster_id}')
 check_ep(f'/disaster/{disaster_id}/forecast-context?{urllib.parse.urlencode({"forecast_init": first_run})}')
 check_ep(f'/disaster/{disaster_id}/decision-support?{urllib.parse.urlencode({"forecast_init": first_run, "lead_day": 1})}')
 check_post(f'/disaster/{disaster_id}/scenario?{urllib.parse.urlencode({"forecast_init": first_run, "lead_day": 1})}', {'hazard_context': 'FLOOD_PREPAREDNESS', 'preparedness_mode': 'RESOURCE_REVIEW', 'vulnerability_level': 'HIGH', 'exposure_level': 'HIGH', 'rainfall_mm_override': 65.0, 'scenario_name': 'Heavy Rain What-If'})
+
+# Phase 9D Renewable Grid Endpoints (36-40)
+print('\n--- Phase 9D Renewable Energy / Grid Endpoints ---')
+renewable_list = check_ep('/renewable')
+zone_id = renewable_list[0]['scenario_id'] if renewable_list and isinstance(renewable_list, list) else 'RENEW_EUP_01'
+
+
+check_ep(f'/renewable/{zone_id}')
+check_ep(f'/renewable/{zone_id}/forecast-context?{urllib.parse.urlencode({"forecast_init": first_run})}')
+check_ep(f'/renewable/{zone_id}/decision-support?{urllib.parse.urlencode({"forecast_init": first_run, "lead_day": 1})}')
+check_post(f'/renewable/{zone_id}/scenario?{urllib.parse.urlencode({"forecast_init": first_run, "lead_day": 1})}', {'wind_speed_multiplier': 1.5, 'temperature_offset_c': 2.0, 'humidity_offset_pct': -5.0, 'rainfall_multiplier': 1.0, 'scenario_name': 'Wind Variability What-If'})
+

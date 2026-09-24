@@ -1,0 +1,35 @@
+# FORTRESS Phase 9D — Renewable Energy / Grid Decision Support Configuration
+# Prototype decision-support heuristics ONLY — not official grid code thresholds
+
+wind:
+  low_ms: 3.0
+  moderate_ms: 6.0
+  elevated_ms: 10.0
+  high_variability_delta_ms: 3.5
+
+trust:
+  low_trust_index: 50.0
+  moderate_trust_index: 70.0
+
+bust:
+  elevated_probability: 0.40
+  high_probability: 0.60
+
+variability:
+  moderate_change_ms: 2.0
+  high_change_ms: 4.0
+
+spatial:
+  pilot_min_lat: 24.5
+  pilot_max_lat: 28.5
+  pilot_min_lon: 80.0
+  pilot_max_lon: 84.5
+  max_snap_dist_deg: 0.75
+
+limitations:
+  - "Prototype renewable energy / grid decision-support heuristics."
+  - "10 m forecast wind is not turbine hub-height wind and must not be interpreted as plant-level turbine inflow."
+
+  - "No turbine power curve model or solar irradiance model is implemented."
+  - "No MW generation prediction, power deficit calculation, or grid dispatch command is issued."
+  - "Coverage restricted to Eastern UP pilot region (24.5-28.5 N, 80.0-84.5 E)."

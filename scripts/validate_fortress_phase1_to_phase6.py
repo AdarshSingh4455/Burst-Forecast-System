@@ -10,15 +10,16 @@ print("============================================")
 print("FORTRESS - PHASE 1 TO PHASE 6 AUTOMATED AUDIT")
 print("============================================")
 
-evidence_file = "FORTRESS/data/processed/FORTRESS_INDEPENDENT_EVIDENCE.parquet"
-analogues_file = "FORTRESS/data/processed/FORTRESS_HISTORICAL_ANALOGUES.parquet"
+base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+evidence_file = os.path.join(base_dir, "data", "processed", "FORTRESS_INDEPENDENT_EVIDENCE.parquet")
+analogues_file = os.path.join(base_dir, "data", "processed", "FORTRESS_HISTORICAL_ANALOGUES.parquet")
 
 if not os.path.exists(evidence_file):
-    print("FAIL: Master evidence dataset missing.")
+    print(f"FAIL: Master evidence dataset missing at {evidence_file}")
     sys.exit(1)
 
 if not os.path.exists(analogues_file):
-    print("FAIL: Historical analogues dataset missing.")
+    print(f"FAIL: Historical analogues dataset missing at {analogues_file}")
     sys.exit(1)
 
 df = pd.read_parquet(evidence_file)

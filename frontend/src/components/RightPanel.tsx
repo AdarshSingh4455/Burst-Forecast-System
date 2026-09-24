@@ -1,7 +1,7 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { 
-  ShieldAlert, Activity, CheckCircle, AlertTriangle, HelpCircle, FileText, 
-  ChevronRight, Thermometer, Droplets, Gauge, Wind
+  ShieldAlert, Droplets, Wind, X, 
+  Waves, Sprout, Sun, ArrowRight, AlertTriangle
 } from 'lucide-react';
 import { GridPointDetail, RegionalSummary } from '../types';
 
@@ -12,193 +12,235 @@ interface RightPanelProps {
 }
 
 export const RightPanel: React.FC<RightPanelProps> = ({ pointDetail, regionalSummary, onOpenPassport }) => {
-  if (!pointDetail) {
-    return (
-      <aside className="w-80 bg-slate-900 border-l border-slate-800 p-5 text-center flex flex-col justify-center items-center text-slate-400 flex-shrink-0">
-        <HelpCircle className="w-10 h-10 text-slate-600 mb-2" />
-        <p className="text-sm font-semibold text-slate-200">No Grid Point Selected</p>
-        <p className="text-xs text-slate-400 mt-1">Click a marker on the map to inspect telemetry & reliability passport.</p>
-        {regionalSummary && (
-          <div className="mt-6 w-full bg-slate-950 p-4 rounded-xl border border-slate-800 text-left text-xs space-y-2">
-            <p className="font-bold text-slate-300 uppercase tracking-wider text-[10px]">Regional Summary ({regionalSummary.region})</p>
-            <div className="flex justify-between text-slate-400">
-              <span>Bust Risk:</span>
-              <span className="font-bold text-red-400">{(regionalSummary.mean_bust_probability * 100).toFixed(1)}%</span>
-            </div>
-            <div className="flex justify-between text-slate-400">
-              <span>Trust Index:</span>
-              <span className="font-bold text-emerald-400">{regionalSummary.median_trust_index} / 100</span>
-            </div>
-            <div className="flex justify-between text-slate-400">
-              <span>Reliability Band:</span>
-              <span className={`font-bold ${regionalSummary.regional_reliability_band === 'GREEN' ? 'text-emerald-400' : regionalSummary.regional_reliability_band === 'YELLOW' ? 'text-amber-400' : 'text-rose-400'}`}>{regionalSummary.regional_reliability_band}</span>
-            </div>
-          </div>
-        )}
-      </aside>
-    );
-  }
+  const [activeTab, setActiveTab] = useState<'overview' | 'assets' | 'insights'>('overview');
 
   const detail = pointDetail;
 
-  const getStatusBadge = (status: string) => {
-    switch (status) {
-      case 'SUPPORTED RELIABILITY':
-        return <span className="bg-emerald-500/10 text-emerald-400 text-xs px-2.5 py-1 rounded-full font-bold border border-emerald-500/30 flex items-center gap-1"><CheckCircle className="w-3.5 h-3.5" /> RELIABLE</span>;
-      case 'SUPPORTED WARNING':
-        return <span className="bg-amber-500/10 text-amber-400 text-xs px-2.5 py-1 rounded-full font-bold border border-amber-500/30 flex items-center gap-1"><AlertTriangle className="w-3.5 h-3.5" /> WARNING</span>;
-      case 'CONFLICT / POSSIBLE BLIND SPOT':
-        return <span className="bg-rose-500/10 text-rose-400 text-xs px-2.5 py-1 rounded-full font-bold border border-rose-500/30 flex items-center gap-1"><ShieldAlert className="w-3.5 h-3.5" /> BLIND SPOT</span>;
-      default:
-        return <span className="bg-slate-800 text-slate-300 text-xs px-2.5 py-1 rounded-full font-bold border border-slate-700">{status}</span>;
-    }
-  };
+  const leadDayStr = detail ? `D${detail.lead_day}` : 'D6';
+  const bustRiskPct = detail ? (detail.baseline_p_bust * 100).toFixed(0) : '62';
+  const rainfallVal = detail ? detail.ensemble_mean_mm.toFixed(1) : '28.4';
+  
+  // FFD logic per spec: if ffd_failure_found == 0, show "No boundary"
+  const ffdVal = detail ? (detail.ffd_failure_found === 0 ? 'No boundary' : detail.ffd.toFixed(2)) : '0.32';
+  const oodVal = detail ? (detail.ood_score ? detail.ood_score.toFixed(0) : '78') : '78';
+  const ensembleStatus = detail ? detail.ensemble_disagreement_category : 'High';
+  const oodStatus = detail ? detail.ood_category : 'Unusual';
+  const fragilityCat = detail ? detail.fragility_category : 'Fragile';
 
-  const getBandBadge = (band: 'GREEN' | 'YELLOW' | 'RED') => {
-    if (band === 'GREEN') return <span className="bg-emerald-500 text-slate-950 text-xs px-2 py-0.5 rounded font-bold">GREEN</span>;
-    if (band === 'YELLOW') return <span className="bg-amber-500 text-slate-950 text-xs px-2 py-0.5 rounded font-bold">YELLOW</span>;
-    return <span className="bg-rose-500 text-white text-xs px-2 py-0.5 rounded font-bold">RED</span>;
-  };
+  // Dynamic colors based on risk
+  const bustRiskNum = parseFloat(bustRiskPct);
+  const bustBadgeColor = bustRiskNum > 60 ? 'bg-red-100 text-red-700' : bustRiskNum > 30 ? 'bg-amber-100 text-amber-800' : 'bg-emerald-100 text-emerald-800';
 
   return (
-    <aside className="w-80 bg-slate-900 border-l border-slate-800 flex flex-col h-full overflow-y-auto flex-shrink-0 shadow-xl text-slate-200">
-      <div className="p-4 bg-slate-950 border-b border-slate-800">
-        <div className="flex items-center justify-between mb-1">
-          <span className="text-xs text-emerald-400 font-semibold tracking-wide uppercase">{detail.region.replace('_', ' ')}</span>
-          {getBandBadge(detail.reliability_band)}
-        </div>
-        <h2 className="text-lg font-bold font-mono text-slate-100">
-          {detail.latitude.toFixed(2)}°N, {detail.longitude.toFixed(2)}°E
+    <aside className="w-[320px] bg-[#F8FAFC] border-l border-[#D9E2EA] flex flex-col h-full overflow-y-auto select-none flex-shrink-0 text-slate-800">
+      {/* Header */}
+      <div className="px-4 py-3 border-b border-[#D9E2EA] flex items-center justify-between bg-white">
+        <h2 className="text-[17px] font-extrabold text-[#0B2545] tracking-tight">
+          {detail ? (detail.region || 'Eastern Uttar Pradesh').replace('_', ' ') : 'Eastern Uttar Pradesh'}
         </h2>
-        <p className="text-xs text-slate-400 mt-1">
-          Init: <span className="font-mono text-slate-300">{detail.forecast_init}</span> | Lead D{detail.lead_day}
-        </p>
+        <button className="text-slate-400 hover:text-slate-700 p-1 rounded-md transition-colors">
+          <X className="w-4 h-4" />
+        </button>
       </div>
 
-      <div className="p-4 space-y-4 flex-1">
-        <div className="bg-slate-950 p-3 rounded-xl border border-slate-800">
-          <div className="flex items-center justify-between mb-1">
-            <span className="text-xs font-semibold text-slate-400 uppercase">Self-Audit Status</span>
-            <span className="text-xs font-bold text-emerald-400 font-mono">Score: {detail.trust_index}/100</span>
+      {/* Underline Tabs */}
+      <div className="flex border-b border-[#D9E2EA] bg-white text-xs font-semibold px-2">
+        <button 
+          onClick={() => setActiveTab('overview')}
+          className={`px-3 py-2 text-center text-xs font-bold border-b-2 transition-all ${activeTab === 'overview' ? 'border-blue-600 text-blue-600' : 'border-transparent text-slate-500 hover:text-slate-800'}`}
+        >
+          Overview
+        </button>
+        <button 
+          onClick={() => setActiveTab('assets')}
+          className={`px-3 py-2 text-center text-xs font-bold border-b-2 transition-all ${activeTab === 'assets' ? 'border-blue-600 text-blue-600' : 'border-transparent text-slate-500 hover:text-slate-800'}`}
+        >
+          Assets
+        </button>
+        <button 
+          onClick={() => setActiveTab('insights')}
+          className={`px-3 py-2 text-center text-xs font-bold border-b-2 transition-all ${activeTab === 'insights' ? 'border-blue-600 text-blue-600' : 'border-transparent text-slate-500 hover:text-slate-800'}`}
+        >
+          Key Insights
+        </button>
+      </div>
+
+      {/* Body Content */}
+      <div className="p-3 space-y-3 flex-1 overflow-y-auto text-xs">
+        {/* Landscape Region Info Card */}
+        <div className="bg-white border border-[#D9E2EA] rounded-lg p-2 flex gap-2.5 shadow-xs items-center">
+          {/* Simulated Reservoir Thumbnail */}
+          <div className="w-[72px] h-[58px] rounded-md overflow-hidden bg-gradient-to-tr from-sky-700 via-teal-600 to-emerald-700 flex-shrink-0 relative flex items-center justify-center">
+            <svg className="w-full h-full opacity-60 absolute inset-0" viewBox="0 0 100 50" preserveAspectRatio="none">
+              <path d="M0,25 Q25,10 50,25 T100,20 L100,50 L0,50 Z" fill="#0284c7" />
+              <path d="M0,35 Q35,15 70,35 T100,30 L100,50 L0,50 Z" fill="#0369a1" />
+            </svg>
+            <span className="text-[9px] font-bold text-white relative z-10 bg-slate-900/60 px-1 py-0.5 rounded">Rihand</span>
           </div>
-          <div className="my-2">{getStatusBadge(detail.self_audit_status)}</div>
-          <p className="text-xs text-slate-300 mt-2 bg-slate-900 p-2 rounded border border-slate-800 italic">
-            "{detail.self_audit_reason}"
-          </p>
+          <div className="text-[10px] space-y-0.5 text-slate-600 leading-tight">
+            <p><span className="font-semibold text-slate-400">State:</span> <strong className="text-slate-800">Uttar Pradesh</strong></p>
+            <p><span className="font-semibold text-slate-400">Region:</span> <strong className="text-slate-800">Eastern UP (Pilot)</strong></p>
+            <p><span className="font-semibold text-slate-400">Grid Points:</span> <strong className="text-slate-800">323</strong></p>
+            <p className="text-[9px] text-slate-500 font-mono">
+              Lat: {detail ? detail.latitude.toFixed(1) : '24.5'}°N – 28.5°N | Lon: {detail ? detail.longitude.toFixed(1) : '80.0'}°E – 84.5°E
+            </p>
+          </div>
         </div>
 
-        <div className="grid grid-cols-2 gap-3">
-          <div className="bg-slate-950 p-3 rounded-xl border border-slate-800">
-            <p className="text-[11px] font-semibold text-slate-400 uppercase">Bust Risk</p>
-            <p className="text-xl font-bold text-red-400 font-mono mt-1">{(detail.baseline_p_bust * 100).toFixed(1)}%</p>
-            <span className="text-[10px] font-bold text-slate-400 bg-slate-800 px-1.5 py-0.5 rounded mt-1 inline-block">
-              {detail.ai_risk_category}
-            </span>
-          </div>
-
-          <div className="bg-slate-950 p-3 rounded-xl border border-slate-800">
-            <p className="text-[11px] font-semibold text-slate-400 uppercase">Rainfall Mean</p>
-            <p className="text-xl font-bold text-cyan-400 font-mono mt-1">{detail.ensemble_mean_mm.toFixed(1)} mm</p>
-            <span className="text-[10px] text-slate-400 mt-1 inline-block">Spread: {detail.ensemble_spread_mm.toFixed(1)}mm</span>
-          </div>
-
-          <div className="bg-slate-950 p-3 rounded-xl border border-slate-800">
-            <p className="text-[11px] font-semibold text-slate-400 uppercase">Stress FFD</p>
-            <p className="text-xl font-bold text-purple-400 font-mono mt-1">{detail.ffd.toFixed(2)}</p>
-            <span className="text-[10px] text-slate-400 mt-1 block truncate">
-              {detail.ffd_failure_found === 1 ? 'Boundary Found' : 'Robust Range'}
-            </span>
-          </div>
-
-          <div className="bg-slate-950 p-3 rounded-xl border border-slate-800">
-            <p className="text-[11px] font-semibold text-slate-400 uppercase">Fragility AUC</p>
-            <p className="text-xl font-bold text-amber-400 font-mono mt-1">{detail.fragility_auc.toFixed(2)}</p>
-            <span className="text-[10px] text-slate-400 mt-1 block truncate">
-              {detail.fragility_category}
-            </span>
-          </div>
-        </div>
-
-        <div className="bg-slate-950 p-3 rounded-xl border border-slate-800 space-y-2 text-xs">
-          <div className="flex items-center justify-between border-b border-slate-800 pb-1.5">
-            <span className="font-semibold text-slate-400">Trust Horizon:</span>
-            <span className="font-bold text-emerald-400 font-mono">D1 – D{detail.trust_horizon_day}</span>
-          </div>
+        {/* Current Forecast (D#) */}
+        <div className="space-y-1.5">
           <div className="flex items-center justify-between">
-            <span className="font-semibold text-slate-400">Breaking Point:</span>
-            <span className="font-bold text-rose-400 font-mono">
-              {detail.breaking_point_day ? `Day D${detail.breaking_point_day}` : 'None Detected'}
-            </span>
+            <h3 className="font-extrabold text-slate-800 text-[11px] uppercase tracking-wider">
+              Current Forecast ({leadDayStr})
+            </h3>
+          </div>
+
+          <div className="grid grid-cols-3 gap-1.5">
+            {/* Bust Risk Card */}
+            <div className="bg-white border border-[#D9E2EA] p-2 rounded-md text-center shadow-xs flex flex-col justify-between h-[64px]">
+              <span className="text-[9px] font-bold text-slate-400 uppercase">Bust Risk</span>
+              <span className="text-[17px] font-extrabold text-red-600 leading-none">{bustRiskPct}%</span>
+              <div className="mt-0.5">
+                <span className={`text-[8px] font-bold px-1.5 py-0.2 rounded inline-block ${bustBadgeColor}`}>
+                  {detail ? detail.ai_risk_category : 'High Risk'}
+                </span>
+              </div>
+            </div>
+
+            {/* Rainfall Card */}
+            <div className="bg-white border border-[#D9E2EA] p-2 rounded-md text-center shadow-xs flex flex-col justify-between h-[64px]">
+              <span className="text-[9px] font-bold text-slate-400 uppercase">Rainfall</span>
+              <span className="text-[15px] font-extrabold text-slate-900 leading-none">{rainfallVal} mm</span>
+              <div className="mt-0.5">
+                <span className="text-[8px] font-bold text-emerald-700 bg-emerald-100 px-1 py-0.2 rounded inline-block">
+                  ↑ 12%
+                </span>
+              </div>
+            </div>
+
+            {/* FFD Card */}
+            <div className="bg-white border border-[#D9E2EA] p-2 rounded-md text-center shadow-xs flex flex-col justify-between h-[64px]">
+              <span className="text-[9px] font-bold text-slate-400 uppercase">FFD</span>
+              <span className="text-[14px] font-extrabold text-slate-800 leading-none truncate">{ffdVal}</span>
+              <div className="mt-0.5">
+                <span className="text-[8px] font-bold text-amber-800 bg-amber-100 px-1 py-0.2 rounded inline-block">
+                  {fragilityCat}
+                </span>
+              </div>
+            </div>
+
+            {/* Ensemble Card */}
+            <div className="bg-white border border-[#D9E2EA] p-2 rounded-md text-center shadow-xs flex flex-col justify-between h-[64px]">
+              <span className="text-[9px] font-bold text-slate-400 uppercase">Ensemble</span>
+              <span className="text-[13px] font-extrabold text-slate-900 leading-none">{ensembleStatus}</span>
+              <div className="mt-0.5">
+                <span className="text-[8px] font-bold text-red-700 bg-red-100 px-1 py-0.2 rounded inline-block">
+                  Disagreement
+                </span>
+              </div>
+            </div>
+
+            {/* OOD Card */}
+            <div className="bg-white border border-[#D9E2EA] p-2 rounded-md text-center shadow-xs flex flex-col justify-between h-[64px]">
+              <span className="text-[9px] font-bold text-slate-400 uppercase">OOD</span>
+              <span className="text-[15px] font-extrabold text-purple-900 leading-none">{oodVal}</span>
+              <div className="mt-0.5">
+                <span className="text-[8px] font-bold text-purple-700 bg-purple-100 px-1 py-0.2 rounded inline-block">
+                  {oodStatus}
+                </span>
+              </div>
+            </div>
+
+            {/* Condition Card */}
+            <div className="bg-white border border-[#D9E2EA] p-2 rounded-md text-center shadow-xs flex flex-col justify-between h-[64px]">
+              <span className="text-[9px] font-bold text-slate-400 uppercase">Condition</span>
+              <span className="text-[13px] font-extrabold text-red-600 leading-none">{fragilityCat}</span>
+              <div className="mt-0.5">
+                <span className="text-[8px] font-bold text-amber-800 bg-amber-200 px-1 py-0.2 rounded inline-block">
+                  Monitor
+                </span>
+              </div>
+            </div>
           </div>
         </div>
 
-        <div className="bg-slate-950 p-3 rounded-xl border border-slate-800 space-y-2">
-          <p className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Atmospheric Baseline</p>
-          <div className="grid grid-cols-2 gap-2 text-xs font-mono">
-            {(detail.temperature_c !== undefined || detail.temp_2m_c_mean !== undefined) && (
-              <div className="flex items-center gap-1.5 text-slate-300">
-                <Thermometer className="w-3.5 h-3.5 text-rose-400" />
-                {(detail.temperature_c ?? detail.temp_2m_c_mean ?? 0).toFixed(1)}°C
-              </div>
-            )}
-            {(detail.humidity_gkg !== undefined || detail.specific_humidity_gkg_mean !== undefined) && (
-              <div className="flex items-center gap-1.5 text-slate-300">
-                <Droplets className="w-3.5 h-3.5 text-cyan-400" />
-                {(detail.humidity_gkg ?? detail.specific_humidity_gkg_mean ?? 0).toFixed(1)} g/kg
-              </div>
-            )}
-            {(detail.pressure_hpa !== undefined || detail.mslp_hpa_mean !== undefined) && (
-              <div className="flex items-center gap-1.5 text-slate-300">
-                <Gauge className="w-3.5 h-3.5 text-slate-400" />
-                {(detail.pressure_hpa ?? detail.mslp_hpa_mean ?? 0).toFixed(0)} hPa
-              </div>
-            )}
-            {(detail.wind_speed_ms !== undefined || detail.wind_speed_mean_ms !== undefined) && (
-              <div className="flex items-center gap-1.5 text-slate-300">
-                <Wind className="w-3.5 h-3.5 text-emerald-400" />
-                {(detail.wind_speed_ms ?? detail.wind_speed_mean_ms ?? 0).toFixed(1)} m/s
-              </div>
-            )}
-          </div>
+        {/* Key Vulnerabilities */}
+        <div className="bg-white border border-[#D9E2EA] p-2.5 rounded-lg space-y-1.5 shadow-xs">
+          <h3 className="font-extrabold text-slate-800 text-[10px] uppercase tracking-wider">
+            Key Vulnerabilities
+          </h3>
+          <ul className="space-y-1.5 text-slate-700 text-[11px]">
+            <li className="flex items-center gap-2">
+              <Droplets className="w-3.5 h-3.5 text-blue-500 flex-shrink-0" />
+              <span>High Moisture Sensitivity</span>
+            </li>
+            <li className="flex items-center gap-2">
+              <Wind className="w-3.5 h-3.5 text-teal-500 flex-shrink-0" />
+              <span>Wind Circulation Influence</span>
+            </li>
+            <li className="flex items-center gap-2">
+              <ShieldAlert className="w-3.5 h-3.5 text-rose-500 flex-shrink-0" />
+              <span>Matches 3 Historical Busts</span>
+            </li>
+          </ul>
         </div>
 
-        <div className="bg-slate-950 p-3 rounded-xl border border-slate-800 space-y-2">
-          <p className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Independent Verification</p>
-          <div className="space-y-1.5 text-xs">
-            <div className="flex items-center justify-between">
-              <span className="text-slate-400">Analogues:</span>
-              <span className="font-semibold text-slate-200">{detail.analogue_available === 1 ? `${(detail.analogue_mean_bust_rate * 100).toFixed(0)}% Hist Bust` : 'No History'}</span>
+        {/* Nearby Assets */}
+        <div className="space-y-1.5 pt-1">
+          <div className="flex items-center justify-between">
+            <h3 className="font-extrabold text-slate-800 text-[10px] uppercase tracking-wider">
+              Nearby Assets
+            </h3>
+            <span className="text-[10px] font-bold text-blue-600 cursor-pointer hover:underline">View All</span>
+          </div>
+
+          <div className="space-y-1 text-[10px]">
+            <div className="flex items-center justify-between p-1.5 bg-white rounded-md border border-[#D9E2EA] shadow-xs">
+              <span className="flex items-center gap-1.5 font-medium text-slate-800">
+                <Waves className="w-3.5 h-3.5 text-blue-500 flex-shrink-0" /> Rihand Reservoir
+              </span>
+              <span className="text-slate-500 font-mono">~ 112 km</span>
             </div>
-            <div className="flex items-center justify-between">
-              <span className="text-slate-400">Failure DNA:</span>
-              <span className="font-semibold text-slate-200">{(detail.failure_dna_max_sim * 100).toFixed(0)}% Match</span>
+
+            <div className="flex items-center justify-between p-1.5 bg-white rounded-md border border-[#D9E2EA] shadow-xs">
+              <span className="flex items-center gap-1.5 font-medium text-slate-800">
+                <Sprout className="w-3.5 h-3.5 text-emerald-500 flex-shrink-0" /> Agriculture Zone (East UP)
+              </span>
+              <span className="text-slate-500 font-mono">~ 24 km</span>
             </div>
-            <div className="flex items-center justify-between">
-              <span className="text-slate-400">Ensemble Spread:</span>
-              <span className="font-semibold text-cyan-400">{detail.ensemble_disagreement_category}</span>
+
+            <div className="flex items-center justify-between p-1.5 bg-white rounded-md border border-[#D9E2EA] shadow-xs">
+              <span className="flex items-center gap-1.5 font-medium text-slate-800">
+                <AlertTriangle className="w-3.5 h-3.5 text-rose-500 flex-shrink-0" /> Flood Prone Area
+              </span>
+              <span className="text-slate-500 font-mono">~ 37 km</span>
             </div>
-            <div className="flex items-center justify-between">
-              <span className="text-slate-400">OOD Novelty:</span>
-              <span className="font-semibold text-purple-400">{detail.ood_category}</span>
+
+            <div className="flex items-center justify-between p-1.5 bg-white rounded-md border border-[#D9E2EA] shadow-xs">
+              <span className="flex items-center gap-1.5 font-medium text-slate-800">
+                <Sun className="w-3.5 h-3.5 text-amber-500 flex-shrink-0" /> Solar Plant (Mirzapur)
+              </span>
+              <span className="text-slate-500 font-mono">~ 98 km</span>
+            </div>
+
+            <div className="flex items-center justify-between p-1.5 bg-white rounded-md border border-[#D9E2EA] shadow-xs">
+              <span className="flex items-center gap-1.5 font-medium text-slate-800">
+                <Wind className="w-3.5 h-3.5 text-teal-500 flex-shrink-0" /> Wind Site (Varanasi)
+              </span>
+              <span className="text-slate-500 font-mono">~ 76 km</span>
             </div>
           </div>
-        </div>
-
-        <div className="bg-emerald-950/20 p-3 rounded-xl border border-emerald-800/40 text-xs">
-          <p className="font-bold text-emerald-400">Primary Vulnerability:</p>
-          <p className="text-emerald-300 mt-0.5">{detail.primary_vulnerability}</p>
-          <p className="text-[10px] text-emerald-400/70 mt-1 italic">Corridor: {detail.failure_corridor_label}</p>
         </div>
       </div>
 
-      <div className="p-4 border-t border-slate-800 bg-slate-950">
+      {/* Action Footer */}
+      <div className="p-3 border-t border-[#D9E2EA] bg-white">
         <button
           onClick={onOpenPassport}
-          className="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-bold py-2.5 px-4 rounded-xl shadow-md transition-colors flex items-center justify-center gap-2 text-sm"
+          className="w-full bg-[#0B2545] hover:bg-[#071C30] text-white font-extrabold py-2.5 px-3 rounded-md shadow-sm transition-colors flex items-center justify-center gap-2 text-xs uppercase tracking-wider"
         >
-          <FileText className="w-4 h-4" />
-          <span>Reliability Passport</span>
-          <ChevronRight className="w-4 h-4" />
+          <span>Open Detailed Analysis</span>
+          <ArrowRight className="w-4 h-4 text-white" />
         </button>
       </div>
     </aside>

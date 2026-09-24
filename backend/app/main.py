@@ -51,11 +51,12 @@ def get_forecast_runs():
 def get_map_data(
     forecast_init: str = Query(...),
     lead_day: int = Query(..., ge=1, le=10),
-    metric: str = Query("bust_probability")
+    metric: str = Query("bust_probability"),
+    region: str = Query("ALL")
 ):
     if forecast_init not in data_service.init_dates:
         raise HTTPException(status_code=404, detail=f"Forecast init date {forecast_init} not found.")
-    return data_service.get_map_data(forecast_init, lead_day, metric)
+    return data_service.get_map_data(forecast_init, lead_day, metric, region)
 
 @app.get("/api/forecast/{region}")
 def get_regional_summary(

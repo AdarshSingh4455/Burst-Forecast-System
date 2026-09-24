@@ -1,18 +1,22 @@
 import React, { useState, useEffect } from 'react';
 import { Header } from './components/Header';
 import { Sidebar } from './components/Sidebar';
-import { RightPanel } from './components/RightPanel';
 import { OverviewView } from './views/OverviewView';
 import { StressLabView } from './views/StressLabView';
 import { FailureIntelligenceView } from './views/FailureIntelligenceView';
 import { IndependentEvidenceView } from './views/IndependentEvidenceView';
 import { SelfAuditView } from './views/SelfAuditView';
+import { TrustHorizonView } from './views/TrustHorizonView';
+import { BreakingPointView } from './views/BreakingPointView';
 import { PassportView } from './views/PassportView';
 import { AnalyticsView } from './views/AnalyticsView';
 import { DecisionSupportView } from './views/DecisionSupportView';
 import { AIAssistantView } from './views/AIAssistantView';
 import { SettingsView } from './views/SettingsView';
 import { AboutView } from './views/AboutView';
+import { MapView } from './components/MapView';
+import { TrendChart } from './components/TrendChart';
+import { RightPanel } from './components/RightPanel';
 import {
   fetchMetadata,
   fetchGridMap,
@@ -53,8 +57,8 @@ export const App: React.FC = () => {
   const [selectedRegion, setSelectedRegion] = useState<string>('ALL');
 
   // Selected Grid Point
-  const [selectedLat, setSelectedLat] = useState<number | null>(26.75);
-  const [selectedLon, setSelectedLon] = useState<number | null>(83.37);
+  const [selectedLat, setSelectedLat] = useState<number | null>(null);
+  const [selectedLon, setSelectedLon] = useState<number | null>(null);
 
   // Data states
   const [gridPoints, setGridPoints] = useState<GridPointMap[]>([]);
@@ -99,8 +103,15 @@ export const App: React.FC = () => {
       fetchRegionalSummary(selectedRun, selectedLead, selectedRegion)
     ])
       .then(([mapRes, summaryRes]) => {
-        setGridPoints(Array.isArray(mapRes) ? mapRes : (mapRes.grid_points || []));
+        const pts = Array.isArray(mapRes) ? mapRes : (mapRes.grid_points || []);
+        setGridPoints(pts);
         setRegionalSummary(summaryRes);
+
+        // Dynamically initialize grid point coordinates from first valid backend point
+        if (pts.length > 0 && selectedLat === null) {
+          setSelectedLat(pts[0].latitude);
+          setSelectedLon(pts[0].longitude);
+        }
       })
       .catch((err) => console.error('Map fetch error:', err))
       .finally(() => setLoading(false));
@@ -108,45 +119,47 @@ export const App: React.FC = () => {
 
   // Fetch Grid Detail, Stress, Corridors, Fingerprint, Passport when lat/lon/run/lead changes
   useEffect(() => {
-    if (selectedLat === null || selectedLon === null || !selectedRun) return;
+    const lat = selectedLat ?? 26.75;
+    const lon = selectedLon ?? 83.25;
+    if (!selectedRun) return;
 
-    fetchGridDetail(selectedRun, selectedLat, selectedLon, selectedLead)
+    fetchGridDetail(selectedRun, lat, lon, selectedLead)
       .then((data) => setSelectedPointDetail(data))
       .catch((err) => console.error('Point detail fetch error:', err));
 
-    fetchTrend(selectedRun, selectedLat, selectedLon)
-      .then((res) => setTrendData(res.trend))
+    fetchTrend(selectedRun, lat, lon)
+      .then((res) => setTrendData(Array.isArray(res) ? res : (res?.trend || [])))
       .catch((err) => console.error('Trend fetch error:', err));
 
-    fetchStressTestData(selectedRun, selectedLat, selectedLon, selectedLead)
+    fetchStressTestData(selectedRun, lat, lon, selectedLead)
       .then((res) => setStressData(res))
       .catch((err) => console.error('Stress test fetch error:', err));
 
-    fetchFailureCorridors(selectedRun, selectedLat, selectedLon, selectedLead)
-      .then((res) => setFailureCorridors(res.corridors))
+    fetchFailureCorridors(selectedRun, lat, lon, selectedLead)
+      .then((res) => setFailureCorridors(Array.isArray(res) ? res : (res?.corridors || [])))
       .catch((err) => console.error('Corridors fetch error:', err));
 
-    fetchFingerprint(selectedRun, selectedLat, selectedLon, selectedLead)
+    fetchFingerprint(selectedRun, lat, lon, selectedLead)
       .then((res) => setFingerprint(res))
       .catch((err) => console.error('Fingerprint fetch error:', err));
 
-    fetchAnalogues(selectedRun, selectedLat, selectedLon, selectedLead)
+    fetchAnalogues(selectedRun, lat, lon, selectedLead)
       .then((res) => setAnalogues(res))
       .catch((err) => console.error('Analogues fetch error:', err));
 
-    fetchFailureDNA(selectedRun, selectedLat, selectedLon, selectedLead)
+    fetchFailureDNA(selectedRun, lat, lon, selectedLead)
       .then((res) => setFailureDNA(res))
       .catch((err) => console.error('DNA fetch error:', err));
 
-    fetchSelfAuditData(selectedRun, selectedLat, selectedLon, selectedLead)
+    fetchSelfAuditData(selectedRun, lat, lon, selectedLead)
       .then((res) => setSelfAuditData(res))
       .catch((err) => console.error('Self Audit fetch error:', err));
 
-    fetchTrustHorizonData(selectedRun, selectedLat, selectedLon)
+    fetchTrustHorizonData(selectedRun, lat, lon)
       .then((res) => setTrustHorizonData(res))
       .catch((err) => console.error('Trust Horizon fetch error:', err));
 
-    fetchPassportData(selectedRun, selectedLat, selectedLon, selectedLead)
+    fetchPassportData(selectedRun, lat, lon, selectedLead)
       .then((res) => setPassportData(res))
       .catch((err) => console.error('Passport fetch error:', err));
   }, [selectedRun, selectedLat, selectedLon, selectedLead]);
@@ -165,12 +178,47 @@ export const App: React.FC = () => {
             selectedLead={selectedLead}
             selectedMetric={selectedMetric}
             gridPoints={gridPoints}
-            selectedLat={selectedLat ?? 26.75}
-            selectedLon={selectedLon ?? 83.37}
+            selectedLat={selectedLat}
+            selectedLon={selectedLon}
             onSelectPoint={handlePointSelect}
             regionalSummary={regionalSummary}
             trendData={trendData}
             onOpenPassport={() => setActiveTab('passport')}
+            onNavigateTab={(tab) => setActiveTab(tab)}
+          />
+        );
+      case 'india_map':
+        return (
+          <div className="flex h-full w-full overflow-hidden p-3 gap-3 bg-[#F5FAF8] select-none">
+            <div className="flex-1 flex flex-col gap-3 min-w-0 h-full overflow-hidden">
+              <div className="flex-[6.2] min-h-0 relative">
+                <MapView 
+                  mapPoints={gridPoints}
+                  selectedMetric={selectedMetric}
+                  selectedLat={selectedLat ?? 26.75}
+                  selectedLon={selectedLon ?? 83.25}
+                  onSelectPoint={handlePointSelect}
+                />
+              </div>
+              <div className="flex-[3.8] min-h-0">
+                <TrendChart trendData={trendData} onNavigateTab={(tab) => setActiveTab(tab)} />
+              </div>
+            </div>
+            <div className="w-[320px] flex-shrink-0 h-full overflow-hidden rounded-lg shadow-sm border border-[#D2E5DF]">
+              <RightPanel
+                pointDetail={selectedPointDetail}
+                regionalSummary={regionalSummary}
+                onOpenPassport={() => setActiveTab('passport')}
+              />
+            </div>
+          </div>
+        );
+      case 'analytics':
+        return (
+          <AnalyticsView
+            selectedRun={selectedRun}
+            selectedLead={selectedLead}
+            gridPoints={gridPoints}
           />
         );
       case 'stress_lab':
@@ -204,16 +252,26 @@ export const App: React.FC = () => {
             pointDetail={selectedPointDetail}
           />
         );
-      case 'passport':
-        return <PassportView passport={passportData} />;
-      case 'analytics':
+      case 'trust_horizon':
         return (
-          <AnalyticsView
-            selectedRun={selectedRun}
-            selectedLead={selectedLead}
-            gridPoints={gridPoints}
+          <TrustHorizonView
+            trustHorizon={trustHorizonData}
+            pointDetail={selectedPointDetail}
           />
         );
+      case 'breaking_point':
+        return (
+          <BreakingPointView
+            trustHorizon={trustHorizonData}
+            pointDetail={selectedPointDetail}
+          />
+        );
+      case 'passport':
+        return <PassportView passport={passportData} />;
+      case 'reservoir':
+      case 'agriculture':
+      case 'disaster':
+      case 'grid':
       case 'decision_support':
         return <DecisionSupportView />;
       case 'ai_assistant':
@@ -229,25 +287,26 @@ export const App: React.FC = () => {
             selectedLead={selectedLead}
             selectedMetric={selectedMetric}
             gridPoints={gridPoints}
-            selectedLat={selectedLat ?? 26.75}
-            selectedLon={selectedLon ?? 83.37}
+            selectedLat={selectedLat}
+            selectedLon={selectedLon}
             onSelectPoint={handlePointSelect}
             regionalSummary={regionalSummary}
             trendData={trendData}
             onOpenPassport={() => setActiveTab('passport')}
+            onNavigateTab={(tab) => setActiveTab(tab)}
           />
         );
     }
   };
 
   return (
-    <div className="flex h-screen w-screen overflow-hidden bg-slate-950 text-slate-100 font-sans">
-      {/* Sidebar */}
+    <div className="flex h-screen w-screen overflow-hidden bg-[#F5FAF8] text-[#102A2A] font-sans select-none">
+      {/* Dark Green Sidebar */}
       <Sidebar activeTab={activeTab} setActiveTab={setActiveTab} />
 
       {/* Main Content Area */}
-      <div className="flex-1 flex flex-col min-w-0 overflow-hidden">
-        {/* Header */}
+      <div className="flex-1 flex flex-col min-w-0 overflow-hidden h-full">
+        {/* Top Header */}
         <Header
           metadata={metadata}
           selectedRun={selectedRun}
@@ -260,27 +319,15 @@ export const App: React.FC = () => {
           setSelectedRegion={setSelectedRegion}
         />
 
-        {/* Dynamic Body Layout */}
-        <div className="flex-1 flex overflow-hidden min-h-0">
-          {/* Active View Container */}
-          <div className="flex-1 overflow-y-auto">
-            {error ? (
-              <div className="p-8 text-center text-red-400 bg-red-950/20 m-6 border border-red-800 rounded-xl">
-                <p className="font-bold text-lg mb-2">Backend Connection Error</p>
-                <p className="text-sm text-red-300 font-mono">{error}</p>
-              </div>
-            ) : (
-              renderActiveView()
-            )}
-          </div>
-
-          {/* Right Telemetry Panel (Visible in Overview tab or when grid point selected) */}
-          {activeTab === 'overview' && (
-            <RightPanel
-              pointDetail={selectedPointDetail}
-              regionalSummary={regionalSummary}
-              onOpenPassport={() => setActiveTab('passport')}
-            />
+        {/* Active View Container */}
+        <div className="flex-1 overflow-hidden h-full min-h-0 bg-[#F5FAF8]">
+          {error ? (
+            <div className="p-8 text-center text-red-600 bg-red-50 m-6 border border-red-200 rounded-xl shadow-md">
+              <p className="font-bold text-lg mb-2">Backend Connection Error</p>
+              <p className="text-sm text-red-800 font-mono">{error}</p>
+            </div>
+          ) : (
+            renderActiveView()
           )}
         </div>
       </div>

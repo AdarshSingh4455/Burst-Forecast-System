@@ -22,11 +22,12 @@ class DataService:
         corridors_file = os.path.join(processed_dir, "FORTRESS_FAILURE_CORRIDORS.parquet")
 
         if not os.path.exists(audit_file):
-            alt_dir = os.path.join(base_dir, "FORTRESS", "data", "processed")
-            audit_file = os.path.join(alt_dir, "FORTRESS_SELF_AUDIT.parquet")
-            horizon_file = os.path.join(alt_dir, "FORTRESS_TRUST_HORIZON.parquet")
-            analogues_file = os.path.join(alt_dir, "FORTRESS_HISTORICAL_ANALOGUES.parquet")
-            corridors_file = os.path.join(alt_dir, "FORTRESS_FAILURE_CORRIDORS.parquet")
+            alt_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+            alt_processed = os.path.join(os.path.dirname(alt_dir), "data", "processed")
+            audit_file = os.path.join(alt_processed, "FORTRESS_SELF_AUDIT.parquet")
+            horizon_file = os.path.join(alt_processed, "FORTRESS_TRUST_HORIZON.parquet")
+            analogues_file = os.path.join(alt_processed, "FORTRESS_HISTORICAL_ANALOGUES.parquet")
+            corridors_file = os.path.join(alt_processed, "FORTRESS_FAILURE_CORRIDORS.parquet")
 
         self.df_self_audit = pd.read_parquet(audit_file)
         self.df_self_audit['forecast_init_str'] = pd.to_datetime(self.df_self_audit['forecast_init']).dt.strftime('%Y-%m-%d %H:%M:%S')
@@ -44,7 +45,8 @@ class DataService:
             self.df_corridors = pd.read_parquet(corridors_file)
 
         self.init_dates = sorted(self.df_self_audit['forecast_init_str'].unique().tolist())
-        self.regions = sorted(self.df_self_audit['region'].unique().tolist())
+        raw_regions = sorted(self.df_self_audit['region'].unique().tolist())
+        self.regions = ["ALL"] + [r for r in raw_regions if r != "ALL"]
         self.data_loaded = True
 
     def _sanitize(self, val):
@@ -73,16 +75,19 @@ class DataService:
             "grid_point_count": int(self.df_self_audit[['latitude', 'longitude']].drop_duplicates().shape[0])
         }
 
-    def get_map_data(self, forecast_init: str, lead_day: int, metric: str):
-        sub = self.df_self_audit[
-            (self.df_self_audit['forecast_init_str'] == forecast_init) &
-            (self.df_self_audit['lead_day'] == lead_day)
-        ]
+    def get_map_data(self, forecast_init: str, lead_day: int, metric: str, region: str = "ALL"):
+        mask = (self.df_self_audit['forecast_init_str'] == forecast_init) & (self.df_self_audit['lead_day'] == lead_day)
+        if region != "ALL":
+            mask &= (self.df_self_audit['region'] == region)
+
+        sub = self.df_self_audit[mask]
         
         metric_col_map = {
             "bust_probability": "baseline_p_bust",
+            "bust_risk_probability": "baseline_p_bust",
             "rainfall": "ensemble_mean_mm",
             "ffd": "ffd",
+            "fragility_score": "ffd",
             "fragility_auc": "fragility_auc",
             "trust_index": "trust_index",
             "ood_score": "ood_score",
@@ -102,16 +107,26 @@ class DataService:
         return records
 
     def get_regional_summary(self, region: str, forecast_init: str, lead_day: int):
-        sub_grid = self.df_self_audit[
-            (self.df_self_audit['region'] == region) &
-            (self.df_self_audit['forecast_init_str'] == forecast_init) &
-            (self.df_self_audit['lead_day'] == lead_day)
-        ]
-        sub_th = self.df_trust_horizon[
-            (self.df_trust_horizon['region'] == region) &
-            (self.df_trust_horizon['forecast_init_str'] == forecast_init) &
-            (self.df_trust_horizon['lead_day'] == lead_day)
-        ]
+        if region == "ALL" or region == "Eastern_UP_Pilot":
+            sub_grid = self.df_self_audit[
+                (self.df_self_audit['forecast_init_str'] == forecast_init) &
+                (self.df_self_audit['lead_day'] == lead_day)
+            ]
+            sub_th = self.df_trust_horizon[
+                (self.df_trust_horizon['forecast_init_str'] == forecast_init) &
+                (self.df_trust_horizon['lead_day'] == lead_day)
+            ]
+        else:
+            sub_grid = self.df_self_audit[
+                (self.df_self_audit['region'] == region) &
+                (self.df_self_audit['forecast_init_str'] == forecast_init) &
+                (self.df_self_audit['lead_day'] == lead_day)
+            ]
+            sub_th = self.df_trust_horizon[
+                (self.df_trust_horizon['region'] == region) &
+                (self.df_trust_horizon['forecast_init_str'] == forecast_init) &
+                (self.df_trust_horizon['lead_day'] == lead_day)
+            ]
         
         if len(sub_grid) == 0:
             return None
@@ -127,37 +142,59 @@ class DataService:
             "mean_ffd": round(float(sub_grid['ffd'].mean()), 4),
             "mean_fragility": round(float(sub_grid['fragility_auc'].mean()), 4),
             "median_trust_index": round(float(sub_grid['trust_index'].median()), 2),
-            "green_fraction": round(float(th_row['green_fraction']), 4) if th_row is not None else 0.0,
-            "yellow_fraction": round(float(th_row['yellow_fraction']), 4) if th_row is not None else 0.0,
-            "red_fraction": round(float(th_row['red_fraction']), 4) if th_row is not None else 0.0,
-            "regional_reliability_band": str(th_row['regional_reliability_band']) if th_row is not None else "GREEN",
-            "regional_trust_horizon_day": int(th_row['regional_trust_horizon_day']) if th_row is not None else 10,
+            "green_fraction": round(float(th_row['green_fraction']), 4) if th_row is not None else None,
+            "yellow_fraction": round(float(th_row['yellow_fraction']), 4) if th_row is not None else None,
+            "red_fraction": round(float(th_row['red_fraction']), 4) if th_row is not None else None,
+            "regional_reliability_band": str(th_row['regional_reliability_band']) if th_row is not None else None,
+            "regional_trust_horizon_day": int(th_row['regional_trust_horizon_day']) if th_row is not None else None,
             "regional_breaking_point_day": self._sanitize(th_row['regional_breaking_point_day']) if th_row is not None else None,
-            "dominant_failure_corridor": str(sub_grid['failure_corridor_label'].mode()[0]),
-            "dominant_vulnerability": str(sub_grid['primary_vulnerability'].mode()[0])
+            "dominant_failure_corridor": str(sub_grid['failure_corridor_label'].mode()[0]) if len(sub_grid) > 0 else None,
+            "dominant_vulnerability": str(sub_grid['primary_vulnerability'].mode()[0]) if len(sub_grid) > 0 else None
         }
 
     def get_grid_detail(self, forecast_init: str, lead_day: int, latitude: float, longitude: float):
         sub = self.df_self_audit[
             (self.df_self_audit['forecast_init_str'] == forecast_init) &
-            (self.df_self_audit['lead_day'] == lead_day) &
-            (np.abs(self.df_self_audit['latitude'] - latitude) < 0.01) &
-            (np.abs(self.df_self_audit['longitude'] - longitude) < 0.01)
+            (self.df_self_audit['lead_day'] == lead_day)
         ]
         if len(sub) == 0:
             return None
-        row = sub.iloc[0]
+        
+        dists = (sub['latitude'] - latitude)**2 + (sub['longitude'] - longitude)**2
+        min_idx = dists.idxmin()
+        if dists.loc[min_idx] > 1.0:
+            return None
+
+        row = sub.loc[min_idx]
         
         detail = {}
         for k, v in row.items():
             detail[k] = self._sanitize(v)
+
+        if detail.get('ffd_failure_found') == 0:
+            detail['stress_evidence'] = "No failure found within tested perturbation range"
+
         return detail
 
     def get_point_trend(self, forecast_init: str, latitude: float, longitude: float):
-        sub = self.df_self_audit[
-            (self.df_self_audit['forecast_init_str'] == forecast_init) &
-            (np.abs(self.df_self_audit['latitude'] - latitude) < 0.01) &
-            (np.abs(self.df_self_audit['longitude'] - longitude) < 0.01)
+        sub_all = self.df_self_audit[
+            (self.df_self_audit['forecast_init_str'] == forecast_init)
+        ]
+        if len(sub_all) == 0:
+            return []
+
+        sub_d1 = sub_all[sub_all['lead_day'] == 1]
+        if len(sub_d1) == 0:
+            return []
+
+        dists = (sub_d1['latitude'] - latitude)**2 + (sub_d1['longitude'] - longitude)**2
+        min_idx = dists.idxmin()
+        target_lat = float(sub_d1.loc[min_idx, 'latitude'])
+        target_lon = float(sub_d1.loc[min_idx, 'longitude'])
+
+        sub = sub_all[
+            (np.abs(sub_all['latitude'] - target_lat) < 0.001) &
+            (np.abs(sub_all['longitude'] - target_lon) < 0.001)
         ].sort_values(by='lead_day')
         
         records = []
@@ -178,31 +215,40 @@ class DataService:
         return records
 
     def get_regional_trend(self, forecast_init: str, region: str):
-        sub = self.df_trust_horizon[
-            (self.df_trust_horizon['forecast_init_str'] == forecast_init) &
-            (self.df_trust_horizon['region'] == region)
-        ].sort_values(by='lead_day')
-        
-        sub_audit = self.df_self_audit[
-            (self.df_self_audit['forecast_init_str'] == forecast_init) &
-            (self.df_self_audit['region'] == region)
-        ]
+        if region == "ALL" or region == "Eastern_UP_Pilot":
+            sub_th = self.df_trust_horizon[
+                (self.df_trust_horizon['forecast_init_str'] == forecast_init)
+            ].sort_values(by='lead_day')
+            
+            sub_audit = self.df_self_audit[
+                (self.df_self_audit['forecast_init_str'] == forecast_init)
+            ]
+        else:
+            sub_th = self.df_trust_horizon[
+                (self.df_trust_horizon['forecast_init_str'] == forecast_init) &
+                (self.df_trust_horizon['region'] == region)
+            ].sort_values(by='lead_day')
+            
+            sub_audit = self.df_self_audit[
+                (self.df_self_audit['forecast_init_str'] == forecast_init) &
+                (self.df_self_audit['region'] == region)
+            ]
         
         records = []
         for l_day in range(1, 11):
-            th_row = sub[sub['lead_day'] == l_day]
+            th_row = sub_th[sub_th['lead_day'] == l_day]
             aud_sub = sub_audit[sub_audit['lead_day'] == l_day]
             
             records.append({
                 "lead_day": l_day,
-                "mean_rainfall": round(float(aud_sub['ensemble_mean_mm'].mean()), 2) if len(aud_sub) > 0 else 0.0,
-                "mean_bust_probability": round(float(aud_sub['baseline_p_bust'].mean()), 4) if len(aud_sub) > 0 else 0.0,
-                "median_ffd": round(float(aud_sub['ffd'].median()), 4) if len(aud_sub) > 0 else 1.0,
-                "median_trust_index": round(float(aud_sub['trust_index'].median()), 2) if len(aud_sub) > 0 else 100.0,
-                "green_fraction": round(float(th_row['green_fraction'].values[0]), 4) if len(th_row) > 0 else 0.0,
-                "yellow_fraction": round(float(th_row['yellow_fraction'].values[0]), 4) if len(th_row) > 0 else 0.0,
-                "red_fraction": round(float(th_row['red_fraction'].values[0]), 4) if len(th_row) > 0 else 0.0,
-                "regional_reliability_band": str(th_row['regional_reliability_band'].values[0]) if len(th_row) > 0 else "GREEN"
+                "mean_rainfall": round(float(aud_sub['ensemble_mean_mm'].mean()), 2) if len(aud_sub) > 0 else None,
+                "mean_bust_probability": round(float(aud_sub['baseline_p_bust'].mean()), 4) if len(aud_sub) > 0 else None,
+                "median_ffd": round(float(aud_sub['ffd'].median()), 4) if len(aud_sub) > 0 else None,
+                "median_trust_index": round(float(aud_sub['trust_index'].median()), 2) if len(aud_sub) > 0 else None,
+                "green_fraction": round(float(th_row['green_fraction'].values[0]), 4) if len(th_row) > 0 else None,
+                "yellow_fraction": round(float(th_row['yellow_fraction'].values[0]), 4) if len(th_row) > 0 else None,
+                "red_fraction": round(float(th_row['red_fraction'].values[0]), 4) if len(th_row) > 0 else None,
+                "regional_reliability_band": str(th_row['regional_reliability_band'].values[0]) if len(th_row) > 0 else None
             })
         return records
 
@@ -210,15 +256,25 @@ class DataService:
         if self.df_analogues is None:
             return {"available": False, "message": "Historical analogues dataset missing."}
             
-        sub = self.df_analogues[
+        sub_all = self.df_analogues[
             (self.df_analogues['target_forecast_init_str'] == forecast_init) &
-            (self.df_analogues['target_lead_day'] == lead_day) &
-            (np.abs(self.df_analogues['target_latitude'] - latitude) < 0.01) &
-            (np.abs(self.df_analogues['target_longitude'] - longitude) < 0.01)
+            (self.df_analogues['target_lead_day'] == lead_day)
+        ]
+        if len(sub_all) == 0:
+            return {"available": False, "message": "No prior historical analogue available for this date."}
+            
+        dists = (sub_all['target_latitude'] - latitude)**2 + (sub_all['target_longitude'] - longitude)**2
+        min_idx = dists.idxmin()
+        target_lat = float(sub_all.loc[min_idx, 'target_latitude'])
+        target_lon = float(sub_all.loc[min_idx, 'target_longitude'])
+
+        sub = sub_all[
+            (np.abs(sub_all['target_latitude'] - target_lat) < 0.001) &
+            (np.abs(sub_all['target_longitude'] - target_lon) < 0.001)
         ].sort_values(by='analogue_rank')
         
         if len(sub) == 0:
-            return {"available": False, "message": "No prior historical analogue available for this date/location."}
+            return {"available": False, "message": "No prior historical analogue available for this location."}
             
         records = []
         for _, row in sub.iterrows():
@@ -247,10 +303,10 @@ class DataService:
             "longitude": float(detail['longitude']),
             "region": str(detail['region']),
             "rainfall_mm": round(float(detail['ensemble_mean_mm']), 2),
-            "temperature_c": round(float(detail['temp_2m_c_mean']), 2),
-            "humidity_gkg": round(float(detail['specific_humidity_gkg_mean']), 2),
-            "pressure_hpa": round(float(detail['mslp_hpa_mean']), 2),
-            "wind_speed_ms": round(float(detail['wind_speed_mean_ms']), 2),
+            "temperature_c": round(float(detail.get('temp_2m_c_mean', 0.0)), 2),
+            "humidity_gkg": round(float(detail.get('specific_humidity_gkg_mean', 0.0)), 2),
+            "pressure_hpa": round(float(detail.get('mslp_hpa_mean', 0.0)), 2),
+            "wind_speed_ms": round(float(detail.get('wind_speed_mean_ms', 0.0)), 2),
             "bust_probability": round(float(detail['baseline_p_bust']), 4),
             "ai_risk_category": str(detail['ai_risk_category']),
             "ffd": round(float(detail['ffd']), 4),

@@ -679,6 +679,25 @@ export interface RenewableScenarioResponse {
   data_mode: string;
 }
 
+export interface AssistantExplainResponse {
+  answer: string;
+  detected_language: string;
+  intent: string;
+  context_used: {
+    forecast_init?: string;
+    lead_day?: number;
+    latitude?: number;
+    longitude?: number;
+    inside_pilot?: boolean;
+    active_view?: string;
+    scenario_id?: string | null;
+  };
+  evidence_used: string[];
+  limitations: string[];
+  grounded: boolean;
+}
+
+
 
 
 

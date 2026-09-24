@@ -592,6 +592,31 @@ class RenewableScenarioResponse(BaseModel):
     reasons: List[str]
     data_mode: str
 
+# ============================================================
+# PHASE 10A — MULTILINGUAL ASSISTANT SCHEMAS
+# ============================================================
+
+class AssistantExplainRequest(BaseModel):
+    message: str
+    language: Optional[str] = "auto"
+    forecast_init: Optional[str] = None
+    forecast_run: Optional[str] = None
+    lead_day: Optional[int] = 5
+    latitude: Optional[float] = 25.75
+    longitude: Optional[float] = 82.00
+    active_view: Optional[str] = "Overview"
+    scenario_id: Optional[str] = None
+
+class AssistantExplainResponse(BaseModel):
+    answer: str
+    detected_language: str
+    intent: str
+    context_used: Dict[str, Any]
+    evidence_used: List[str]
+    limitations: List[str]
+    grounded: bool = True
+
+
 
 
 

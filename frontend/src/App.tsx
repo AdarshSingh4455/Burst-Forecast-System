@@ -301,7 +301,15 @@ export const App: React.FC = () => {
           />
         );
       case 'ai_assistant':
-        return <AIAssistantView pointDetail={selectedPointDetail} />;
+        return (
+          <AIAssistantView
+            pointDetail={selectedPointDetail}
+            selectedRun={selectedRun}
+            selectedLead={selectedLead}
+            selectedLat={selectedLat}
+            selectedLon={selectedLon}
+          />
+        );
       case 'settings':
         return <SettingsView />;
       case 'about':
@@ -369,6 +377,11 @@ export const App: React.FC = () => {
         isOpen={isAiOpen} 
         onClose={() => setIsAiOpen(false)} 
         pointDetail={selectedPointDetail} 
+        selectedRun={selectedRun}
+        selectedLead={selectedLead}
+        selectedLat={selectedLat}
+        selectedLon={selectedLon}
+        activeView={activeTab}
       />
 
       {/* Floating Bottom-Right Launcher Button */}

@@ -28,7 +28,8 @@ import {
   RenewableSummary,
   RenewableForecastContextResponse,
   RenewableDecisionSupportResponse,
-  RenewableScenarioResponse
+  RenewableScenarioResponse,
+  AssistantExplainResponse
 } from '../types';
 
 const API_BASE = (((import.meta as any).env?.VITE_API_URL as string) || 'http://127.0.0.1:8000/api').replace(/\/$/, '');
@@ -427,6 +428,39 @@ export async function postRenewableScenario(
   }
   return res.json();
 }
+
+export async function postAssistantExplain(params: {
+  message: string;
+  language?: string;
+  forecastInit?: string;
+  leadDay?: number;
+  latitude?: number;
+  longitude?: number;
+  activeView?: string;
+  scenarioId?: string | null;
+}): Promise<AssistantExplainResponse> {
+  const url = `${API_BASE}/assistant/explain`;
+  const res = await fetch(url, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      message: params.message,
+      language: params.language || 'auto',
+      forecast_init: params.forecastInit,
+      lead_day: params.leadDay || 5,
+      latitude: params.latitude,
+      longitude: params.longitude,
+      active_view: params.activeView || 'Overview',
+      scenario_id: params.scenarioId
+    })
+  });
+  if (!res.ok) {
+    const text = await res.text();
+    throw new Error(`API Error (${res.status}): ${text || res.statusText}`);
+  }
+  return res.json();
+}
+
 
 
 

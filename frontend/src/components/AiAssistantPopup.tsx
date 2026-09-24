@@ -1,76 +1,151 @@
-import React, { useState } from 'react';
-import { Bot, Send, User, X, Sparkles } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { Bot, Send, User, X, Sparkles, Trash2, Globe, CheckCircle2, AlertTriangle, HelpCircle } from 'lucide-react';
 import { GridPointDetail } from '../types';
+import { postAssistantExplain } from '../lib/api';
+
+interface Message {
+  id: string;
+  sender: 'user' | 'bot';
+  text: string;
+  detectedLang?: string;
+  intent?: string;
+  evidenceUsed?: string[];
+  limitations?: string[];
+  timestamp: string;
+}
 
 interface AiAssistantPopupProps {
   isOpen: boolean;
   onClose: () => void;
   pointDetail?: GridPointDetail | null;
+  selectedRun?: string;
+  selectedLead?: number;
+  selectedLat?: number | null;
+  selectedLon?: number | null;
+  activeView?: string;
+  scenarioId?: string | null;
 }
 
-export const AiAssistantPopup: React.FC<AiAssistantPopupProps> = ({ isOpen, onClose, pointDetail }) => {
-  const [messages, setMessages] = useState<Array<{ sender: 'user' | 'bot'; text: string }>>([
-    { 
-      sender: 'bot', 
-      text: `Hello! I am FORTRESS AI Assistant. Ask me about current grid point telemetry (${pointDetail ? `${pointDetail.latitude.toFixed(2)}°N, ${pointDetail.longitude.toFixed(2)}°E` : 'Selected Grid Point'}), bust risk, FFD, or self-audit verdicts.` 
+export const AiAssistantPopup: React.FC<AiAssistantPopupProps> = ({
+  isOpen,
+  onClose,
+  pointDetail,
+  selectedRun = '2019-07-01 00:00:00',
+  selectedLead = 5,
+  selectedLat = 26.75,
+  selectedLon = 83.37,
+  activeView = 'Overview',
+  scenarioId = null
+}) => {
+  const [language, setLanguage] = useState<'auto' | 'en' | 'hi' | 'hinglish'>('auto');
+  const [messages, setMessages] = useState<Message[]>([
+    {
+      id: '1',
+      sender: 'bot',
+      text: `Hello! I am FORTRESS Multilingual Explanation Assistant. Ask me about current grid point telemetry (${pointDetail ? `${pointDetail.latitude.toFixed(2)}°N, ${pointDetail.longitude.toFixed(2)}°E` : `${selectedLat?.toFixed(2) || '26.75'}°N, ${selectedLon?.toFixed(2) || '83.37'}°E`}), bust risk, FFD, stress lab, self-audit, or decision support context.`,
+      timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
     }
   ]);
   const [input, setInput] = useState('');
+  const [isSending, setIsSending] = useState(false);
 
   if (!isOpen) return null;
 
-  const quickQuestions = [
-    'Why is this forecast risky?',
-    'Why is FFD small?',
-    'Why did Self-Audit flag this?',
-    'When does reliability deteriorate?'
-  ];
-
-  const handleSend = (textToSend?: string) => {
-    const q = textToSend || input;
-    if (!q.trim()) return;
-
-    const userMsg = { sender: 'user' as const, text: q };
-    
-    const latStr = pointDetail ? `${pointDetail.latitude.toFixed(2)}°N, ${pointDetail.longitude.toFixed(2)}°E` : 'selected grid point';
-    const bustRiskPct = pointDetail ? (pointDetail.baseline_p_bust * 100).toFixed(0) : '62';
-    const ffdVal = pointDetail ? (pointDetail.ffd_failure_found === 0 ? 'No boundary' : pointDetail.ffd.toFixed(2)) : '0.32';
-    const auditStatus = pointDetail ? pointDetail.self_audit_status : 'SUPPORTED WARNING';
-    const auditReason = pointDetail ? pointDetail.self_audit_reason : 'Ensemble disagreement exceeding 0.45 threshold';
-    const horizonDay = pointDetail ? pointDetail.trust_horizon_day : 5;
-    const breakingDay = pointDetail ? (pointDetail.breaking_point_day ?? 6) : 6;
-
-    let replyText = 'FORTRESS Explanation Assistant — Prototype: Model explanation rule executed.';
-
-    const qLower = q.toLowerCase();
-    if (qLower.includes('mw') || qLower.includes('power generation') || qLower.includes('exact mw') || qLower.includes('generation forecast')) {
-      replyText = 'No. Phase 9D provides weather-reliability and planning context. It does not provide validated plant-level MW generation forecasts or automatic grid-dispatch instructions.';
-    } else if (qLower.includes('solar') || qLower.includes('irradiance') || qLower.includes('solar generation')) {
-      replyText = 'Solar generation diagnostic is unavailable because validated surface solar irradiance input is not integrated in the current prototype.';
-    } else if (qLower.includes('official') || qLower.includes('warning') || qLower.includes('flood warning') || qLower.includes('evacuation') || qLower.includes('dispatch')) {
-      replyText = 'No. FORTRESS provides forecast-reliability and decision-support context. It does not issue official flood, evacuation, emergency-management warnings, or grid-dispatch instructions. Official load-dispatch center (SLDC/RLDC) instructions remain authoritative.';
-    } else if (qLower.includes('outside pilot') || qLower.includes('outside')) {
-      replyText = 'FORTRESS reliability analysis is unavailable outside the current Eastern UP pilot coverage (24.5–28.5°N, 80.0–84.5°E). Grid snapping and reliability metrics are strictly suppressed for outside-pilot locations.';
-    } else if (q.includes('risky')) {
-      replyText = `Forecast at ${latStr} has a Bust Risk of ${bustRiskPct}% (${pointDetail?.ai_risk_category || 'High Risk'}). This risk is driven by ${pointDetail?.primary_vulnerability || 'elevated specific humidity sensitivity'} and high ensemble spread on D${pointDetail?.lead_day || 5}.`;
-    } else if (q.includes('FFD') || q.includes('small')) {
-      replyText = `FFD at ${latStr} is ${ffdVal} (${pointDetail?.fragility_category || 'Fragile'}). This indicates small perturbation perturbations (+1.2°C temp / +15% moisture) push model forecasts across the bust risk failure threshold.`;
-    } else if (q.includes('Self-Audit') || q.includes('flag')) {
-      replyText = `Self-Audit verdict for ${latStr} is ${auditStatus}. Explanation: ${auditReason}. Trust Index is ${pointDetail?.trust_index || 78}/100.`;
-    } else if (q.includes('deteriorate') || q.includes('when')) {
-      replyText = `Forecast reliability remains usable up to Trust Horizon D${horizonDay}. Reliability deteriorates into sustained RED starting at Day ${breakingDay} (Breaking Point: D${breakingDay}).`;
-    } else if (qLower.includes('disaster') || qLower.includes('preparedness')) {
-      replyText = `Disaster preparedness context synthesizes weather forecast signals with local vulnerability/exposure attributes under 3-dimension separation. Prototype statuses include NORMAL_MONITORING, PREPAREDNESS_REVIEW, HEIGHTENED_PREPAREDNESS, and HIGH_UNCERTAINTY_EXPERT_REVIEW.`;
-    } else if (qLower.includes('renewable') || qLower.includes('grid')) {
-      replyText = `Renewable grid decision support evaluates 10m wind speed diagnostics and forecast reliability evidence for grid planning context. Prototype statuses include NORMAL_MONITORING, GENERATION_VARIABILITY_REVIEW, GRID_PREPAREDNESS_REVIEW, and HIGH_UNCERTAINTY_EXPERT_REVIEW.`;
+  // View-based dynamic quick questions
+  const getQuickQuestions = () => {
+    const v = (activeView || '').toLowerCase();
+    if (v.includes('stress')) {
+      return ['Why is FFD small?', 'What variable is most sensitive?', 'What happens under stress testing?'];
+    } else if (v.includes('audit')) {
+      return ['Why did Self-Audit flag this?', 'What does Conflict mean?', 'Why is Expert Review shown?'];
+    } else if (v.includes('trust') || v.includes('breaking')) {
+      return ['When does reliability deteriorate?', 'What is Trust Horizon?', 'Can I trust Day 5?'];
+    } else if (v.includes('reservoir')) {
+      return ['Why is reservoir monitoring heightened?', 'Can FORTRESS open dam gates?', 'Why is expert review advised?'];
+    } else if (v.includes('agri')) {
+      return ['Why is this weather-sensitive?', 'What does dry-spell diagnostic mean?', 'Is this an official advisory?'];
+    } else if (v.includes('disaster')) {
+      return ['Does this rainfall mean flooding?', 'Should people evacuate?', 'Why is preparedness heightened?'];
+    } else if (v.includes('renewable')) {
+      return ['Why is solar diagnostic unavailable?', 'What does 10 m wind mean?', 'Can FORTRESS predict MW generation?'];
     }
-
-
-    const botMsg = { sender: 'bot' as const, text: replyText };
-
-    setMessages(prev => [...prev, userMsg, botMsg]);
-    if (!textToSend) setInput('');
+    return [
+      'Why is this forecast risky?',
+      'How reliable is D5?',
+      'Why is FFD small?',
+      'When does reliability deteriorate?'
+    ];
   };
+
+  const handleSend = async (textToSend?: string) => {
+    const q = textToSend || input;
+    if (!q.trim() || isSending) return;
+
+    const userMsgId = Date.now().toString();
+    const userMsg: Message = {
+      id: userMsgId,
+      sender: 'user',
+      text: q,
+      timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+    };
+
+    setMessages((prev) => [...prev, userMsg]);
+    if (!textToSend) setInput('');
+    setIsSending(true);
+
+    try {
+      const lat = pointDetail ? pointDetail.latitude : (selectedLat ?? 26.75);
+      const lon = pointDetail ? pointDetail.longitude : (selectedLon ?? 83.37);
+
+      const resp = await postAssistantExplain({
+        message: q,
+        language: language,
+        forecastInit: selectedRun,
+        leadDay: selectedLead,
+        latitude: lat,
+        longitude: lon,
+        activeView: activeView,
+        scenarioId: scenarioId
+      });
+
+      const botMsg: Message = {
+        id: (Date.now() + 1).toString(),
+        sender: 'bot',
+        text: resp.answer,
+        detectedLang: resp.detected_language,
+        intent: resp.intent,
+        evidenceUsed: resp.evidence_used,
+        limitations: resp.limitations,
+        timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+      };
+
+      setMessages((prev) => [...prev, botMsg]);
+    } catch (err: any) {
+      const errorMsg: Message = {
+        id: (Date.now() + 1).toString(),
+        sender: 'bot',
+        text: `Error connecting to explanation engine: ${err?.message || 'Server unavailable'}. Please verify backend is running.`,
+        timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+      };
+      setMessages((prev) => [...prev, errorMsg]);
+    } finally {
+      setIsSending(false);
+    }
+  };
+
+  const clearChat = () => {
+    setMessages([
+      {
+        id: Date.now().toString(),
+        sender: 'bot',
+        text: 'Conversation history cleared. How can I assist you with FORTRESS forecast reliability context?',
+        timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+      }
+    ]);
+  };
+
+  const currentLat = pointDetail ? pointDetail.latitude : (selectedLat ?? 26.75);
+  const currentLon = pointDetail ? pointDetail.longitude : (selectedLon ?? 83.37);
 
   return (
     <>
@@ -80,67 +155,135 @@ export const AiAssistantPopup: React.FC<AiAssistantPopupProps> = ({ isOpen, onCl
         className="fixed inset-0 bg-slate-900/40 backdrop-blur-xs z-[9998] transition-opacity"
       />
 
-      {/* Side Slide-Over Pop-Up Drawer */}
-      <div className="fixed top-0 right-0 h-full w-[410px] max-w-[95vw] bg-white border-l border-[#C8EAD9] shadow-2xl z-[9999] flex flex-col flex-shrink-0 select-none animate-in slide-in-from-right duration-300">
+      {/* Side Slide-Over Drawer */}
+      <div className="fixed top-0 right-0 h-full w-[440px] max-w-[95vw] bg-white border-l border-[#C8EAD9] shadow-2xl z-[9999] flex flex-col flex-shrink-0 select-none animate-in slide-in-from-right duration-300">
+        
         {/* Header */}
-        <div className="p-4 bg-[#F4FAF6] border-b border-[#C8EAD9] flex items-center justify-between flex-shrink-0">
+        <div className="p-3.5 bg-[#F4FAF6] border-b border-[#C8EAD9] flex items-center justify-between flex-shrink-0">
           <div className="flex items-center gap-2.5">
             <div className="w-9 h-9 rounded-xl bg-[#059669] text-white flex items-center justify-center shadow-xs">
               <Bot className="w-5 h-5" />
             </div>
             <div>
               <h2 className="font-extrabold text-[#044E3A] text-sm flex items-center gap-1.5">
-                FORTRESS AI Assistant
-                <span className="text-[9px] bg-[#D4F0E2] text-[#047857] px-1.5 py-0.5 rounded font-extrabold">Side Popup</span>
+                FORTRESS Assistant — Prototype
+                <span className="text-[9px] bg-[#D4F0E2] text-[#047857] px-1.5 py-0.5 rounded font-extrabold">Phase 10A</span>
               </h2>
               <p className="text-[10px] text-[#065F46] font-medium">
-                Target: <span className="font-bold text-[#044E3A]">{pointDetail ? `${pointDetail.latitude.toFixed(2)}°N, ${pointDetail.longitude.toFixed(2)}°E` : 'Selected Grid Point'}</span>
+                Context-grounded forecast reliability explanation
               </p>
             </div>
           </div>
 
-          <button 
-            onClick={onClose}
-            className="p-1.5 rounded-lg text-slate-400 hover:text-[#044E3A] hover:bg-[#E2F5EC] transition-colors"
-          >
-            <X className="w-5 h-5" />
-          </button>
+          <div className="flex items-center gap-1">
+            <button
+              onClick={clearChat}
+              title="Clear conversation"
+              className="p-1.5 rounded-lg text-slate-400 hover:text-red-600 hover:bg-red-50 transition-colors"
+            >
+              <Trash2 className="w-4 h-4" />
+            </button>
+            <button 
+              onClick={onClose}
+              className="p-1.5 rounded-lg text-slate-400 hover:text-[#044E3A] hover:bg-[#E2F5EC] transition-colors"
+            >
+              <X className="w-5 h-5" />
+            </button>
+          </div>
         </div>
 
-        {/* Messages Container */}
-        <div className="flex-1 p-4 overflow-y-auto space-y-3 bg-[#EEF9F4] text-xs">
-          {messages.map((m, i) => (
-            <div key={i} className={`flex items-start gap-2 ${m.sender === 'user' ? 'justify-end' : 'justify-start'}`}>
+        {/* Language Selector Bar */}
+        <div className="px-3.5 py-2 bg-[#EAF8F3] border-b border-[#C8EAD9] flex items-center justify-between text-xs">
+          <span className="text-[11px] font-bold text-[#047857] flex items-center gap-1">
+            <Globe className="w-3.5 h-3.5 text-[#059669]" /> Language:
+          </span>
+          <div className="flex items-center gap-1 bg-white p-0.5 rounded-lg border border-[#C8EAD9]">
+            {(['auto', 'en', 'hi', 'hinglish'] as const).map((lang) => (
+              <button
+                key={lang}
+                onClick={() => setLanguage(lang)}
+                className={`px-2 py-0.5 rounded text-[10.5px] font-bold transition-colors ${
+                  language === lang
+                    ? 'bg-[#059669] text-white shadow-xs'
+                    : 'text-[#044E3A] hover:bg-[#EEF9F4]'
+                }`}
+              >
+                {lang === 'auto' ? 'Auto' : lang === 'en' ? 'English' : lang === 'hi' ? 'हिन्दी' : 'Hinglish'}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        {/* Active Context Card */}
+        <div className="mx-3.5 mt-2.5 p-2.5 bg-[#EEF9F4] border border-[#C8EAD9] rounded-xl text-[11px] space-y-1">
+          <div className="flex items-center justify-between text-[#044E3A] font-bold border-b border-[#C8EAD9]/60 pb-1">
+            <span className="uppercase text-[9.5px] tracking-wider text-[#059669] font-extrabold flex items-center gap-1">
+              <CheckCircle2 className="w-3 h-3" /> CURRENT CONTEXT
+            </span>
+            <span className="text-[10px] text-[#065F46] font-semibold">{activeView || 'Overview'}</span>
+          </div>
+          <div className="grid grid-cols-2 gap-1 text-[#065F46]">
+            <div><span className="font-semibold text-[#044E3A]">Run:</span> {selectedRun.split(' ')[0]}</div>
+            <div><span className="font-semibold text-[#044E3A]">Lead:</span> D{selectedLead}</div>
+            <div><span className="font-semibold text-[#044E3A]">Grid:</span> {currentLat.toFixed(2)}°N, {currentLon.toFixed(2)}°E</div>
+            <div><span className="font-semibold text-[#044E3A]">Domain:</span> {((24.5 <= currentLat && currentLat <= 28.5) && (80.0 <= currentLon && currentLon <= 84.5)) ? 'Eastern UP Pilot' : 'Outside Pilot'}</div>
+          </div>
+        </div>
+
+        {/* Chat Area */}
+        <div className="flex-1 p-3.5 overflow-y-auto space-y-3 text-xs bg-slate-50/50">
+          {messages.map((m) => (
+            <div key={m.id} className={`flex items-start gap-2 ${m.sender === 'user' ? 'justify-end' : 'justify-start'}`}>
               {m.sender === 'bot' && (
-                <div className="w-7 h-7 rounded-full bg-[#059669] text-white flex items-center justify-center flex-shrink-0 text-xs font-bold shadow-xs">
+                <div className="w-7 h-7 rounded-full bg-[#059669] text-white flex items-center justify-center flex-shrink-0 text-xs font-bold shadow-xs mt-0.5">
                   <Bot className="w-4 h-4" />
                 </div>
               )}
-              <div className={`p-3 rounded-2xl max-w-[82%] leading-relaxed ${
-                m.sender === 'user' ? 'bg-[#059669] text-white font-medium shadow-xs' : 'bg-white text-[#044E3A] border border-[#C8EAD9] shadow-xs'
+              <div className={`p-3 rounded-2xl max-w-[85%] leading-relaxed ${
+                m.sender === 'user' 
+                  ? 'bg-[#059669] text-white font-medium shadow-xs' 
+                  : 'bg-white text-[#044E3A] border border-[#C8EAD9] shadow-xs'
               }`}>
-                {m.text}
+                <div className="whitespace-pre-line">{m.text}</div>
+
+                {/* Evidence Chips */}
+                {m.evidenceUsed && m.evidenceUsed.length > 0 && (
+                  <div className="mt-2 pt-2 border-t border-[#C8EAD9]/50 flex flex-wrap gap-1 items-center text-[10px]">
+                    <span className="font-bold text-[#059669] uppercase text-[9px]">Evidence Used:</span>
+                    {m.evidenceUsed.map((ev, i) => (
+                      <span key={i} className="bg-[#EAF8F3] text-[#047857] px-1.5 py-0.5 rounded border border-[#C8EAD9] font-semibold text-[9.5px]">
+                        {ev}
+                      </span>
+                    ))}
+                  </div>
+                )}
               </div>
               {m.sender === 'user' && (
-                <div className="w-7 h-7 rounded-full bg-[#044E3A] text-white flex items-center justify-center flex-shrink-0 text-xs font-bold shadow-xs">
+                <div className="w-7 h-7 rounded-full bg-[#044E3A] text-white flex items-center justify-center flex-shrink-0 text-xs font-bold shadow-xs mt-0.5">
                   <User className="w-4 h-4" />
                 </div>
               )}
             </div>
           ))}
+          {isSending && (
+            <div className="flex items-center gap-2 text-xs text-[#059669] font-medium italic">
+              <Bot className="w-4 h-4 animate-spin" /> Retrieving context & generating explanation...
+            </div>
+          )}
         </div>
 
         {/* Quick Questions & Input Footer */}
         <div className="p-3 bg-white border-t border-[#C8EAD9] space-y-2 flex-shrink-0">
           <div className="flex items-center gap-1.5 flex-wrap text-[10px]">
-            <span className="text-[#047857] font-extrabold uppercase flex items-center gap-1">
-              <Sparkles className="w-3 h-3 text-[#059669]" /> Quick Prompts:
+            <span className="text-[#047857] font-extrabold uppercase flex items-center gap-1 text-[9.5px]">
+              <Sparkles className="w-3 h-3 text-[#059669]" /> Suggested:
             </span>
-            {quickQuestions.map((q, idx) => (
+            {getQuickQuestions().map((q, idx) => (
               <button
                 key={idx}
                 onClick={() => handleSend(q)}
-                className="bg-[#EEF9F4] hover:bg-[#C9EFE0] text-[#044E3A] px-2 py-0.5 rounded-md border border-[#C8EAD9] transition-colors font-medium text-[10.5px]"
+                disabled={isSending}
+                className="bg-[#EEF9F4] hover:bg-[#C9EFE0] text-[#044E3A] px-2 py-0.5 rounded-md border border-[#C8EAD9] transition-colors font-medium text-[10.5px] disabled:opacity-50"
               >
                 {q}
               </button>
@@ -156,14 +299,16 @@ export const AiAssistantPopup: React.FC<AiAssistantPopupProps> = ({ isOpen, onCl
           >
             <input
               type="text"
-              placeholder="Ask AI Assistant..."
+              placeholder={language === 'hi' ? "प्रश्न पूछें..." : language === 'hinglish' ? "Puchhein..." : "Ask FORTRESS Assistant..."}
               value={input}
               onChange={(e) => setInput(e.target.value)}
-              className="flex-1 bg-[#EEF9F4] border border-[#C8EAD9] rounded-lg px-3 py-2 text-xs text-[#044E3A] focus:outline-none focus:border-[#059669]"
+              disabled={isSending}
+              className="flex-1 bg-[#EEF9F4] border border-[#C8EAD9] rounded-lg px-3 py-2 text-xs text-[#044E3A] focus:outline-none focus:border-[#059669] disabled:opacity-50"
             />
             <button
               type="submit"
-              className="bg-[#059669] hover:bg-[#047857] text-white font-bold p-2 rounded-lg transition-colors flex items-center justify-center shadow-xs"
+              disabled={isSending || !input.trim()}
+              className="bg-[#059669] hover:bg-[#047857] text-white font-bold p-2 rounded-lg transition-colors flex items-center justify-center shadow-xs disabled:opacity-50"
             >
               <Send className="w-4 h-4" />
             </button>

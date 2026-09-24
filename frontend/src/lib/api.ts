@@ -16,7 +16,11 @@ import {
   ReservoirSummary,
   ReservoirForecastContextResponse,
   ReservoirDecisionSupportResponse,
-  ReservoirScenarioResponse
+  ReservoirScenarioResponse,
+  AgricultureSummary,
+  AgricultureForecastContextResponse,
+  AgricultureDecisionSupportResponse,
+  AgricultureScenarioResponse
 } from '../types';
 
 const API_BASE = (((import.meta as any).env?.VITE_API_URL as string) || 'http://127.0.0.1:8000/api').replace(/\/$/, '');
@@ -231,4 +235,67 @@ export async function postReservoirScenario(
   }
   return res.json();
 }
+
+// Phase 9B Agriculture API Functions
+export async function fetchAgricultureScenarios(): Promise<AgricultureSummary[]> {
+  return apiFetch<AgricultureSummary[]>('/agriculture');
+}
+
+export async function fetchAgricultureDetail(agriId: string): Promise<AgricultureSummary> {
+  return apiFetch<AgricultureSummary>(`/agriculture/${agriId}`);
+}
+
+export async function fetchAgricultureForecastContext(agriId: string, forecastInit: string): Promise<AgricultureForecastContextResponse> {
+  return apiFetch<AgricultureForecastContextResponse>(`/agriculture/${agriId}/forecast-context`, {
+    forecast_init: forecastInit
+  });
+}
+
+export async function fetchAgricultureDecisionSupport(
+  agriId: string,
+  forecastInit: string,
+  leadDay: number = 1
+): Promise<AgricultureDecisionSupportResponse> {
+  return apiFetch<AgricultureDecisionSupportResponse>(`/agriculture/${agriId}/decision-support`, {
+    forecast_init: forecastInit,
+    lead_day: leadDay.toString()
+  });
+}
+
+export async function postAgricultureScenario(
+  agriId: string,
+  forecastInit: string,
+  leadDay: number = 1,
+  crop?: string,
+  cropStage?: string,
+  fieldOperation?: string,
+  soilMoisturePercent?: number,
+  rainfallMmOverride?: number,
+  drySpellDaysOverride?: number,
+  scenarioName?: string
+): Promise<AgricultureScenarioResponse> {
+  const url = new URL(`${API_BASE}/agriculture/${agriId}/scenario`);
+  url.searchParams.append('forecast_init', forecastInit);
+  url.searchParams.append('lead_day', leadDay.toString());
+
+  const res = await fetch(url.toString(), {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      crop,
+      crop_stage: cropStage,
+      field_operation: fieldOperation,
+      soil_moisture_percent: soilMoisturePercent,
+      rainfall_mm_override: rainfallMmOverride,
+      dry_spell_days_override: drySpellDaysOverride,
+      scenario_name: scenarioName || 'Custom What-If Scenario'
+    })
+  });
+  if (!res.ok) {
+    const text = await res.text();
+    throw new Error(`API Error (${res.status}): ${text || res.statusText}`);
+  }
+  return res.json();
+}
+
 

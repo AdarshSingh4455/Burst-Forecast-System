@@ -214,4 +214,135 @@ class ReservoirScenarioResponse(BaseModel):
     reasons: List[str]
     data_mode: str
 
+# ============================================================
+# PHASE 9B — AGRICULTURE DECISION SUPPORT SCHEMAS
+# ============================================================
+
+class AgricultureSummary(BaseModel):
+    agri_id: str
+    name: str
+    latitude: float
+    longitude: float
+    district_label: str
+    state: str
+    data_mode: str
+    crop: str
+    crop_stage: str
+    field_operation: str
+    soil_moisture_mode: str
+    soil_moisture_percent: float
+    scenario_name: str
+    coverage_available: bool = True
+    in_pilot_coverage: bool = True
+
+class AgricultureLeadContext(BaseModel):
+    lead_day: int
+    rainfall_mm: float
+    temperature_c: float
+    humidity_gkg: float
+    wind_speed_ms: float
+    bust_probability: float
+    ffd: float
+    ffd_failure_found: bool
+    fragility_category: str
+    trust_index: float
+    reliability_band: str
+    self_audit_status: str
+    attention_status: Optional[str] = None
+
+class AgricultureForecastContextResponse(BaseModel):
+    agri_id: str
+    agri_name: str
+    forecast_init: str
+    data_mode: str
+    coverage_available: bool = True
+    in_pilot_coverage: bool = True
+    context_mode: str
+    reason: Optional[str] = None
+    forecast_context: Optional[Any] = None
+    lead_contexts: Optional[List[AgricultureLeadContext]] = None
+
+class AgricultureDecisionSupportResponse(BaseModel):
+    agri_id: str
+    agri_name: str
+    data_mode: str
+    forecast_init: str
+    lead_day: int
+    latitude: float
+    longitude: float
+    coverage_available: bool = True
+    in_pilot_coverage: bool = True
+    context_mode: str
+    
+    # Farm & Crop state
+    crop: str
+    crop_stage: str
+    field_operation: str
+    soil_moisture_mode: str
+    soil_moisture_percent: float
+    scenario_name: str
+    
+    # Weather & Reliability evidence (Suppressed if coverage_available is False)
+    forecast_context: Optional[Any] = None
+    decision_support: Optional[Any] = None
+    rainfall_mm: Optional[float] = None
+    dry_spell_days: Optional[int] = None
+    dry_spell_source: Optional[str] = "ACTUAL_DERIVED_FORECAST_SERIES"
+    temperature_c: Optional[float] = None
+    humidity_gkg: Optional[float] = None
+    wind_speed_ms: Optional[float] = None
+    bust_probability: Optional[float] = None
+    ffd: Optional[float] = None
+    ffd_failure_found: Optional[bool] = None
+    fragility_category: Optional[str] = None
+    ensemble_disagreement_category: Optional[str] = None
+    ood_category: Optional[str] = None
+    self_audit_status: Optional[str] = None
+    self_audit_reason: Optional[str] = None
+    trust_index: Optional[float] = None
+    reliability_band: Optional[str] = None
+    trust_horizon_day: Optional[int] = None
+    breaking_point_day: Optional[int] = None
+    
+    # What-if Override indicators
+    is_what_if_override: bool = False
+    rainfall_mm_override: Optional[float] = None
+    dry_spell_days_override: Optional[int] = None
+    
+    # Decision output
+    attention_status: Optional[str] = None
+    weather_flags: List[str]
+    reasons: List[str]
+    limitations: List[str]
+    disclaimer: str
+
+class AgricultureScenarioRequest(BaseModel):
+    crop: Optional[str] = None
+    crop_stage: Optional[str] = None
+    field_operation: Optional[str] = None
+    soil_moisture_percent: Optional[float] = None
+    rainfall_mm_override: Optional[float] = None
+    dry_spell_days_override: Optional[int] = None
+    scenario_name: Optional[str] = "Custom What-If Scenario"
+
+class AgricultureScenarioResponse(BaseModel):
+    agri_id: str
+    scenario_name: str
+    crop: str
+    crop_stage: str
+    field_operation: str
+    soil_moisture_percent: float
+    soil_moisture_mode: str = "DEMO"
+    coverage_available: bool = True
+    is_what_if_override: bool = True
+    actual_rainfall_mm: Optional[float] = None
+    rainfall_mm_override: Optional[float] = None
+    actual_dry_spell_days: Optional[int] = None
+    dry_spell_days_override: Optional[int] = None
+    attention_status: Optional[str] = None
+    weather_flags: List[str]
+    reasons: List[str]
+    data_mode: str
+
+
 

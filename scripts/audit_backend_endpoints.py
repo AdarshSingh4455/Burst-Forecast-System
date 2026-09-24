@@ -3,7 +3,7 @@ import json
 import urllib.parse
 
 base = 'http://127.0.0.1:8000/api'
-print('=== AUDITING ALL FASTAPI ENDPOINTS (INCLUDING PHASE 9A RESERVOIR ENDPOINTS) ===')
+print('=== AUDITING ALL FASTAPI ENDPOINTS (INCLUDING PHASE 9A RESERVOIR & PHASE 9B AGRICULTURE ENDPOINTS) ===')
 
 def check_ep(url_path):
     url = f'{base}{url_path}'
@@ -79,9 +79,19 @@ check_ep(f'/passport?{q_grid}')
 # Phase 9A Reservoir Endpoints (21-25)
 print('\n--- Phase 9A Reservoir Endpoints ---')
 res_list = check_ep('/reservoirs')
-res_id = res_list[0]['reservoir_id'] if res_list and isinstance(res_list, list) else 'RES_RIHAND'
+res_id = res_list[0]['reservoir_id'] if res_list and isinstance(res_list, list) else 'RES_MEJA'
 
 check_ep(f'/reservoirs/{res_id}')
 check_ep(f'/reservoirs/{res_id}/forecast-context?{urllib.parse.urlencode({"forecast_init": first_run})}')
 check_ep(f'/reservoirs/{res_id}/decision-support?{urllib.parse.urlencode({"forecast_init": first_run, "lead_day": 1, "scenario": "NORMAL"})}')
 check_post(f'/reservoirs/{res_id}/scenario?{urllib.parse.urlencode({"forecast_init": first_run, "lead_day": 1})}', {'storage_percent': 88.0, 'recent_inflow_cumecs': 1200.0, 'scenario_name': 'High Storage What-If'})
+
+# Phase 9B Agriculture Endpoints (26-30)
+print('\n--- Phase 9B Agriculture Endpoints ---')
+agri_list = check_ep('/agriculture')
+agri_id = agri_list[0]['agri_id'] if agri_list and isinstance(agri_list, list) else 'AGRI_EUP_01'
+
+check_ep(f'/agriculture/{agri_id}')
+check_ep(f'/agriculture/{agri_id}/forecast-context?{urllib.parse.urlencode({"forecast_init": first_run})}')
+check_ep(f'/agriculture/{agri_id}/decision-support?{urllib.parse.urlencode({"forecast_init": first_run, "lead_day": 1})}')
+check_post(f'/agriculture/{agri_id}/scenario?{urllib.parse.urlencode({"forecast_init": first_run, "lead_day": 1})}', {'crop': 'Wheat', 'crop_stage': 'SOWING', 'field_operation': 'SOWING_WINDOW', 'soil_moisture_percent': 25.0, 'scenario_name': 'Rabi Sowing What-If'})

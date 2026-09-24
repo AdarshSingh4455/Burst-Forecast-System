@@ -42,7 +42,12 @@ export const AiAssistantPopup: React.FC<AiAssistantPopupProps> = ({ isOpen, onCl
 
     let replyText = 'FORTRESS Explanation Assistant — Prototype: Model explanation rule executed.';
 
-    if (q.includes('risky')) {
+    const qLower = q.toLowerCase();
+    if (qLower.includes('official') || qLower.includes('warning') || qLower.includes('flood warning') || qLower.includes('evacuation')) {
+      replyText = 'No. FORTRESS provides forecast-reliability and decision-support context. It does not issue official flood, evacuation, or emergency-management warnings. Official IMD/CWC/NDMA warnings remain authoritative.';
+    } else if (qLower.includes('outside pilot') || qLower.includes('outside')) {
+      replyText = 'FORTRESS reliability analysis is unavailable outside the current Eastern UP pilot coverage (24.5–28.5°N, 80.0–84.5°E). Grid snapping and reliability metrics are strictly suppressed for outside-pilot locations.';
+    } else if (q.includes('risky')) {
       replyText = `Forecast at ${latStr} has a Bust Risk of ${bustRiskPct}% (${pointDetail?.ai_risk_category || 'High Risk'}). This risk is driven by ${pointDetail?.primary_vulnerability || 'elevated specific humidity sensitivity'} and high ensemble spread on D${pointDetail?.lead_day || 5}.`;
     } else if (q.includes('FFD') || q.includes('small')) {
       replyText = `FFD at ${latStr} is ${ffdVal} (${pointDetail?.fragility_category || 'Fragile'}). This indicates small perturbation perturbations (+1.2°C temp / +15% moisture) push model forecasts across the bust risk failure threshold.`;
@@ -50,6 +55,8 @@ export const AiAssistantPopup: React.FC<AiAssistantPopupProps> = ({ isOpen, onCl
       replyText = `Self-Audit verdict for ${latStr} is ${auditStatus}. Explanation: ${auditReason}. Trust Index is ${pointDetail?.trust_index || 78}/100.`;
     } else if (q.includes('deteriorate') || q.includes('when')) {
       replyText = `Forecast reliability remains usable up to Trust Horizon D${horizonDay}. Reliability deteriorates into sustained RED starting at Day ${breakingDay} (Breaking Point: D${breakingDay}).`;
+    } else if (qLower.includes('disaster') || qLower.includes('preparedness')) {
+      replyText = `Disaster preparedness context synthesizes weather forecast signals with local vulnerability/exposure attributes under 3-dimension separation. Prototype statuses include NORMAL_MONITORING, PREPAREDNESS_REVIEW, HEIGHTENED_PREPAREDNESS, and HIGH_UNCERTAINTY_EXPERT_REVIEW.`;
     }
 
     const botMsg = { sender: 'bot' as const, text: replyText };

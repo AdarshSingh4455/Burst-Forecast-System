@@ -449,5 +449,120 @@ export interface AgricultureScenarioResponse {
   data_mode: string;
 }
 
+// Phase 9C Disaster Management Decision Support Interfaces
+export interface DisasterSummary {
+  scenario_id: string;
+  name: string;
+  latitude: number;
+  longitude: number;
+  district_label: string;
+  state: string;
+  data_mode: string;
+  hazard_context: string;
+  preparedness_mode: string;
+  vulnerability_level: string;
+  exposure_level: string;
+  population_exposure_mode: string;
+  population_exposure_value: number;
+  coverage_available: boolean;
+  in_pilot_coverage: boolean;
+}
+
+export interface DisasterLeadContext {
+  lead_day: number;
+  rainfall_mm: number;
+  multi_day_rainfall_mm: number;
+  temperature_c: number;
+  humidity_gkg: number;
+  wind_speed_ms: number;
+  bust_probability: number;
+  ffd: number;
+  ffd_failure_found: boolean;
+  fragility_category: string;
+  trust_index: number;
+  reliability_band: 'GREEN' | 'YELLOW' | 'RED';
+  self_audit_status: string;
+  attention_status?: ('NORMAL_MONITORING' | 'PREPAREDNESS_REVIEW' | 'HEIGHTENED_PREPAREDNESS' | 'HIGH_UNCERTAINTY_EXPERT_REVIEW') | null;
+}
+
+export interface DisasterForecastContextResponse {
+  scenario_id: string;
+  scenario_name: string;
+  forecast_init: string;
+  data_mode: string;
+  coverage_available: boolean;
+  in_pilot_coverage: boolean;
+  context_mode: string;
+  reason?: string | null;
+  forecast_context?: any;
+  lead_contexts?: DisasterLeadContext[] | null;
+}
+
+export interface DisasterDecisionSupportResponse {
+  scenario_id: string;
+  scenario_name: string;
+  data_mode: string;
+  forecast_init: string;
+  lead_day: number;
+  latitude: number;
+  longitude: number;
+  coverage_available: boolean;
+  in_pilot_coverage: boolean;
+  context_mode: string;
+  hazard_context: string;
+  preparedness_mode: string;
+  vulnerability_level: string;
+  exposure_level: string;
+  critical_assets: string;
+  population_exposure_mode: string;
+  population_exposure_value: number;
+  forecast_context?: any;
+  decision_support?: any;
+  rainfall_mm?: number | null;
+  multi_day_rainfall_mm?: number | null;
+  temperature_c?: number | null;
+  humidity_gkg?: number | null;
+  wind_speed_ms?: number | null;
+  bust_probability?: number | null;
+  ffd?: number | null;
+  ffd_failure_found?: boolean | null;
+  fragility_category?: string | null;
+  ensemble_disagreement_category?: string | null;
+  ood_category?: string | null;
+  self_audit_status?: string | null;
+  self_audit_reason?: string | null;
+  trust_index?: number | null;
+  reliability_band?: ('GREEN' | 'YELLOW' | 'RED') | null;
+  trust_horizon_day?: number | null;
+  breaking_point_day?: number | null;
+  is_what_if_override?: boolean;
+  rainfall_mm_override?: number | null;
+  wind_speed_override?: number | null;
+  attention_status?: ('NORMAL_MONITORING' | 'PREPAREDNESS_REVIEW' | 'HEIGHTENED_PREPAREDNESS' | 'HIGH_UNCERTAINTY_EXPERT_REVIEW') | null;
+  weather_flags: string[];
+  reasons: string[];
+  limitations: string[];
+  disclaimer: string;
+}
+
+export interface DisasterScenarioResponse {
+  scenario_id: string;
+  scenario_name: string;
+  hazard_context: string;
+  preparedness_mode: string;
+  vulnerability_level: string;
+  exposure_level: string;
+  coverage_available: boolean;
+  is_what_if_override?: boolean;
+  actual_rainfall_mm?: number | null;
+  rainfall_mm_override?: number | null;
+  actual_wind_speed_ms?: number | null;
+  wind_speed_override?: number | null;
+  attention_status?: ('NORMAL_MONITORING' | 'PREPAREDNESS_REVIEW' | 'HEIGHTENED_PREPAREDNESS' | 'HIGH_UNCERTAINTY_EXPERT_REVIEW') | null;
+  weather_flags: string[];
+  reasons: string[];
+  data_mode: string;
+}
+
 
 

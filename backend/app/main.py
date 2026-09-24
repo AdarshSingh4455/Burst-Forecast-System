@@ -5,7 +5,8 @@ from fastapi.middleware.cors import CORSMiddleware
 from backend.app.data_service import data_service
 from backend.app.reservoir_service import reservoir_service
 from backend.app.agriculture_service import agriculture_service
-from backend.app.schemas import ReservoirScenarioRequest, AgricultureScenarioRequest
+from backend.app.disaster_service import disaster_service
+from backend.app.schemas import ReservoirScenarioRequest, AgricultureScenarioRequest, DisasterScenarioRequest
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -13,6 +14,7 @@ async def lifespan(app: FastAPI):
     data_service.load_data(base_dir)
     reservoir_service.load_data(base_dir)
     agriculture_service.load_data(base_dir)
+    disaster_service.load_data(base_dir)
     yield
 
 app = FastAPI(
@@ -426,6 +428,65 @@ def post_agriculture_scenario(
     )
     if res is None:
         raise HTTPException(status_code=404, detail=f"Agriculture scenario '{agri_id}' not found.")
+    return res
+
+# ============================================================
+# PHASE 9C — DISASTER MANAGEMENT DECISION SUPPORT ENDPOINTS
+# ============================================================
+
+@app.get("/api/disaster")
+def get_disaster_scenarios():
+    return disaster_service.get_disaster_summary()
+
+@app.get("/api/disaster/{scenario_id}")
+def get_disaster_detail(scenario_id: str):
+    scen = disaster_service.get_disaster_detail(scenario_id)
+    if scen is None:
+        raise HTTPException(status_code=404, detail=f"Disaster scenario '{scenario_id}' not found.")
+    return scen
+
+@app.get("/api/disaster/{scenario_id}/forecast-context")
+def get_disaster_forecast_context(
+    scenario_id: str,
+    forecast_init: str = Query(...)
+):
+    ctx = disaster_service.get_forecast_context(scenario_id, forecast_init)
+    if ctx is None:
+        raise HTTPException(status_code=404, detail=f"Forecast context for disaster scenario '{scenario_id}' not found.")
+    return ctx
+
+@app.get("/api/disaster/{scenario_id}/decision-support")
+def get_disaster_decision_support(
+    scenario_id: str,
+    forecast_init: str = Query(...),
+    lead_day: int = Query(1, ge=1, le=10)
+):
+    ds = disaster_service.get_decision_support(scenario_id, forecast_init, lead_day)
+    if ds is None:
+        raise HTTPException(status_code=404, detail=f"Decision support for disaster scenario '{scenario_id}' not found.")
+    return ds
+
+@app.post("/api/disaster/{scenario_id}/scenario")
+def post_disaster_scenario(
+    scenario_id: str,
+    body: DisasterScenarioRequest,
+    forecast_init: str = Query(...),
+    lead_day: int = Query(1, ge=1, le=10)
+):
+    res = disaster_service.process_custom_scenario(
+        scenario_id,
+        hazard_context=body.hazard_context,
+        preparedness_mode=body.preparedness_mode,
+        vulnerability_level=body.vulnerability_level,
+        exposure_level=body.exposure_level,
+        rainfall_mm_override=body.rainfall_mm_override,
+        wind_speed_override=body.wind_speed_override,
+        scenario_name=body.scenario_name or "Custom Disaster What-If Scenario",
+        forecast_init=forecast_init,
+        lead_day=lead_day
+    )
+    if res is None:
+        raise HTTPException(status_code=404, detail=f"Disaster scenario '{scenario_id}' not found.")
     return res
 
 

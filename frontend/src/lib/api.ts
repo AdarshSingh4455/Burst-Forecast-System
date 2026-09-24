@@ -20,7 +20,11 @@ import {
   AgricultureSummary,
   AgricultureForecastContextResponse,
   AgricultureDecisionSupportResponse,
-  AgricultureScenarioResponse
+  AgricultureScenarioResponse,
+  DisasterSummary,
+  DisasterForecastContextResponse,
+  DisasterDecisionSupportResponse,
+  DisasterScenarioResponse
 } from '../types';
 
 const API_BASE = (((import.meta as any).env?.VITE_API_URL as string) || 'http://127.0.0.1:8000/api').replace(/\/$/, '');
@@ -289,6 +293,68 @@ export async function postAgricultureScenario(
       rainfall_mm_override: rainfallMmOverride,
       dry_spell_days_override: drySpellDaysOverride,
       scenario_name: scenarioName || 'Custom What-If Scenario'
+    })
+  });
+  if (!res.ok) {
+    const text = await res.text();
+    throw new Error(`API Error (${res.status}): ${text || res.statusText}`);
+  }
+  return res.json();
+}
+
+// Phase 9C Disaster Management API Functions
+export async function fetchDisasterScenarios(): Promise<DisasterSummary[]> {
+  return apiFetch<DisasterSummary[]>('/disaster');
+}
+
+export async function fetchDisasterDetail(scenarioId: string): Promise<DisasterSummary> {
+  return apiFetch<DisasterSummary>(`/disaster/${scenarioId}`);
+}
+
+export async function fetchDisasterForecastContext(scenarioId: string, forecastInit: string): Promise<DisasterForecastContextResponse> {
+  return apiFetch<DisasterForecastContextResponse>(`/disaster/${scenarioId}/forecast-context`, {
+    forecast_init: forecastInit
+  });
+}
+
+export async function fetchDisasterDecisionSupport(
+  scenarioId: string,
+  forecastInit: string,
+  leadDay: number = 1
+): Promise<DisasterDecisionSupportResponse> {
+  return apiFetch<DisasterDecisionSupportResponse>(`/disaster/${scenarioId}/decision-support`, {
+    forecast_init: forecastInit,
+    lead_day: leadDay.toString()
+  });
+}
+
+export async function postDisasterScenario(
+  scenarioId: string,
+  forecastInit: string,
+  leadDay: number = 1,
+  hazardContext?: string,
+  preparednessMode?: string,
+  vulnerabilityLevel?: string,
+  exposureLevel?: string,
+  rainfallMmOverride?: number,
+  windSpeedOverride?: number,
+  scenarioName?: string
+): Promise<DisasterScenarioResponse> {
+  const url = new URL(`${API_BASE}/disaster/${scenarioId}/scenario`);
+  url.searchParams.append('forecast_init', forecastInit);
+  url.searchParams.append('lead_day', leadDay.toString());
+
+  const res = await fetch(url.toString(), {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      hazard_context: hazardContext,
+      preparedness_mode: preparednessMode,
+      vulnerability_level: vulnerabilityLevel,
+      exposure_level: exposureLevel,
+      rainfall_mm_override: rainfallMmOverride,
+      wind_speed_override: windSpeedOverride,
+      scenario_name: scenarioName || 'Custom Disaster What-If Scenario'
     })
   });
   if (!res.ok) {

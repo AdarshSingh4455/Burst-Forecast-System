@@ -344,5 +344,128 @@ class AgricultureScenarioResponse(BaseModel):
     reasons: List[str]
     data_mode: str
 
+# Phase 9C Disaster Management Decision Support Schemas
+class DisasterSummary(BaseModel):
+    scenario_id: str
+    name: str
+    latitude: float
+    longitude: float
+    district_label: str
+    state: str
+    data_mode: str
+    hazard_context: str
+    preparedness_mode: str
+    vulnerability_level: str
+    exposure_level: str
+    population_exposure_mode: str
+    population_exposure_value: int
+    coverage_available: bool = True
+    in_pilot_coverage: bool = True
+
+class DisasterLeadContext(BaseModel):
+    lead_day: int
+    rainfall_mm: float
+    multi_day_rainfall_mm: float
+    temperature_c: float
+    humidity_gkg: float
+    wind_speed_ms: float
+    bust_probability: float
+    ffd: float
+    ffd_failure_found: bool
+    fragility_category: str
+    trust_index: float
+    reliability_band: str
+    self_audit_status: str
+    attention_status: Optional[str] = None
+
+class DisasterForecastContextResponse(BaseModel):
+    scenario_id: str
+    scenario_name: str
+    forecast_init: str
+    data_mode: str
+    coverage_available: bool = True
+    in_pilot_coverage: bool = True
+    context_mode: str
+    reason: Optional[str] = None
+    forecast_context: Optional[Any] = None
+    lead_contexts: Optional[List[DisasterLeadContext]] = None
+
+class DisasterDecisionSupportResponse(BaseModel):
+    scenario_id: str
+    scenario_name: str
+    data_mode: str
+    forecast_init: str
+    lead_day: int
+    latitude: float
+    longitude: float
+    coverage_available: bool = True
+    in_pilot_coverage: bool = True
+    context_mode: str
+    
+    hazard_context: str
+    preparedness_mode: str
+    vulnerability_level: str
+    exposure_level: str
+    critical_assets: str
+    population_exposure_mode: str
+    population_exposure_value: int
+    
+    forecast_context: Optional[Any] = None
+    decision_support: Optional[Any] = None
+    rainfall_mm: Optional[float] = None
+    multi_day_rainfall_mm: Optional[float] = None
+    temperature_c: Optional[float] = None
+    humidity_gkg: Optional[float] = None
+    wind_speed_ms: Optional[float] = None
+    bust_probability: Optional[float] = None
+    ffd: Optional[float] = None
+    ffd_failure_found: Optional[bool] = None
+    fragility_category: Optional[str] = None
+    ensemble_disagreement_category: Optional[str] = None
+    ood_category: Optional[str] = None
+    self_audit_status: Optional[str] = None
+    self_audit_reason: Optional[str] = None
+    trust_index: Optional[float] = None
+    reliability_band: Optional[str] = None
+    trust_horizon_day: Optional[int] = None
+    breaking_point_day: Optional[int] = None
+    
+    is_what_if_override: bool = False
+    rainfall_mm_override: Optional[float] = None
+    wind_speed_override: Optional[float] = None
+    
+    attention_status: Optional[str] = None
+    weather_flags: List[str]
+    reasons: List[str]
+    limitations: List[str]
+    disclaimer: str
+
+class DisasterScenarioRequest(BaseModel):
+    hazard_context: Optional[str] = None
+    preparedness_mode: Optional[str] = None
+    vulnerability_level: Optional[str] = None
+    exposure_level: Optional[str] = None
+    rainfall_mm_override: Optional[float] = None
+    wind_speed_override: Optional[float] = None
+    scenario_name: Optional[str] = "Custom Disaster What-If Scenario"
+
+class DisasterScenarioResponse(BaseModel):
+    scenario_id: str
+    scenario_name: str
+    hazard_context: str
+    preparedness_mode: str
+    vulnerability_level: str
+    exposure_level: str
+    coverage_available: bool = True
+    is_what_if_override: bool = True
+    actual_rainfall_mm: Optional[float] = None
+    rainfall_mm_override: Optional[float] = None
+    actual_wind_speed_ms: Optional[float] = None
+    wind_speed_override: Optional[float] = None
+    attention_status: Optional[str] = None
+    weather_flags: List[str]
+    reasons: List[str]
+    data_mode: str
+
 
 

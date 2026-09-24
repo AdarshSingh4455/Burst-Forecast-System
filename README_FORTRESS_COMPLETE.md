@@ -254,7 +254,7 @@ sqrt(
 
 Advanced versions:
 
-- Mahalanobis distance
+- IsolationForest anomaly score
 - Physics-weighted distance
 - Learned latent distance
 
@@ -381,7 +381,7 @@ Possible methods:
 - kNN
 - Euclidean distance
 - Cosine similarity
-- Mahalanobis distance
+- IsolationForest anomaly score
 - Learned embeddings
 - FAISS
 - pgvector
@@ -457,7 +457,7 @@ The AI should know when it is seeing an unfamiliar weather pattern.
 Possible methods:
 
 - Isolation Forest
-- Mahalanobis distance
+- IsolationForest anomaly score
 - Local Outlier Factor
 - Autoencoder reconstruction error
 - Latent-density methods

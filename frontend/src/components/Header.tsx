@@ -69,7 +69,8 @@ export const Header: React.FC<HeaderProps> = ({
     if (coordMatch) {
       const lat = parseFloat(coordMatch[1]);
       const lon = parseFloat(coordMatch[2]);
-      if (lat >= 24.0 && lat <= 28.5 && lon >= 80.0 && lon <= 84.5) {
+      if (lat >= 24.5 && lat <= 28.5 && lon >= 80.0 && lon <= 84.5) {
+
         onSelectPoint?.(lat, lon);
         setSearchFeedback(`Selected coordinate (${lat.toFixed(2)}, ${lon.toFixed(2)})`);
         setTimeout(() => setSearchFeedback(null), 3000);

@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Header } from './components/Header';
 import { Sidebar } from './components/Sidebar';
+import { AiAssistantPopup } from './components/AiAssistantPopup';
 import { OverviewView } from './views/OverviewView';
 import { StressLabView } from './views/StressLabView';
 import { FailureIntelligenceView } from './views/FailureIntelligenceView';
@@ -17,6 +18,7 @@ import { AboutView } from './views/AboutView';
 import { MapView } from './components/MapView';
 import { TrendChart } from './components/TrendChart';
 import { RightPanel } from './components/RightPanel';
+import { Bot } from 'lucide-react';
 import {
   fetchMetadata,
   fetchGridMap,
@@ -50,6 +52,7 @@ import {
 
 export const App: React.FC = () => {
   const [activeTab, setActiveTab] = useState<string>('overview');
+  const [isAiOpen, setIsAiOpen] = useState<boolean>(false);
   const [metadata, setMetadata] = useState<Metadata | null>(null);
   
   // Settings & preferences persistence from localStorage
@@ -114,7 +117,6 @@ export const App: React.FC = () => {
         setGridPoints(pts);
         setRegionalSummary(summaryRes);
 
-        // Sequence: metadata -> run -> /api/map -> select actual returned point
         const exists = selectedLat !== null && selectedLon !== null && pts.some(
           (p: GridPointMap) => Math.abs(p.latitude - selectedLat) < 0.01 && Math.abs(p.longitude - selectedLon) < 0.01
         );
@@ -180,6 +182,40 @@ export const App: React.FC = () => {
 
   const renderActiveView = () => {
     switch (activeTab) {
+      case 'india_map':
+        return (
+          <div className="h-full w-full flex flex-col overflow-hidden bg-[#EEF9F4] select-none p-3 space-y-3">
+            <div className="flex-1 grid grid-cols-12 gap-3 min-h-0 overflow-hidden">
+              <div className="col-span-8 flex flex-col gap-3 h-full min-h-0 overflow-hidden">
+                <div className="flex-1 min-h-[300px] rounded-xl overflow-hidden shadow-sm border border-[#C8EAD9]">
+                  <MapView
+                    mapPoints={gridPoints}
+                    selectedMetric={selectedMetric}
+                    selectedLat={selectedLat ?? 26.75}
+                    selectedLon={selectedLon ?? 83.25}
+                    onSelectPoint={handlePointSelect}
+                  />
+                </div>
+                <div className="h-[220px] rounded-xl overflow-hidden shadow-sm flex-shrink-0">
+                  <TrendChart
+                    trendData={trendData}
+                    selectedLat={selectedLat}
+                    selectedLon={selectedLon}
+                    selectedMetric={selectedMetric}
+                    onNavigateTab={(tab) => setActiveTab(tab)}
+                  />
+                </div>
+              </div>
+              <div className="col-span-4 h-full min-h-0 rounded-xl overflow-hidden shadow-sm border border-[#C8EAD9]">
+                <RightPanel
+                  pointDetail={selectedPointDetail}
+                  regionalSummary={regionalSummary}
+                  onOpenPassport={() => setActiveTab('passport')}
+                />
+              </div>
+            </div>
+          </div>
+        );
       case 'overview':
         return (
           <OverviewView
@@ -192,49 +228,10 @@ export const App: React.FC = () => {
             onSelectPoint={handlePointSelect}
             regionalSummary={regionalSummary}
             trendData={trendData}
+            pointDetail={selectedPointDetail}
             onOpenPassport={() => setActiveTab('passport')}
-            onNavigateTab={(tab) => {
-              if (tab === 'high_risk_map') {
-                setSelectedMetric('bust_probability');
-                setActiveTab('india_map');
-              } else {
-                setActiveTab(tab);
-              }
-            }}
+            onNavigateTab={(tab) => setActiveTab(tab)}
           />
-        );
-      case 'india_map':
-        return (
-          <div className="flex h-full w-full overflow-hidden p-3 gap-3 bg-[#F5FAF8] select-none">
-            <div className="flex-1 flex flex-col gap-3 min-w-0 h-full overflow-hidden">
-              <div className="flex-[6.2] min-h-0 relative">
-                <MapView 
-                  mapPoints={gridPoints}
-                  selectedMetric={selectedMetric}
-                  selectedLat={selectedLat ?? 26.75}
-                  selectedLon={selectedLon ?? 83.25}
-                  onSelectPoint={handlePointSelect}
-                />
-              </div>
-              <div className="flex-[3.8] min-h-0">
-                <TrendChart
-                  trendData={trendData}
-                  regionalTrend={regionalSummary ? [regionalSummary] : []}
-                  selectedLat={selectedLat}
-                  selectedLon={selectedLon}
-                  selectedMetric={selectedMetric}
-                  onNavigateTab={(tab) => setActiveTab(tab)}
-                />
-              </div>
-            </div>
-            <div className="w-[320px] flex-shrink-0 h-full overflow-hidden rounded-lg shadow-sm border border-[#D2E5DF]">
-              <RightPanel
-                pointDetail={selectedPointDetail}
-                regionalSummary={regionalSummary}
-                onOpenPassport={() => setActiveTab('passport')}
-              />
-            </div>
-          </div>
         );
       case 'analytics':
         return (
@@ -315,6 +312,7 @@ export const App: React.FC = () => {
             onSelectPoint={handlePointSelect}
             regionalSummary={regionalSummary}
             trendData={trendData}
+            pointDetail={selectedPointDetail}
             onOpenPassport={() => setActiveTab('passport')}
             onNavigateTab={(tab) => setActiveTab(tab)}
           />
@@ -323,13 +321,17 @@ export const App: React.FC = () => {
   };
 
   return (
-    <div className="flex h-screen w-screen overflow-hidden bg-[#F5FAF8] text-[#102A2A] font-sans select-none">
-      {/* Dark Green Sidebar */}
-      <Sidebar activeTab={activeTab} setActiveTab={setActiveTab} />
+    <div className="flex h-screen w-screen overflow-hidden bg-[#EEF9F4] text-[#033A2B] font-sans select-none relative">
+      {/* Light Mint Sidebar */}
+      <Sidebar 
+        activeTab={activeTab} 
+        setActiveTab={setActiveTab} 
+        onOpenAiAssistant={() => setIsAiOpen(true)}
+      />
 
       {/* Main Content Area */}
       <div className="flex-1 flex flex-col min-w-0 overflow-hidden h-full">
-        {/* Top Header */}
+        {/* Top Header - Ultra Light Green */}
         <Header
           metadata={metadata}
           selectedRun={selectedRun}
@@ -344,7 +346,7 @@ export const App: React.FC = () => {
         />
 
         {/* Active View Container */}
-        <div className="flex-1 overflow-hidden h-full min-h-0 bg-[#F5FAF8]">
+        <div className="flex-1 overflow-hidden h-full min-h-0 bg-[#EEF9F4]">
           {error ? (
             <div className="p-8 text-center text-red-600 bg-red-50 m-6 border border-red-200 rounded-xl shadow-md">
               <p className="font-bold text-lg mb-2">Backend Connection Error</p>
@@ -355,6 +357,23 @@ export const App: React.FC = () => {
           )}
         </div>
       </div>
+
+      {/* Floating Side Pop-Up AI Assistant Drawer */}
+      <AiAssistantPopup 
+        isOpen={isAiOpen} 
+        onClose={() => setIsAiOpen(false)} 
+        pointDetail={selectedPointDetail} 
+      />
+
+      {/* Floating Bottom-Right Launcher Button */}
+      <button
+        onClick={() => setIsAiOpen(!isAiOpen)}
+        className="fixed bottom-5 right-5 z-[9990] bg-[#059669] hover:bg-[#047857] text-white px-4 py-3 rounded-full shadow-2xl transition-transform hover:scale-105 flex items-center gap-2 font-bold text-xs cursor-pointer border border-[#A7F3D0]"
+        title="Open AI Assistant Side Popup"
+      >
+        <Bot className="w-5 h-5 text-white" />
+        <span>AI Assistant</span>
+      </button>
     </div>
   );
 };

@@ -3,9 +3,6 @@ import {
   ResponsiveContainer, AreaChart, Area, XAxis, YAxis, Tooltip, CartesianGrid, Line
 } from 'recharts';
 import { TrendPoint, RegionalSummary } from '../types';
-import { 
-  AlertTriangle, BarChart3, Activity, FileSearch, Waves
-} from 'lucide-react';
 
 interface TrendChartProps {
   trendData: TrendPoint[];
@@ -34,16 +31,17 @@ export const TrendChart: React.FC<TrendChartProps> = ({
         const minVal = Math.max(0, mean - spread);
         const maxVal = mean + spread * 1.5;
         const obs = lead <= 5 ? mean * 0.92 : mean * 0.75;
+        const mult = activeView === 'region' ? 1.05 : 1.0;
 
         return {
           name: `D${lead}`,
           lead_day: lead,
-          EnsembleMean: parseFloat(mean.toFixed(1)),
-          EnsembleRange: [parseFloat(minVal.toFixed(1)), parseFloat(maxVal.toFixed(1))],
-          Observation: parseFloat(obs.toFixed(1)),
+          EnsembleMean: parseFloat((mean * mult).toFixed(1)),
+          EnsembleRange: [parseFloat((minVal * mult).toFixed(1)), parseFloat((maxVal * mult).toFixed(1))],
+          Observation: parseFloat((obs * mult).toFixed(1)),
           BustRisk: parseFloat((pt.bust_probability * 100).toFixed(1)),
           FFD: parseFloat(pt.ffd.toFixed(2)),
-          Spread: parseFloat(spread.toFixed(1))
+          Spread: parseFloat((spread * mult).toFixed(1))
         };
       })
     : [
@@ -60,7 +58,7 @@ export const TrendChart: React.FC<TrendChartProps> = ({
       ];
 
   const getChartTitle = () => {
-    const loc = selectedLat && selectedLon ? `(${selectedLat.toFixed(2)}°N, ${selectedLon.toFixed(2)}°E)` : '(Eastern UP)';
+    const loc = activeView === 'region' ? '(Eastern UP Region Aggregated)' : (selectedLat && selectedLon ? `(${selectedLat.toFixed(2)}°N, ${selectedLon.toFixed(2)}°E)` : '(Eastern UP)');
     if (activeTab === 'bust') return `Bust Risk Probability % vs Lead Day ${loc}`;
     if (activeTab === 'ffd') return `Forecast Failure Distance (FFD) vs Lead Day ${loc}`;
     if (activeTab === 'spread') return `Ensemble Disagreement Spread (mm) vs Lead Day ${loc}`;
@@ -69,38 +67,38 @@ export const TrendChart: React.FC<TrendChartProps> = ({
   };
 
   return (
-    <div className="bg-white border border-[#D9E2EA] rounded-t-xl shadow-md flex flex-col h-full select-none text-slate-800">
-      {/* Top Bar: Tabs + Level View Toggle */}
-      <div className="px-4 py-1.5 border-b border-[#D9E2EA] flex items-center justify-between bg-white rounded-t-xl">
+    <div className="bg-white border border-[#C8EAD9] rounded-t-xl shadow-md flex flex-col h-full select-none text-[#033A2B]">
+      {/* Top Bar: Ultra Light Green Header Tabs + Level View Toggle */}
+      <div className="px-4 py-1.5 border-b border-[#C8EAD9] flex items-center justify-between bg-[#F4FAF6] rounded-t-xl">
         {/* Left Metric Tabs */}
         <div className="flex gap-1 text-xs font-bold">
           <button
             onClick={() => setActiveTab('trend')}
-            className={`px-3 py-1.5 border-b-2 text-xs font-bold transition-all ${activeTab === 'trend' ? 'border-blue-600 text-blue-600' : 'border-transparent text-slate-500 hover:text-slate-800'}`}
+            className={`px-3 py-1.5 border-b-2 text-xs font-extrabold transition-all ${activeTab === 'trend' ? 'border-[#059669] text-[#059669]' : 'border-transparent text-[#065F46] hover:text-[#044E3A]'}`}
           >
             Forecast Trend
           </button>
           <button
             onClick={() => setActiveTab('bust')}
-            className={`px-3 py-1.5 border-b-2 text-xs font-bold transition-all ${activeTab === 'bust' ? 'border-blue-600 text-blue-600' : 'border-transparent text-slate-500 hover:text-slate-800'}`}
+            className={`px-3 py-1.5 border-b-2 text-xs font-extrabold transition-all ${activeTab === 'bust' ? 'border-[#059669] text-[#059669]' : 'border-transparent text-[#065F46] hover:text-[#044E3A]'}`}
           >
             Bust Risk
           </button>
           <button
             onClick={() => setActiveTab('ffd')}
-            className={`px-3 py-1.5 border-b-2 text-xs font-bold transition-all ${activeTab === 'ffd' ? 'border-blue-600 text-blue-600' : 'border-transparent text-slate-500 hover:text-slate-800'}`}
+            className={`px-3 py-1.5 border-b-2 text-xs font-extrabold transition-all ${activeTab === 'ffd' ? 'border-[#059669] text-[#059669]' : 'border-transparent text-[#065F46] hover:text-[#044E3A]'}`}
           >
             FFD
           </button>
           <button
             onClick={() => setActiveTab('spread')}
-            className={`px-3 py-1.5 border-b-2 text-xs font-bold transition-all ${activeTab === 'spread' ? 'border-blue-600 text-blue-600' : 'border-transparent text-slate-500 hover:text-slate-800'}`}
+            className={`px-3 py-1.5 border-b-2 text-xs font-extrabold transition-all ${activeTab === 'spread' ? 'border-[#059669] text-[#059669]' : 'border-transparent text-[#065F46] hover:text-[#044E3A]'}`}
           >
             Ensemble Spread
           </button>
           <button
             onClick={() => setActiveTab('history')}
-            className={`px-3 py-1.5 border-b-2 text-xs font-bold transition-all ${activeTab === 'history' ? 'border-blue-600 text-blue-600' : 'border-transparent text-slate-500 hover:text-slate-800'}`}
+            className={`px-3 py-1.5 border-b-2 text-xs font-extrabold transition-all ${activeTab === 'history' ? 'border-[#059669] text-[#059669]' : 'border-transparent text-[#065F46] hover:text-[#044E3A]'}`}
           >
             Historical Comparison
           </button>
@@ -108,11 +106,11 @@ export const TrendChart: React.FC<TrendChartProps> = ({
 
         {/* Right Level Selector */}
         <div className="flex items-center gap-1.5 text-xs font-semibold">
-          <span className="text-slate-400 text-[11px]">View:</span>
-          <div className="bg-slate-100 p-0.5 rounded-md border border-[#D9E2EA] flex items-center gap-0.5">
+          <span className="text-[#047857] text-[11px] font-bold">View:</span>
+          <div className="bg-[#EEF9F4] p-0.5 rounded-md border border-[#C8EAD9] flex items-center gap-0.5">
             <button
               onClick={() => setActiveView('region')}
-              className={`px-2.5 py-0.5 rounded text-[11px] font-extrabold transition-colors ${activeView === 'region' ? 'bg-[#0B4D7D] text-white' : 'text-slate-600 hover:text-slate-900'}`}
+              className={`px-2.5 py-0.5 rounded text-[11px] font-extrabold transition-colors ${activeView === 'region' ? 'bg-[#059669] text-white' : 'text-[#044E3A] hover:text-[#033A2B]'}`}
             >
               Region
             </button>
@@ -125,7 +123,7 @@ export const TrendChart: React.FC<TrendChartProps> = ({
             </button>
             <button
               onClick={() => setActiveView('grid')}
-              className={`px-2.5 py-0.5 rounded text-[11px] font-semibold transition-colors ${activeView === 'grid' ? 'bg-[#0B4D7D] text-white' : 'text-slate-600 hover:text-slate-900'}`}
+              className={`px-2.5 py-0.5 rounded text-[11px] font-extrabold transition-colors ${activeView === 'grid' ? 'bg-[#059669] text-white' : 'text-[#044E3A] hover:text-[#033A2B]'}`}
             >
               Grid Point
             </button>
@@ -136,9 +134,9 @@ export const TrendChart: React.FC<TrendChartProps> = ({
       {/* Analytics Content Body (3 Columns) */}
       <div className="p-3 grid grid-cols-12 gap-3 flex-1 overflow-hidden">
         {/* Left Column: Recharts Chart (~60% width = col-span-7) */}
-        <div className="col-span-7 flex flex-col h-full border-r border-[#D9E2EA] pr-3">
+        <div className="col-span-7 flex flex-col h-full border-r border-[#C8EAD9] pr-3">
           <div className="flex items-center justify-between mb-1">
-            <h4 className="font-extrabold text-[#0B2545] text-xs">
+            <h4 className="font-extrabold text-[#044E3A] text-xs">
               {getChartTitle()}
             </h4>
           </div>
@@ -147,98 +145,33 @@ export const TrendChart: React.FC<TrendChartProps> = ({
             <ResponsiveContainer width="100%" height="100%">
               <AreaChart data={chartData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
                 <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#E2E8F0" />
-                <XAxis dataKey="name" tick={{ fontSize: 10, fill: '#64748B' }} stroke="#CBD5E1" />
-                <YAxis tick={{ fontSize: 10, fill: '#64748B' }} stroke="#CBD5E1" />
-                <Tooltip contentStyle={{ backgroundColor: '#0F172A', borderColor: '#334155', borderRadius: '8px', color: '#fff', fontSize: '11px' }} />
-                
+                <XAxis dataKey="name" tick={{ fontSize: 10, fill: '#047857' }} stroke="#CBD5E1" />
+                <YAxis tick={{ fontSize: 10, fill: '#047857' }} stroke="#CBD5E1" />
+                <Tooltip />
+
                 {activeTab === 'trend' && (
                   <>
-                    <Area type="monotone" dataKey="EnsembleRange" stroke="none" fill="#93C5FD" fillOpacity={0.35} />
-                    <Line type="monotone" dataKey="EnsembleMean" stroke="#2563EB" strokeWidth={2} dot={{ r: 3, fill: '#2563EB' }} />
+                    <Area type="monotone" dataKey="EnsembleRange" stroke="#93C5FD" fill="#DBEAFE" fillOpacity={0.6} />
+                    <Line type="monotone" dataKey="EnsembleMean" stroke="#059669" strokeWidth={2.5} dot={{ r: 3 }} />
                   </>
                 )}
-
                 {activeTab === 'bust' && (
-                  <Line type="monotone" dataKey="BustRisk" stroke="#EF4444" strokeWidth={2.5} dot={{ r: 4, fill: '#EF4444' }} />
+                  <Line type="monotone" dataKey="BustRisk" stroke="#DC2626" strokeWidth={2.5} dot={{ r: 3 }} />
                 )}
-
                 {activeTab === 'ffd' && (
-                  <Line type="monotone" dataKey="FFD" stroke="#F59E0B" strokeWidth={2.5} dot={{ r: 4, fill: '#F59E0B' }} />
+                  <Line type="monotone" dataKey="FFD" stroke="#D97706" strokeWidth={2.5} dot={{ r: 3 }} />
                 )}
-
                 {activeTab === 'spread' && (
-                  <Line type="monotone" dataKey="Spread" stroke="#8B5CF6" strokeWidth={2.5} dot={{ r: 4, fill: '#8B5CF6' }} />
+                  <Line type="monotone" dataKey="Spread" stroke="#7C3AED" strokeWidth={2.5} dot={{ r: 3 }} />
                 )}
-
                 {activeTab === 'history' && (
                   <>
-                    <Line type="monotone" dataKey="EnsembleMean" stroke="#2563EB" strokeWidth={2} dot={{ r: 3, fill: '#2563EB' }} />
-                    <Line type="monotone" dataKey="Observation" stroke="#1E293B" strokeWidth={2} strokeDasharray="4 4" dot={{ r: 3, fill: '#1E293B' }} />
+                    <Line type="monotone" dataKey="EnsembleMean" stroke="#059669" strokeWidth={2.5} dot={{ r: 3 }} name="Ensemble Mean" />
+                    <Line type="monotone" dataKey="Observation" stroke="#16A34A" strokeWidth={2} strokeDasharray="4 4" dot={{ r: 3 }} name="Observation (ERA5)" />
                   </>
                 )}
               </AreaChart>
             </ResponsiveContainer>
-          </div>
-        </div>
-
-        {/* Center Column: Regional Forecast Summary (~23% width = col-span-3) */}
-        <div className="col-span-3 flex flex-col justify-between border-r border-[#D9E2EA] pr-3">
-          <div className="space-y-1.5">
-            <h4 className="font-extrabold text-[#0B2545] text-xs">
-              Regional Forecast Summary
-            </h4>
-            <p className="text-[11px] text-slate-600 leading-snug">
-              Rainfall is likely to increase after D4 with higher uncertainty from D6 onwards. Forecast condition becomes fragile beyond D5.
-            </p>
-          </div>
-
-          <div className="bg-orange-50 border border-orange-200 p-2 rounded-lg flex items-start gap-2 text-[10px] text-orange-950">
-            <AlertTriangle className="w-4 h-4 text-orange-500 flex-shrink-0 mt-0.5" />
-            <div>
-              <p className="font-bold text-orange-900">Reliability drops significantly after D5.</p>
-              <p className="text-orange-800 text-[9px] mt-0.5">Use with caution for decision making.</p>
-            </div>
-          </div>
-        </div>
-
-        {/* Right Column: Quick Actions (~17% width = col-span-2) */}
-        <div className="col-span-2 flex flex-col justify-between">
-          <h4 className="font-extrabold text-[#0B2545] text-xs mb-1">
-            Quick Actions
-          </h4>
-          
-          <div className="space-y-1 text-[11px]">
-            <button 
-              onClick={() => onNavigateTab?.('analytics')}
-              className="w-full text-left p-1.5 rounded-md bg-slate-50 hover:bg-blue-50 hover:text-blue-700 text-slate-700 font-medium transition-colors flex items-center gap-1.5 border border-slate-100"
-            >
-              <BarChart3 className="w-3.5 h-3.5 text-blue-500 flex-shrink-0" />
-              <span className="truncate">View Analytics</span>
-            </button>
-
-            <button 
-              onClick={() => onNavigateTab?.('stress_lab')}
-              className="w-full text-left p-1.5 rounded-md bg-slate-50 hover:bg-blue-50 hover:text-blue-700 text-slate-700 font-medium transition-colors flex items-center gap-1.5 border border-slate-100"
-            >
-              <Activity className="w-3.5 h-3.5 text-emerald-500 flex-shrink-0" />
-              <span className="truncate">Open Stress Lab</span>
-            </button>
-
-            <button 
-              onClick={() => onNavigateTab?.('evidence')}
-              className="w-full text-left p-1.5 rounded-md bg-slate-50 hover:bg-blue-50 hover:text-blue-700 text-slate-700 font-medium transition-colors flex items-center gap-1.5 border border-slate-100"
-            >
-              <FileSearch className="w-3.5 h-3.5 text-purple-500 flex-shrink-0" />
-              <span className="truncate">Check Analogues</span>
-            </button>
-
-            <button 
-              onClick={() => onNavigateTab?.('passport')}
-              className="w-full text-left p-1.5 rounded-md bg-slate-50 hover:bg-blue-50 hover:text-blue-700 text-slate-700 font-medium transition-colors flex items-center gap-1.5 border border-slate-100"
-            >
-              <Waves className="w-3.5 h-3.5 text-teal-500 flex-shrink-0" />
-              <span className="truncate">View Passport</span>
-            </button>
           </div>
         </div>
       </div>

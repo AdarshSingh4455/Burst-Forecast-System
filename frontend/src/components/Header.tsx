@@ -65,7 +65,6 @@ export const Header: React.FC<HeaderProps> = ({
     const query = searchQuery.trim();
     if (!query) return;
 
-    // Check if coordinate search: e.g. "26.75, 83.25" or "26.75 83.25"
     const coordMatch = query.match(/^([-+]?\d*\.?\d+)[,\s]+([-+]?\d*\.?\d+)$/);
     if (coordMatch) {
       const lat = parseFloat(coordMatch[1]);
@@ -81,7 +80,6 @@ export const Header: React.FC<HeaderProps> = ({
       return;
     }
 
-    // Asset name search
     const lower = query.toLowerCase();
     if (lower.includes('rihand') || lower.includes('dam') || lower.includes('reservoir')) {
       onSelectPoint?.(24.22, 83.02);
@@ -115,14 +113,14 @@ export const Header: React.FC<HeaderProps> = ({
 
   return (
     <div className="flex flex-col select-none flex-shrink-0">
-      {/* Top Main Light Header */}
-      <header className="bg-[#F5FAF8] border-b border-[#D2E5DF] px-5 py-2 flex items-center justify-between gap-4 h-[60px]">
+      {/* Top Ultra Light Green Header */}
+      <header className="bg-[#F4FAF6] border-b border-[#C8EAD9] px-5 py-2 flex items-center justify-between gap-4 h-[60px]">
         {/* Title & Tagline */}
         <div>
-          <h1 className="text-[19px] font-extrabold text-[#102A2A] tracking-tight leading-none">
+          <h1 className="text-[19px] font-extrabold text-[#044E3A] tracking-tight leading-none">
             FORTRESS
           </h1>
-          <p className="text-[11px] text-[#617874] font-medium leading-tight mt-0.5">
+          <p className="text-[11px] text-[#065F46] font-semibold leading-tight mt-0.5">
             Forecast Reliability | Stress-Testing & Self-Audit System
           </p>
         </div>
@@ -130,12 +128,12 @@ export const Header: React.FC<HeaderProps> = ({
         {/* Global Controls & Filters */}
         <div className="flex items-center gap-2">
           {/* Region */}
-          <div className="bg-white border border-[#D2E5DF] rounded-md px-2.5 py-1 flex flex-col justify-center min-w-[95px] h-[40px] shadow-xs">
-            <span className="text-[9px] font-bold text-[#617874] uppercase leading-tight">Region</span>
+          <div className="bg-white border border-[#C8EAD9] rounded-md px-2.5 py-1 flex flex-col justify-center min-w-[95px] h-[40px] shadow-xs">
+            <span className="text-[9px] font-extrabold text-[#047857] uppercase leading-tight">Region</span>
             <select
               value={selectedRegion}
               onChange={(e) => setSelectedRegion(e.target.value)}
-              className="bg-transparent font-bold text-[#102A2A] text-xs focus:outline-none cursor-pointer p-0 -mt-0.5"
+              className="bg-transparent font-extrabold text-[#044E3A] text-xs focus:outline-none cursor-pointer p-0 -mt-0.5"
             >
               <option value="ALL">India</option>
               {regionsList.map(r => (
@@ -145,12 +143,12 @@ export const Header: React.FC<HeaderProps> = ({
           </div>
 
           {/* Forecast Run */}
-          <div className="bg-white border border-[#D2E5DF] rounded-md px-2.5 py-1 flex flex-col justify-center min-w-[135px] h-[40px] shadow-xs">
-            <span className="text-[9px] font-bold text-[#617874] uppercase leading-tight">Forecast Run</span>
+          <div className="bg-white border border-[#C8EAD9] rounded-md px-2.5 py-1 flex flex-col justify-center min-w-[135px] h-[40px] shadow-xs">
+            <span className="text-[9px] font-extrabold text-[#047857] uppercase leading-tight">Forecast Run</span>
             <select
               value={selectedRun}
               onChange={(e) => setSelectedRun(e.target.value)}
-              className="bg-transparent font-bold text-[#102A2A] text-xs font-mono focus:outline-none cursor-pointer p-0 -mt-0.5"
+              className="bg-transparent font-bold text-[#044E3A] text-xs font-mono focus:outline-none cursor-pointer p-0 -mt-0.5"
             >
               {runList.map(d => (
                 <option key={d} value={d}>{d.slice(0, 10)} 00Z</option>
@@ -159,12 +157,12 @@ export const Header: React.FC<HeaderProps> = ({
           </div>
 
           {/* Lead Day */}
-          <div className="bg-white border border-[#D2E5DF] rounded-md px-2.5 py-1 flex flex-col justify-center min-w-[80px] h-[40px] shadow-xs">
-            <span className="text-[9px] font-bold text-[#617874] uppercase leading-tight">Lead Day</span>
+          <div className="bg-white border border-[#C8EAD9] rounded-md px-2.5 py-1 flex flex-col justify-center min-w-[80px] h-[40px] shadow-xs">
+            <span className="text-[9px] font-extrabold text-[#047857] uppercase leading-tight">Lead Day</span>
             <select
               value={selectedLead}
               onChange={(e) => setSelectedLead(parseInt(e.target.value))}
-              className="bg-transparent font-extrabold text-[#00A878] text-xs focus:outline-none cursor-pointer p-0 -mt-0.5"
+              className="bg-transparent font-extrabold text-[#059669] text-xs focus:outline-none cursor-pointer p-0 -mt-0.5"
             >
               {leadList.map(l => (
                 <option key={l} value={l}>D{l}</option>
@@ -173,12 +171,12 @@ export const Header: React.FC<HeaderProps> = ({
           </div>
 
           {/* Variable / Metric Selector */}
-          <div className="bg-white border border-[#D2E5DF] rounded-md px-2.5 py-1 flex flex-col justify-center min-w-[125px] h-[40px] shadow-xs">
-            <span className="text-[9px] font-bold text-[#617874] uppercase leading-tight">Variable</span>
+          <div className="bg-white border border-[#C8EAD9] rounded-md px-2.5 py-1 flex flex-col justify-center min-w-[125px] h-[40px] shadow-xs">
+            <span className="text-[9px] font-extrabold text-[#047857] uppercase leading-tight">Variable</span>
             <select
               value={selectedMetric}
               onChange={(e) => setSelectedMetric(e.target.value)}
-              className="bg-transparent font-bold text-[#102A2A] text-xs focus:outline-none cursor-pointer p-0 -mt-0.5"
+              className="bg-transparent font-extrabold text-[#044E3A] text-xs focus:outline-none cursor-pointer p-0 -mt-0.5"
             >
               {metricOptions.map(m => (
                 <option key={m.id} value={m.id}>{m.label}</option>
@@ -188,47 +186,47 @@ export const Header: React.FC<HeaderProps> = ({
 
           {/* Functional Search Bar */}
           <form onSubmit={handleSearchSubmit} className="relative ml-1">
-            <Search className="w-3.5 h-3.5 text-[#617874] absolute left-3 top-1/2 -translate-y-1/2" />
+            <Search className="w-3.5 h-3.5 text-[#047857] absolute left-3 top-1/2 -translate-y-1/2" />
             <input
               type="text"
               placeholder="Search lat,lon or asset (e.g. 26.75,83.25)"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="pl-8 pr-3 py-2 bg-white border border-[#D2E5DF] rounded-md text-xs text-[#102A2A] focus:outline-none focus:border-[#00A878] w-[240px] placeholder-[#617874]/60 shadow-xs h-[40px]"
+              className="pl-8 pr-3 py-2 bg-white border border-[#C8EAD9] rounded-md text-xs text-[#044E3A] focus:outline-none focus:border-[#059669] w-[240px] placeholder-[#047857]/60 shadow-xs h-[40px]"
             />
             {searchFeedback && (
-              <div className="absolute top-11 left-0 bg-[#003B32] text-white text-[10px] py-1 px-2 rounded shadow-lg z-[2000] whitespace-nowrap">
+              <div className="absolute top-11 left-0 bg-[#044E3A] text-white text-[10px] py-1 px-2 rounded shadow-lg z-[2000] whitespace-nowrap">
                 {searchFeedback}
               </div>
             )}
           </form>
 
           {/* User Avatar */}
-          <div className="w-[38px] h-[38px] rounded-full bg-[#003B32] text-white font-bold text-xs flex items-center justify-center shadow-xs ml-1 flex-shrink-0">
+          <div className="w-[38px] h-[38px] rounded-full bg-[#059669] text-white font-bold text-xs flex items-center justify-center shadow-xs ml-1 flex-shrink-0">
             AS
           </div>
         </div>
       </header>
 
-      {/* Dark Green Info Strip */}
-      <div className="bg-[#003B32] px-5 py-1 flex items-center justify-between text-[11px] text-emerald-100 h-[30px]">
-        <div className="flex items-center gap-1.5">
-          <Info className="w-3.5 h-3.5 text-emerald-300 flex-shrink-0" />
+      {/* Soft Light Green Info Strip */}
+      <div className="bg-[#D4F0E2] border-b border-[#C8EAD9] px-5 py-1 flex items-center justify-between text-[11px] text-[#044E3A] h-[30px]">
+        <div className="flex items-center gap-1.5 font-medium">
+          <Info className="w-3.5 h-3.5 text-[#059669] flex-shrink-0" />
           <span>From Data to Decisions — For a Safer Tomorrow</span>
         </div>
-        <div className="flex items-center gap-3 text-[10px]">
+        <div className="flex items-center gap-3 text-[10px] font-semibold">
           <span className="flex items-center gap-1.5">
-            <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
-            <span className="text-emerald-300/80">Data:</span>
-            <strong className="text-white">NOAA GEFSv12 (Reforecast)</strong>
+            <span className="w-2 h-2 rounded-full bg-[#059669] animate-pulse"></span>
+            <span className="text-[#065F46]">Data:</span>
+            <strong className="text-[#033A2B]">NOAA GEFSv12 (Reforecast)</strong>
           </span>
-          <span className="text-emerald-700">|</span>
+          <span className="text-[#A7F3D0]">|</span>
           <span>
-            <span className="text-emerald-300/80">Last Updated:</span>{' '}
-            <strong className="text-white">{formatRunDate(selectedRun)}</strong>
+            <span className="text-[#065F46]">Last Updated:</span>{' '}
+            <strong className="text-[#033A2B]">{formatRunDate(selectedRun)}</strong>
           </span>
-          <span className="text-emerald-700">|</span>
-          <span className="font-mono text-emerald-300 font-bold">SIH26079</span>
+          <span className="text-[#A7F3D0]">|</span>
+          <span className="font-mono text-[#059669] font-bold">SIH26079</span>
         </div>
       </div>
     </div>

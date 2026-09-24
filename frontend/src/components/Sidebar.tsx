@@ -2,12 +2,13 @@ import React from 'react';
 import { 
   LayoutDashboard, MapPin, BarChart3, Activity, ShieldAlert, FileSearch, 
   CheckCircle2, FileText, Waves, Sprout, AlertTriangle, Zap, 
-  Bot, Settings, Info, Cloud, AlertCircle, Clock, ZapOff
+  Settings, Info, Cloud, AlertCircle, Clock, ZapOff
 } from 'lucide-react';
 
 interface SidebarProps {
   activeTab: string;
   setActiveTab: (tab: string) => void;
+  onOpenAiAssistant?: () => void;
 }
 
 export const Sidebar: React.FC<SidebarProps> = ({ activeTab, setActiveTab }) => {
@@ -49,7 +50,6 @@ export const Sidebar: React.FC<SidebarProps> = ({ activeTab, setActiveTab }) => 
     {
       title: "TOOLS",
       items: [
-        { id: "ai_assistant", label: "AI Assistant", icon: Bot },
         { id: "settings", label: "Settings", icon: Settings },
         { id: "about", label: "About", icon: Info },
       ]
@@ -57,49 +57,50 @@ export const Sidebar: React.FC<SidebarProps> = ({ activeTab, setActiveTab }) => 
   ];
 
   return (
-    <aside className="w-[235px] bg-[#003B32] text-emerald-100 flex flex-col h-screen border-r border-[#005C4B] select-none flex-shrink-0">
-      {/* Brand Header */}
-      <div className="p-3.5 border-b border-[#005C4B] flex items-center gap-3 bg-[#003B32] h-[80px]">
-        <div className="bg-[#00A878] p-2.5 rounded-xl text-white font-bold shadow-md flex items-center justify-center flex-shrink-0">
+    <aside className="w-[235px] bg-[#E2F5EC] text-[#044E3A] flex flex-col h-screen border-r border-[#C4EAD6] select-none flex-shrink-0">
+      {/* Brand Header - Ultra Light Green */}
+      <div className="p-3.5 border-b border-[#C4EAD6] flex items-center gap-3 bg-[#D4F0E2] h-[80px]">
+        <div className="bg-[#059669] p-2.5 rounded-xl text-white font-bold shadow-xs flex items-center justify-center flex-shrink-0">
           <Cloud className="w-6 h-6 text-white" />
         </div>
         <div className="overflow-hidden">
-          <h1 className="font-extrabold text-white tracking-wide text-sm leading-tight">
+          <h1 className="font-extrabold text-[#033A2B] tracking-wide text-sm leading-tight">
             FORTRESS
           </h1>
-          <p className="text-[10px] text-emerald-200/90 font-medium leading-tight mt-0.5">
+          <p className="text-[10px] text-[#065F46] font-semibold leading-tight mt-0.5">
             Forecast Reliability
           </p>
-          <p className="text-[9px] text-emerald-400/80 leading-tight">
+          <p className="text-[9px] text-[#047857] leading-tight font-medium">
             Stress-Testing & Self-Audit
           </p>
         </div>
       </div>
 
       {/* Navigation Links */}
-      <nav className="flex-1 overflow-y-auto px-2 py-3 space-y-4 scrollbar-thin scrollbar-thumb-[#005C4B]">
+      <nav className="flex-1 overflow-y-auto px-2 py-3 space-y-4 scrollbar-thin scrollbar-thumb-[#A7F3D0]">
         {navGroups.map((group, gIdx) => (
           <div key={gIdx} className="space-y-1">
-            <h2 className="px-3 text-[10px] font-extrabold text-emerald-400/70 uppercase tracking-wider">
+            <h2 className="px-3 text-[10px] font-extrabold text-[#047857] uppercase tracking-wider">
               {group.title}
             </h2>
             {group.items.map((item) => {
               const Icon = item.icon;
-              const isActive = activeTab === item.id || (activeTab === 'overview' && item.id === 'india_map_active');
+              const isActive = activeTab === item.id;
+              
               return (
                 <button
                   key={item.id}
                   onClick={() => setActiveTab(item.id)}
-                  className={`w-full flex items-center gap-2.5 px-3 py-2 text-[12.5px] font-medium rounded-md transition-all duration-150 relative ${
+                  className={`w-full flex items-center gap-2.5 px-3 py-2 text-[12.5px] font-semibold rounded-md transition-all duration-150 relative ${
                     isActive 
-                      ? 'bg-[#00A878] text-white font-bold shadow-xs' 
-                      : 'text-emerald-100/80 hover:bg-[#005C4B] hover:text-white'
+                      ? 'bg-[#059669] text-white font-bold shadow-xs' 
+                      : 'text-[#044E3A] hover:bg-[#C9EFE0] hover:text-[#022C20]'
                   }`}
                 >
                   {isActive && (
-                    <span className="absolute left-0 top-1 bottom-1 w-1 bg-emerald-300 rounded-r" />
+                    <span className="absolute left-0 top-1 bottom-1 w-1 bg-[#047857] rounded-r" />
                   )}
-                  <Icon className={`w-4 h-4 flex-shrink-0 ${isActive ? 'text-white' : 'text-emerald-300/80'}`} />
+                  <Icon className={`w-4 h-4 flex-shrink-0 ${isActive ? 'text-white' : 'text-[#059669]'}`} />
                   <span className="truncate">{item.label}</span>
                 </button>
               );
@@ -109,13 +110,13 @@ export const Sidebar: React.FC<SidebarProps> = ({ activeTab, setActiveTab }) => 
       </nav>
 
       {/* Footer Badge */}
-      <div className="p-3 border-t border-[#005C4B] bg-[#002D26] text-emerald-300 text-[11px] flex items-center gap-2">
-        <div className="p-1.5 bg-[#003B32] rounded border border-[#005C4B] text-amber-400 flex-shrink-0">
+      <div className="p-3 border-t border-[#C4EAD6] bg-[#D0EFE0] text-[#044E3A] text-[11px] flex items-center gap-2">
+        <div className="p-1.5 bg-[#E2F5EC] rounded border border-[#BDEBD3] text-amber-700 flex-shrink-0">
           <AlertCircle className="w-3.5 h-3.5" />
         </div>
         <div className="overflow-hidden">
-          <p className="font-mono text-[10px] text-emerald-100 font-bold">SIH26079 Prototype v1.0</p>
-          <p className="text-[9px] text-emerald-400/80">Built for a Safer Tomorrow</p>
+          <p className="font-mono text-[10px] text-[#033A2B] font-bold">SIH26079 Prototype v1.0</p>
+          <p className="text-[9px] text-[#047857] font-medium">Built for a Safer Tomorrow</p>
         </div>
       </div>
     </aside>

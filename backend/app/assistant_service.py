@@ -74,7 +74,7 @@ class AssistantService:
         if any(k in q for k in ["bust risk", "bust probability", "p_bust", "risky", "why risky", "high bust", "guaranteed failure", "बस्ट"]):
             return "BUST_RISK"
 
-        if any(k in q for k in ["trust index", "trust level", "how reliable", "why confidence low", "confidence", "reliability band", "reliable", "reliability"]):
+        if any(k in q for k in ["trust index", "trust level", "how reliable", "why confidence low", "confidence", "reliability band", "reliable", "reliability", "भरोसा", "विश्वासनीयता", "विश्वसनीयता"]):
             return "CONFIDENCE"
 
         if any(k in q for k in ["ffd", "stress lab", "fragility", "small ffd", "sensitive variable", "stress testing", "perturbation"]):

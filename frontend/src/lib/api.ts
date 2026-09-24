@@ -12,7 +12,11 @@ import {
   FailureDNAResponse,
   SelfAuditResponse,
   TrustHorizonResponse,
-  Passport
+  Passport,
+  ReservoirSummary,
+  ReservoirForecastContextResponse,
+  ReservoirDecisionSupportResponse,
+  ReservoirScenarioResponse
 } from '../types';
 
 const API_BASE = (((import.meta as any).env?.VITE_API_URL as string) || 'http://127.0.0.1:8000/api').replace(/\/$/, '');
@@ -38,6 +42,11 @@ export async function fetchHealth(): Promise<{ status: string }> {
 
 export async function fetchMetadata(): Promise<Metadata> {
   return apiFetch<Metadata>('/metadata');
+}
+
+export async function fetchForecastRuns(): Promise<string[]> {
+  const meta = await fetchMetadata();
+  return meta.forecast_init_dates || [];
 }
 
 export async function fetchGridMap(forecastInit: string, leadDay: number, region: string = 'ALL', metric: string = 'bust_probability'): Promise<MapPoint[] | { grid_points: MapPoint[] }> {
@@ -166,3 +175,60 @@ export async function fetchPassportData(forecastInit: string, lat: number, lon: 
 export async function fetchPassport(forecastInit: string, leadDay: number, lat: number, lon: number) {
   return fetchPassportData(forecastInit, lat, lon, leadDay);
 }
+
+// Phase 9A Reservoir API Functions
+export async function fetchReservoirs(): Promise<ReservoirSummary[]> {
+  return apiFetch<ReservoirSummary[]>('/reservoirs');
+}
+
+export async function fetchReservoirDetail(reservoirId: string): Promise<ReservoirSummary> {
+  return apiFetch<ReservoirSummary>(`/reservoirs/${reservoirId}`);
+}
+
+export async function fetchReservoirForecastContext(reservoirId: string, forecastInit: string): Promise<ReservoirForecastContextResponse> {
+  return apiFetch<ReservoirForecastContextResponse>(`/reservoirs/${reservoirId}/forecast-context`, {
+    forecast_init: forecastInit
+  });
+}
+
+export async function fetchReservoirDecisionSupport(
+  reservoirId: string,
+  forecastInit: string,
+  leadDay: number = 1,
+  scenario: string = 'NORMAL'
+): Promise<ReservoirDecisionSupportResponse> {
+  return apiFetch<ReservoirDecisionSupportResponse>(`/reservoirs/${reservoirId}/decision-support`, {
+    forecast_init: forecastInit,
+    lead_day: leadDay.toString(),
+    scenario
+  });
+}
+
+export async function postReservoirScenario(
+  reservoirId: string,
+  storagePercent: number,
+  forecastInit: string,
+  leadDay: number = 1,
+  recentInflowCumecs?: number,
+  scenarioName?: string
+): Promise<ReservoirScenarioResponse> {
+  const url = new URL(`${API_BASE}/reservoirs/${reservoirId}/scenario`);
+  url.searchParams.append('forecast_init', forecastInit);
+  url.searchParams.append('lead_day', leadDay.toString());
+
+  const res = await fetch(url.toString(), {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      storage_percent: storagePercent,
+      recent_inflow_cumecs: recentInflowCumecs || 300.0,
+      scenario_name: scenarioName || 'Custom What-If Scenario'
+    })
+  });
+  if (!res.ok) {
+    const text = await res.text();
+    throw new Error(`API Error (${res.status}): ${text || res.statusText}`);
+  }
+  return res.json();
+}
+

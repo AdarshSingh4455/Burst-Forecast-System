@@ -240,3 +240,98 @@ export interface TrustHorizonResponse {
   sequence_length: number;
   stability_status: string;
 }
+
+// Phase 9A Reservoir Decision Support Interfaces
+export interface ReservoirSummary {
+  reservoir_id: string;
+  name: string;
+  latitude: number;
+  longitude: number;
+  state: string;
+  district: string;
+  river: string;
+  data_mode: string;
+  capacity_mcm: number;
+  current_storage_mcm: number;
+  storage_percent: number;
+  recent_inflow_cumecs: number;
+  recent_outflow_cumecs: number;
+  in_pilot_coverage: boolean;
+}
+
+export interface ReservoirLeadContext {
+  lead_day: number;
+  rainfall_mm: number;
+  bust_probability: number;
+  ffd: number;
+  ffd_failure_found: boolean;
+  fragility_category: string;
+  trust_index: number;
+  reliability_band: 'GREEN' | 'YELLOW' | 'RED';
+  self_audit_status: string;
+  attention_status: 'NORMAL_MONITORING' | 'HEIGHTENED_MONITORING' | 'OPERATOR_REVIEW_ADVISED' | 'HIGH_UNCERTAINTY_EXPERT_REVIEW';
+}
+
+export interface ReservoirForecastContextResponse {
+  reservoir_id: string;
+  reservoir_name: string;
+  forecast_init: string;
+  data_mode: string;
+  coverage_available: boolean;
+  in_pilot_coverage: boolean;
+  context_mode: string;
+  reason?: string | null;
+  forecast_context?: any;
+  lead_contexts?: ReservoirLeadContext[] | null;
+}
+
+export interface ReservoirDecisionSupportResponse {
+  reservoir_id: string;
+  reservoir_name: string;
+  data_mode: string;
+  forecast_init: string;
+  lead_day: number;
+  latitude: number;
+  longitude: number;
+  coverage_available: boolean;
+  in_pilot_coverage: boolean;
+  context_mode: string;
+  capacity_mcm: number;
+  current_storage_mcm: number;
+  storage_percent: number;
+  recent_inflow_cumecs: number;
+  scenario_name: string;
+  forecast_context?: any;
+  decision_support?: any;
+  rainfall_mm?: number | null;
+  bust_probability?: number | null;
+  ffd?: number | null;
+  ffd_failure_found?: boolean | null;
+  fragility_category?: string | null;
+  ensemble_disagreement_category?: string | null;
+  ood_category?: string | null;
+  self_audit_status?: string | null;
+  self_audit_reason?: string | null;
+  trust_index?: number | null;
+  reliability_band?: ('GREEN' | 'YELLOW' | 'RED') | null;
+  trust_horizon_day?: number | null;
+  breaking_point_day?: number | null;
+  attention_status?: ('NORMAL_MONITORING' | 'HEIGHTENED_MONITORING' | 'OPERATOR_REVIEW_ADVISED' | 'HIGH_UNCERTAINTY_EXPERT_REVIEW') | null;
+  reasons: string[];
+  limitations: string[];
+  disclaimer: string;
+}
+
+export interface ReservoirScenarioResponse {
+  reservoir_id: string;
+  scenario_name: string;
+  storage_percent: number;
+  current_storage_mcm: number;
+  recent_inflow_cumecs: number;
+  coverage_available: boolean;
+  attention_status?: ('NORMAL_MONITORING' | 'HEIGHTENED_MONITORING' | 'OPERATOR_REVIEW_ADVISED' | 'HIGH_UNCERTAINTY_EXPERT_REVIEW') | null;
+  reasons: string[];
+  data_mode: string;
+}
+
+

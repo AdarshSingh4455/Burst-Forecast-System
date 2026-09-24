@@ -1,102 +1,82 @@
-import React from 'react';
-import { Waves, Sprout, AlertTriangle, Zap, Clock } from 'lucide-react';
-import { GridDetail } from '../types';
+import React, { useState } from 'react';
+import { Waves, Sprout, AlertTriangle, Zap, Info, ShieldAlert } from 'lucide-react';
 
-interface DecisionSupportViewProps {
-  type?: 'reservoir' | 'agriculture' | 'disaster' | 'grid';
-  selectedDetail?: GridDetail | null;
-}
-
-export const DecisionSupportView: React.FC<DecisionSupportViewProps> = ({ type = 'reservoir', selectedDetail }) => {
-  const configs = {
-    reservoir: {
-      title: 'Dam & Reservoir Operational Support',
-      icon: Waves,
-      color: 'bg-cyan-600',
-      domainNote: 'Gate opening & inflow forecast reliability.'
-    },
-    agriculture: {
-      title: 'Agricultural Climate Resilience',
-      icon: Sprout,
-      color: 'bg-emerald-600',
-      domainNote: 'Monsoon sowing & irrigation risk mitigation.'
-    },
-    disaster: {
-      title: 'Disaster Management & Flood Warning',
-      icon: AlertTriangle,
-      color: 'bg-rose-600',
-      domainNote: 'Emergency response & flood vulnerability mitigation.'
-    },
-    grid: {
-      title: 'Renewable Power Grid Management',
-      icon: Zap,
-      color: 'bg-amber-600',
-      domainNote: 'Solar/wind ramp rate & hydro-power forecast reliability.'
-    }
-  };
-
-  const cfg = configs[type];
-  const Icon = cfg.icon;
+export const DecisionSupportView: React.FC = () => {
+  const [activeSector, setActiveSector] = useState<'dam' | 'agri' | 'disaster' | 'grid'>('dam');
 
   return (
-    <div className="p-6 space-y-6">
-      <div className="bg-slate-900 border border-slate-800 text-white p-6 rounded-2xl shadow-xl flex items-center justify-between">
-        <div className="flex items-center gap-4">
-          <div className="bg-slate-800 p-3 rounded-xl border border-slate-700">
-            <Icon className="w-8 h-8 text-emerald-400" />
-          </div>
-          <div>
-            <span className="text-xs text-emerald-400 font-bold uppercase tracking-wider">PHASE 9 — DECISION-SUPPORT EXTENSIONS (SHELL)</span>
-            <h1 className="text-2xl font-extrabold mt-0.5">{cfg.title}</h1>
-            <p className="text-xs text-slate-400 mt-1">{cfg.domainNote}</p>
-          </div>
+    <div className="h-full w-full overflow-y-auto p-4 space-y-4 bg-[#F5FAF8] text-[#102A2A] select-none">
+      {/* Top Banner Header */}
+      <div className="bg-white border border-[#D2E5DF] rounded-xl p-4 shadow-xs flex items-center justify-between">
+        <div>
+          <span className="text-[10px] font-extrabold text-[#00A878] uppercase tracking-wider">DECISION SUPPORT SYSTEM (PHASE 9 SHELL)</span>
+          <h1 className="text-xl font-extrabold text-[#102A2A] mt-0.5 tracking-tight">Sector-Specific Decision Support</h1>
+          <p className="text-xs text-[#617874] mt-0.5 font-medium">
+            Reliability context translation for water resource management, agriculture, disaster mitigation, and renewable power grids.
+          </p>
+        </div>
+
+        <div className="flex items-center gap-2 bg-amber-50 border border-amber-200 px-3 py-1.5 rounded-lg text-xs font-bold text-amber-900">
+          <Info className="w-4 h-4 text-amber-600 flex-shrink-0" />
+          <span>Phase 9 Prototype Shell</span>
         </div>
       </div>
 
-      {selectedDetail ? (
-        <div className="bg-slate-900 p-5 rounded-2xl border border-slate-800 shadow-sm space-y-4">
-          <h3 className="font-bold text-sm text-slate-200 border-b border-slate-800 pb-2">Current Grid Reliability Context</h3>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-xs font-mono">
-            <div className="bg-slate-950 p-3 rounded-xl border border-slate-800">
-              <span className="text-slate-400 font-semibold uppercase">Bust Risk:</span>
-              <p className="text-lg font-bold text-red-400 mt-1">{(selectedDetail.baseline_p_bust * 100).toFixed(1)}%</p>
-              <span className="text-[10px] text-slate-400 font-bold">{selectedDetail.ai_risk_category}</span>
-            </div>
-            <div className="bg-slate-950 p-3 rounded-xl border border-slate-800">
-              <span className="text-slate-400 font-semibold uppercase">Stress FFD:</span>
-              <p className="text-lg font-bold text-purple-400 mt-1">{selectedDetail.ffd.toFixed(2)}</p>
-              <span className="text-[10px] text-slate-400 font-bold">{selectedDetail.fragility_category}</span>
-            </div>
-            <div className="bg-slate-950 p-3 rounded-xl border border-slate-800">
-              <span className="text-slate-400 font-semibold uppercase">Trust Horizon:</span>
-              <p className="text-lg font-bold text-emerald-400 mt-1">D1 – D{selectedDetail.trust_horizon_day}</p>
-              <span className="text-[10px] text-rose-400 font-bold">Breaking: {selectedDetail.breaking_point_day ? `Day D${selectedDetail.breaking_point_day}` : 'None'}</span>
-            </div>
-          </div>
+      {/* Sector Tabs */}
+      <div className="flex border-b border-[#D2E5DF] bg-white rounded-t-xl p-1 gap-1 text-xs font-bold">
+        <button
+          onClick={() => setActiveSector('dam')}
+          className={`flex-1 py-2 px-3 rounded-lg flex items-center justify-center gap-2 transition-colors ${activeSector === 'dam' ? 'bg-[#00A878] text-white' : 'text-[#617874] hover:bg-[#F5FAF8]'}`}
+        >
+          <Waves className="w-4 h-4" />
+          <span>Dam / Reservoir</span>
+        </button>
+        <button
+          onClick={() => setActiveSector('agri')}
+          className={`flex-1 py-2 px-3 rounded-lg flex items-center justify-center gap-2 transition-colors ${activeSector === 'agri' ? 'bg-[#00A878] text-white' : 'text-[#617874] hover:bg-[#F5FAF8]'}`}
+        >
+          <Sprout className="w-4 h-4" />
+          <span>Agriculture</span>
+        </button>
+        <button
+          onClick={() => setActiveSector('disaster')}
+          className={`flex-1 py-2 px-3 rounded-lg flex items-center justify-center gap-2 transition-colors ${activeSector === 'disaster' ? 'bg-[#00A878] text-white' : 'text-[#617874] hover:bg-[#F5FAF8]'}`}
+        >
+          <AlertTriangle className="w-4 h-4" />
+          <span>Disaster Management</span>
+        </button>
+        <button
+          onClick={() => setActiveSector('grid')}
+          className={`flex-1 py-2 px-3 rounded-lg flex items-center justify-center gap-2 transition-colors ${activeSector === 'grid' ? 'bg-[#00A878] text-white' : 'text-[#617874] hover:bg-[#F5FAF8]'}`}
+        >
+          <Zap className="w-4 h-4" />
+          <span>Renewable Grid</span>
+        </button>
+      </div>
 
-          <div className="bg-slate-950 text-white p-4 rounded-xl space-y-1 border border-slate-800">
-            <span className="text-xs text-emerald-400 font-bold uppercase">Self-Audit Status:</span>
-            <p className="text-lg font-bold font-mono">{selectedDetail.self_audit_status}</p>
-            <p className="text-xs text-slate-400 italic">"{selectedDetail.self_audit_reason}"</p>
-          </div>
-        </div>
-      ) : (
-        <div className="bg-slate-900 p-5 rounded-2xl border border-slate-800 shadow-sm text-center text-xs text-slate-400">
-          Select a grid point on the map to view operational reliability context.
-        </div>
-      )}
+      {/* Sector Content Card */}
+      <div className="bg-white border border-[#D2E5DF] rounded-b-xl p-6 shadow-xs space-y-4">
+        <div className="flex items-center justify-between border-b border-[#D2E5DF] pb-3">
+          <h3 className="font-extrabold text-[#102A2A] text-base capitalize flex items-center gap-2">
+            {activeSector === 'dam' && <Waves className="w-5 h-5 text-blue-500" />}
+            {activeSector === 'agri' && <Sprout className="w-5 h-5 text-emerald-500" />}
+            {activeSector === 'disaster' && <AlertTriangle className="w-5 h-5 text-rose-500" />}
+            {activeSector === 'grid' && <Zap className="w-5 h-5 text-amber-500" />}
+            <span>{activeSector === 'dam' ? 'Dam / Reservoir Inflow Reliability Context' : activeSector === 'agri' ? 'Agricultural Crop Risk Context' : activeSector === 'disaster' ? 'Disaster Mitigation Context' : 'Renewable Grid Dispatch Context'}</span>
+          </h3>
 
-      <div className="bg-amber-950/20 p-6 rounded-2xl border border-amber-800/40 text-amber-300 space-y-2">
-        <div className="flex items-center gap-2 font-bold text-sm text-amber-400">
-          <Clock className="w-5 h-5 text-amber-400" />
-          <span>Domain-Specific Recommendation Engine Integration</span>
+          <span className="text-xs bg-[#EAF8F3] text-[#005C4B] font-extrabold px-2.5 py-1 rounded-md border border-[#BDEADB]">
+            Eastern UP Pilot Context
+          </span>
         </div>
-        <p className="text-xs text-amber-200">
-          Domain-specific operational decision recommendation engines (e.g. dam gate release protocols, crop irrigation prescriptions, emergency evacuation alerts, and power ramp schedules) will be integrated in <strong>Phase 9</strong>.
-        </p>
-        <p className="text-[11px] text-amber-400/80 italic">
-          Decision-support information — not an official weather warning.
-        </p>
+
+        {/* Prototype Disclaimer Card */}
+        <div className="bg-amber-50 border border-amber-200 p-4 rounded-xl text-xs text-amber-950 space-y-1">
+          <p className="font-extrabold text-amber-900 text-sm">Phase 9 Integration Pending</p>
+          <p className="text-amber-800 leading-relaxed">
+            Phase 9 sector-specific decision models (dam release optimization algorithms, agricultural crop vulnerability models, and grid dispatch recommendation engines) are not yet active in Phase 8. Currently, reliability indicators (Bust Risk, FFD, Trust Horizon) provide risk context overlay only.
+          </p>
+        </div>
       </div>
     </div>
   );

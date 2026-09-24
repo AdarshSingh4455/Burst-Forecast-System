@@ -1,92 +1,84 @@
-import React from 'react';
-import { Sliders, Database, Server, Cpu } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { Settings, Save, Check } from 'lucide-react';
 
 export const SettingsView: React.FC = () => {
+  const [defaultRegion, setDefaultRegion] = useState(localStorage.getItem('fortress_region') || 'Eastern_UP_Pilot');
+  const [defaultRun, setDefaultRun] = useState(localStorage.getItem('fortress_run') || '2019-07-01 00:00:00');
+  const [defaultLead, setDefaultLead] = useState(localStorage.getItem('fortress_lead') || '5');
+  const [saved, setSaved] = useState(false);
+
+  const handleSave = () => {
+    localStorage.setItem('fortress_region', defaultRegion);
+    localStorage.setItem('fortress_run', defaultRun);
+    localStorage.setItem('fortress_lead', defaultLead);
+    setSaved(true);
+    setTimeout(() => setSaved(false), 2000);
+  };
+
   return (
-    <div className="p-6 max-w-5xl mx-auto space-y-6">
-      <div className="bg-slate-900 border border-slate-800 rounded-xl p-6 shadow-xl">
-        <div className="flex items-center space-x-3 mb-2">
-          <div className="p-3 bg-cyan-500/10 border border-cyan-500/30 rounded-lg">
-            <Sliders className="w-6 h-6 text-cyan-400" />
-          </div>
-          <div>
-            <h1 className="text-xl font-bold text-slate-100">System Settings & Calibration</h1>
-            <p className="text-sm text-slate-400">
-              Configure telemetry thresholds, backend endpoints, and evaluation parameters
-            </p>
-          </div>
+    <div className="h-full w-full overflow-y-auto p-4 space-y-4 bg-[#F5FAF8] text-[#102A2A] select-none">
+      <div className="bg-white border border-[#D2E5DF] rounded-xl p-4 shadow-xs flex items-center justify-between">
+        <div>
+          <span className="text-[10px] font-extrabold text-[#00A878] uppercase tracking-wider">SYSTEM CONFIGURATION</span>
+          <h1 className="text-xl font-extrabold text-[#102A2A] mt-0.5 tracking-tight flex items-center gap-2">
+            <Settings className="w-5 h-5 text-[#00A878]" />
+            Settings
+          </h1>
+          <p className="text-xs text-[#617874] mt-0.5 font-medium">
+            Manage local dashboard defaults, region parameters, and map preferences.
+          </p>
         </div>
+
+        <button
+          onClick={handleSave}
+          className="bg-[#00A878] hover:bg-[#005C4B] text-white font-extrabold py-2 px-4 rounded-lg text-xs shadow-xs transition-colors flex items-center gap-2"
+        >
+          {saved ? <Check className="w-4 h-4 text-white" /> : <Save className="w-4 h-4" />}
+          <span>{saved ? 'Saved to LocalStorage!' : 'Save Preferences'}</span>
+        </button>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <div className="bg-slate-900 border border-slate-800 rounded-xl p-5 space-y-4">
-          <h2 className="text-sm font-semibold text-slate-200 flex items-center space-x-2">
-            <Server className="w-4 h-4 text-emerald-400" />
-            <span>Backend Connection</span>
-          </h2>
-          <div className="space-y-3 text-xs">
-            <div>
-              <label className="block text-slate-400 mb-1">FastAPI Endpoint URL</label>
-              <input
-                type="text"
-                readOnly
-                value="http://127.0.0.1:8000/api"
-                className="w-full bg-slate-950 border border-slate-800 text-slate-300 rounded px-3 py-2 font-mono"
-              />
-            </div>
-            <div>
-              <label className="block text-slate-400 mb-1">Status</label>
-              <div className="flex items-center space-x-2 text-emerald-400 font-mono">
-                <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
-                <span>Active (Connected)</span>
-              </div>
-            </div>
-          </div>
-        </div>
+      <div className="bg-white border border-[#D2E5DF] rounded-xl p-6 shadow-xs space-y-4 max-w-2xl">
+        <h3 className="font-extrabold text-[#102A2A] text-sm uppercase tracking-wider border-b border-[#D2E5DF] pb-2">
+          Dashboard Default Preferences
+        </h3>
 
-        <div className="bg-slate-900 border border-slate-800 rounded-xl p-5 space-y-4">
-          <h2 className="text-sm font-semibold text-slate-200 flex items-center space-x-2">
-            <Database className="w-4 h-4 text-cyan-400" />
-            <span>Data Sources</span>
-          </h2>
-          <div className="space-y-2 text-xs font-mono text-slate-400">
-            <div className="flex justify-between border-b border-slate-800/60 pb-1">
-              <span>Primary Parquet:</span>
-              <span className="text-slate-200">FORTRESS_SELF_AUDIT.parquet</span>
-            </div>
-            <div className="flex justify-between border-b border-slate-800/60 pb-1">
-              <span>Trust Horizon:</span>
-              <span className="text-slate-200">FORTRESS_TRUST_HORIZON.parquet</span>
-            </div>
-            <div className="flex justify-between border-b border-slate-800/60 pb-1">
-              <span>ML Model:</span>
-              <span className="text-slate-200">fortress_bust_model.pkl</span>
-            </div>
-            <div className="flex justify-between pb-1">
-              <span>Pilot Domain:</span>
-              <span className="text-slate-200">Eastern UP (323 points)</span>
-            </div>
+        <div className="space-y-3 text-xs">
+          <div>
+            <label className="font-extrabold text-[#617874] block mb-1">Default Region</label>
+            <select
+              value={defaultRegion}
+              onChange={(e) => setDefaultRegion(e.target.value)}
+              className="w-full bg-[#F5FAF8] border border-[#D2E5DF] rounded-lg p-2 font-bold text-[#102A2A] focus:outline-none focus:border-[#00A878]"
+            >
+              <option value="Eastern_UP_Pilot">Eastern UP Pilot Region</option>
+              <option value="ALL">India Context</option>
+            </select>
           </div>
-        </div>
 
-        <div className="bg-slate-900 border border-slate-800 rounded-xl p-5 space-y-4 md:col-span-2">
-          <h2 className="text-sm font-semibold text-slate-200 flex items-center space-x-2">
-            <Cpu className="w-4 h-4 text-purple-400" />
-            <span>Operational Threshold Calibration</span>
-          </h2>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-xs">
-            <div className="bg-slate-950 p-3 rounded border border-slate-800">
-              <span className="text-slate-400 block mb-1">Bust Probability Flag Cutoff</span>
-              <span className="text-lg font-bold text-red-400 font-mono">0.65</span>
-            </div>
-            <div className="bg-slate-950 p-3 rounded border border-slate-800">
-              <span className="text-slate-400 block mb-1">FFD Wind Stress Level</span>
-              <span className="text-lg font-bold text-amber-400 font-mono">8.0 m/s</span>
-            </div>
-            <div className="bg-slate-950 p-3 rounded border border-slate-800">
-              <span className="text-slate-400 block mb-1">Self-Audit Min Trust Index</span>
-              <span className="text-lg font-bold text-emerald-400 font-mono">70 / 100</span>
-            </div>
+          <div>
+            <label className="font-extrabold text-[#617874] block mb-1">Default Forecast Run</label>
+            <select
+              value={defaultRun}
+              onChange={(e) => setDefaultRun(e.target.value)}
+              className="w-full bg-[#F5FAF8] border border-[#D2E5DF] rounded-lg p-2 font-mono font-bold text-[#102A2A] focus:outline-none focus:border-[#00A878]"
+            >
+              <option value="2019-07-01 00:00:00">2019-07-01 00:00:00 (Heavy Monsoon Event)</option>
+              <option value="2019-01-01 00:00:00">2019-01-01 00:00:00 (Winter Event)</option>
+            </select>
+          </div>
+
+          <div>
+            <label className="font-extrabold text-[#617874] block mb-1">Default Lead Day</label>
+            <select
+              value={defaultLead}
+              onChange={(e) => setDefaultLead(e.target.value)}
+              className="w-full bg-[#F5FAF8] border border-[#D2E5DF] rounded-lg p-2 font-bold text-[#00A878] focus:outline-none focus:border-[#00A878]"
+            >
+              {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map(l => (
+                <option key={l} value={l}>Lead Day D{l}</option>
+              ))}
+            </select>
           </div>
         </div>
       </div>

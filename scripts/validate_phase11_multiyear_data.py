@@ -40,7 +40,7 @@ def main():
     manifest_json = os.path.join("data", "processed", "FORTRESS_GEFS_MULTIYEAR_MANIFEST.json")
 
     passed_checks = 0
-    total_checks = 23
+    total_checks = 24
     failed_messages = []
 
     # Check 1: Artifact exists
@@ -268,6 +268,16 @@ def main():
         failed_messages.append("Check 23 FAIL: Frozen baseline hashes modified!")
         print("Check 23: Frozen Phase 1–10 baseline files — FAIL")
 
+    # Check 24: Balanced temporal coverage (>= 12 runs per year for 2017, 2018, 2019)
+    runs_per_yr = df.groupby(df["forecast_init"].dt.year)["forecast_init"].nunique().to_dict()
+    balanced = all(runs_per_yr.get(yr, 0) >= 12 for yr in [2017, 2018, 2019])
+    if balanced:
+        passed_checks += 1
+        print(f"Check 24: Balanced temporal coverage >=12 runs/yr ({runs_per_yr}) — PASS")
+    else:
+        failed_messages.append(f"Check 24 FAIL: Imbalanced year distribution: {runs_per_yr}")
+        print("Check 24: Balanced temporal coverage — FAIL")
+
     print("============================================")
     print(f"VALIDATION RESULT: {passed_checks}/{total_checks} CHECKS PASSED")
     print("============================================")
@@ -278,7 +288,7 @@ def main():
             print(f" - {msg}")
         sys.exit(1)
     else:
-        print("\nALL 23 DATA QUALITY CHECKS PASSED SUCCESSFULLY!")
+        print(f"\nALL {total_checks} DATA QUALITY CHECKS PASSED SUCCESSFULLY!")
         sys.exit(0)
 
 if __name__ == "__main__":

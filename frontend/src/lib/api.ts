@@ -1,167 +1,166 @@
-const API_BASE = 'http://127.0.0.1:8000/api';
+import {
+  Metadata,
+  MapPoint,
+  RegionalSummary,
+  GridDetail,
+  PointTrendItem,
+  RegionalTrendItem,
+  StressTestResponse,
+  FailureCorridor,
+  FingerprintResponse,
+  AnalogueResponse,
+  FailureDNAResponse,
+  SelfAuditResponse,
+  TrustHorizonResponse,
+  Passport
+} from '../types';
 
-export async function fetchHealth() {
-  const res = await fetch(`${API_BASE}/health`);
-  return res.json();
+const API_BASE = (((import.meta as any).env?.VITE_API_URL as string) || 'http://127.0.0.1:8000/api').replace(/\/$/, '');
+
+async function apiFetch<T>(endpoint: string, params?: Record<string, string>): Promise<T> {
+  const url = new URL(`${API_BASE}${endpoint.startsWith('/') ? endpoint : '/' + endpoint}`);
+  if (params) {
+    Object.entries(params).forEach(([k, v]) => {
+      if (v !== undefined && v !== null) url.searchParams.append(k, v);
+    });
+  }
+  const res = await fetch(url.toString());
+  if (!res.ok) {
+    const text = await res.text();
+    throw new Error(`API Error (${res.status}): ${text || res.statusText}`);
+  }
+  return res.json() as Promise<T>;
 }
 
-export async function fetchMetadata() {
-  const res = await fetch(`${API_BASE}/metadata`);
-  return res.json();
+export async function fetchHealth(): Promise<{ status: string }> {
+  return apiFetch<{ status: string }>('/health');
 }
 
-export async function fetchGridMap(forecastInit: string, leadDay: number, region: string = 'ALL') {
-  const params = new URLSearchParams({
+export async function fetchMetadata(): Promise<Metadata> {
+  return apiFetch<Metadata>('/metadata');
+}
+
+export async function fetchGridMap(forecastInit: string, leadDay: number, region: string = 'ALL', metric: string = 'bust_probability'): Promise<MapPoint[] | { grid_points: MapPoint[] }> {
+  return apiFetch<MapPoint[] | { grid_points: MapPoint[] }>('/map', {
     forecast_init: forecastInit,
     lead_day: leadDay.toString(),
+    metric: metric,
     region: region
   });
-  const res = await fetch(`${API_BASE}/map?${params}`);
-  return res.json();
 }
 
-export async function fetchMapData(forecastInit: string, leadDay: number, metric: string = 'bust_risk_probability') {
-  const params = new URLSearchParams({
-    forecast_init: forecastInit,
-    lead_day: leadDay.toString(),
-    metric: metric
-  });
-  const res = await fetch(`${API_BASE}/map?${params}`);
-  return res.json();
+export async function fetchMapData(forecastInit: string, leadDay: number, metric: string = 'bust_probability') {
+  return fetchGridMap(forecastInit, leadDay, 'ALL', metric);
 }
 
-export async function fetchRegionalSummary(forecastInit: string, leadDay: number, region: string = 'ALL') {
-  const params = new URLSearchParams({
+export async function fetchRegionalSummary(forecastInit: string, leadDay: number, region: string = 'ALL'): Promise<RegionalSummary> {
+  return apiFetch<RegionalSummary>(`/forecast/${encodeURIComponent(region)}`, {
     forecast_init: forecastInit,
     lead_day: leadDay.toString()
   });
-  const res = await fetch(`${API_BASE}/forecast/${encodeURIComponent(region)}?${params}`);
-  return res.json();
 }
 
-export async function fetchGridDetail(forecastInit: string, lat: number, lon: number, leadDay: number) {
-  const params = new URLSearchParams({
+export async function fetchGridDetail(forecastInit: string, lat: number, lon: number, leadDay: number): Promise<GridDetail> {
+  return apiFetch<GridDetail>('/grid-detail', {
     forecast_init: forecastInit,
     lead_day: leadDay.toString(),
     latitude: lat.toString(),
     longitude: lon.toString()
   });
-  const res = await fetch(`${API_BASE}/grid-detail?${params}`);
-  return res.json();
 }
 
-export async function fetchTrend(forecastInit: string, lat: number, lon: number) {
-  const params = new URLSearchParams({
+export async function fetchTrend(forecastInit: string, lat: number, lon: number): Promise<PointTrendItem[] | { trend: PointTrendItem[] }> {
+  return apiFetch<PointTrendItem[] | { trend: PointTrendItem[] }>('/trend', {
     forecast_init: forecastInit,
     latitude: lat.toString(),
     longitude: lon.toString()
   });
-  const res = await fetch(`${API_BASE}/trend?${params}`);
-  return res.json();
 }
 
 export async function fetchPointTrend(forecastInit: string, lat: number, lon: number) {
   return fetchTrend(forecastInit, lat, lon);
 }
 
-export async function fetchRegionalTrend(forecastInit: string, region: string) {
-  const params = new URLSearchParams({
+export async function fetchRegionalTrend(forecastInit: string, region: string): Promise<RegionalTrendItem[]> {
+  return apiFetch<RegionalTrendItem[]>('/regional-trend', {
     forecast_init: forecastInit,
     region: region
   });
-  const res = await fetch(`${API_BASE}/regional-trend?${params}`);
-  return res.json();
 }
 
-export async function fetchStressTestData(forecastInit: string, lat: number, lon: number, leadDay: number) {
-  const params = new URLSearchParams({
+export async function fetchStressTestData(forecastInit: string, lat: number, lon: number, leadDay: number): Promise<StressTestResponse> {
+  return apiFetch<StressTestResponse>('/stress-test', {
     forecast_init: forecastInit,
     lead_day: leadDay.toString(),
     latitude: lat.toString(),
     longitude: lon.toString()
   });
-  const res = await fetch(`${API_BASE}/stress-test?${params}`);
-  return res.json();
 }
 
 export async function fetchStressTest(forecastInit: string, leadDay: number, lat: number, lon: number) {
   return fetchStressTestData(forecastInit, lat, lon, leadDay);
 }
 
-export async function fetchFailureCorridors(forecastInit: string, lat: number, lon: number, leadDay: number) {
-  const params = new URLSearchParams({
+export async function fetchFailureCorridors(forecastInit: string, lat: number, lon: number, leadDay: number): Promise<FailureCorridor[] | { corridors: FailureCorridor[] }> {
+  return apiFetch<FailureCorridor[] | { corridors: FailureCorridor[] }>('/failure-corridors', {
     forecast_init: forecastInit,
     lead_day: leadDay.toString(),
     latitude: lat.toString(),
     longitude: lon.toString()
   });
-  const res = await fetch(`${API_BASE}/failure-corridors?${params}`);
-  return res.json();
 }
 
-export async function fetchFingerprint(forecastInit: string, lat: number, lon: number, leadDay: number) {
-  const params = new URLSearchParams({
+export async function fetchFingerprint(forecastInit: string, lat: number, lon: number, leadDay: number): Promise<FingerprintResponse> {
+  return apiFetch<FingerprintResponse>('/fingerprint', {
     forecast_init: forecastInit,
     lead_day: leadDay.toString(),
     latitude: lat.toString(),
     longitude: lon.toString()
   });
-  const res = await fetch(`${API_BASE}/fingerprint?${params}`);
-  return res.json();
 }
 
-export async function fetchAnalogues(forecastInit: string, lat: number, lon: number, leadDay: number) {
-  const params = new URLSearchParams({
+export async function fetchAnalogues(forecastInit: string, lat: number, lon: number, leadDay: number): Promise<AnalogueResponse> {
+  return apiFetch<AnalogueResponse>('/analogues', {
     forecast_init: forecastInit,
     lead_day: leadDay.toString(),
     latitude: lat.toString(),
     longitude: lon.toString()
   });
-  const res = await fetch(`${API_BASE}/analogues?${params}`);
-  return res.json();
 }
 
-export async function fetchFailureDNA(forecastInit: string, lat: number, lon: number, leadDay: number) {
-  const params = new URLSearchParams({
+export async function fetchFailureDNA(forecastInit: string, lat: number, lon: number, leadDay: number): Promise<FailureDNAResponse> {
+  return apiFetch<FailureDNAResponse>('/failure-dna', {
     forecast_init: forecastInit,
     lead_day: leadDay.toString(),
     latitude: lat.toString(),
     longitude: lon.toString()
   });
-  const res = await fetch(`${API_BASE}/failure-dna?${params}`);
-  return res.json();
 }
 
-export async function fetchSelfAuditData(forecastInit: string, lat: number, lon: number, leadDay: number) {
-  const params = new URLSearchParams({
+export async function fetchSelfAuditData(forecastInit: string, lat: number, lon: number, leadDay: number): Promise<SelfAuditResponse> {
+  return apiFetch<SelfAuditResponse>('/self-audit', {
     forecast_init: forecastInit,
     lead_day: leadDay.toString(),
     latitude: lat.toString(),
     longitude: lon.toString()
   });
-  const res = await fetch(`${API_BASE}/self-audit?${params}`);
-  return res.json();
 }
 
-export async function fetchTrustHorizonData(forecastInit: string, lat: number, lon: number) {
-  const params = new URLSearchParams({
+export async function fetchTrustHorizonData(forecastInit: string, lat: number, lon: number): Promise<TrustHorizonResponse> {
+  return apiFetch<TrustHorizonResponse>('/trust-horizon', {
     forecast_init: forecastInit,
     latitude: lat.toString(),
     longitude: lon.toString()
   });
-  const res = await fetch(`${API_BASE}/trust-horizon?${params}`);
-  return res.json();
 }
 
-export async function fetchPassportData(forecastInit: string, lat: number, lon: number, leadDay: number) {
-  const params = new URLSearchParams({
+export async function fetchPassportData(forecastInit: string, lat: number, lon: number, leadDay: number): Promise<Passport> {
+  return apiFetch<Passport>('/passport', {
     forecast_init: forecastInit,
     lead_day: leadDay.toString(),
     latitude: lat.toString(),
     longitude: lon.toString()
   });
-  const res = await fetch(`${API_BASE}/passport?${params}`);
-  return res.json();
 }
 
 export async function fetchPassport(forecastInit: string, leadDay: number, lat: number, lon: number) {

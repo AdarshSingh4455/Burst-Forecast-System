@@ -8,10 +8,9 @@ interface TrustHorizonViewProps {
 }
 
 export const TrustHorizonView: React.FC<TrustHorizonViewProps> = ({ trustHorizon, pointDetail }) => {
-  const horizonDay = trustHorizon ? trustHorizon.trust_horizon_day : 5;
-  const breakingDay = trustHorizon ? (trustHorizon.breaking_point_day ?? 6) : 6;
+  const horizonDay = pointDetail?.trust_horizon_day ?? trustHorizon?.trust_horizon_day ?? 5;
+  const breakingDay = pointDetail?.breaking_point_day ?? trustHorizon?.breaking_point_day ?? 6;
 
-  // D1-D10 sequence lead items
   const leadDays = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
 
   return (
@@ -24,7 +23,7 @@ export const TrustHorizonView: React.FC<TrustHorizonViewProps> = ({ trustHorizon
             Trust Horizon Analysis
           </h2>
           <p className="text-xs text-[#617874] font-medium mt-0.5">
-            Maximum reliable lead time evaluation & sequence-level degradation boundary
+            Maximum reliable lead time evaluation & sequence-level degradation boundary ({pointDetail ? `${pointDetail.latitude.toFixed(2)}°N, ${pointDetail.longitude.toFixed(2)}°E` : 'Selected Grid Point'})
           </p>
         </div>
 
@@ -50,14 +49,14 @@ export const TrustHorizonView: React.FC<TrustHorizonViewProps> = ({ trustHorizon
         </div>
 
         <div className="bg-white border border-[#D2E5DF] p-4 rounded-xl shadow-xs text-center space-y-1">
-          <span className="text-xs font-extrabold text-[#617874] uppercase">Median Trust Index</span>
-          <p className="text-3xl font-black text-[#102A2A]">{pointDetail ? pointDetail.trust_index : 78}</p>
+          <span className="text-xs font-extrabold text-[#617874] uppercase">Trust Index</span>
+          <p className="text-3xl font-black text-[#102A2A]">{pointDetail ? pointDetail.trust_index.toFixed(0) : '78'}</p>
           <span className="text-[10px] font-bold text-blue-700 bg-blue-50 px-2 py-0.5 rounded">Sequence Score</span>
         </div>
 
         <div className="bg-white border border-[#D2E5DF] p-4 rounded-xl shadow-xs text-center space-y-1">
           <span className="text-xs font-extrabold text-[#617874] uppercase">Sequence Status</span>
-          <p className="text-xl font-black text-amber-600 mt-1">{trustHorizon ? trustHorizon.stability_status : 'Fragile D6+'}</p>
+          <p className="text-xl font-black text-amber-600 mt-1">{trustHorizon?.stability_status || `Degrades D${breakingDay}+`}</p>
           <span className="text-[10px] font-bold text-amber-800 bg-amber-50 px-2 py-0.5 rounded">Monitored Sequence</span>
         </div>
       </div>
@@ -71,9 +70,9 @@ export const TrustHorizonView: React.FC<TrustHorizonViewProps> = ({ trustHorizon
 
         <div className="grid grid-cols-10 gap-2 pt-2">
           {leadDays.map((d) => {
-            const isGreen = d <= 4;
-            const isYellow = d === 5;
-            const isRed = d >= 6;
+            const isGreen = d <= horizonDay;
+            const isRed = d >= breakingDay;
+            const isYellow = !isGreen && !isRed;
             const colorClass = isGreen ? 'bg-emerald-500 text-white border-emerald-600' : isYellow ? 'bg-amber-400 text-slate-900 border-amber-500' : 'bg-rose-500 text-white border-rose-600';
             const label = isGreen ? 'RELIABLE' : isYellow ? 'MONITOR' : 'UNRELIABLE';
 
@@ -101,9 +100,9 @@ export const TrustHorizonView: React.FC<TrustHorizonViewProps> = ({ trustHorizon
       <div className="bg-[#EAF8F3] border border-[#BDEADB] p-4 rounded-xl flex items-start gap-3 text-xs text-[#005C4B]">
         <Info className="w-5 h-5 text-[#00A878] flex-shrink-0 mt-0.5" />
         <div className="space-y-1">
-          <p className="font-bold text-[#102A2A] text-sm">Understanding Trust Horizon</p>
-          <p className="text-[#617874]">
-            The <strong>Trust Horizon</strong> represents the maximum lead day before forecast reliability undergoes sustained degradation. Beyond Day 5, multi-stream evidence (ensemble spread, stress perturbations, historical analogues) indicates elevated forecast fragility.
+          <p className="font-bold text-[#102A2A] text-sm">Trust Horizon Calculation Logic</p>
+          <p>
+            The Trust Horizon (D{horizonDay}) represents the final consecutive lead day where the forecast maintains acceptable model confidence and low ensemble disagreement. Beyond D{horizonDay}, model uncertainty expands significantly into D{breakingDay} (Breaking Point).
           </p>
         </div>
       </div>

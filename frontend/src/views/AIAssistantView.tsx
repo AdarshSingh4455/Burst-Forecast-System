@@ -1,17 +1,25 @@
 import React, { useState } from 'react';
-import { Bot, Send, User, Info, HelpCircle } from 'lucide-react';
+import { Bot, Send, User } from 'lucide-react';
+import { GridPointDetail } from '../types';
 
-export const AIAssistantView: React.FC = () => {
+interface AIAssistantViewProps {
+  pointDetail?: GridPointDetail | null;
+}
+
+export const AIAssistantView: React.FC<AIAssistantViewProps> = ({ pointDetail }) => {
   const [messages, setMessages] = useState<Array<{ sender: 'user' | 'bot'; text: string }>>([
-    { sender: 'bot', text: 'Hello! I am FORTRESS AI Assistant (Phase 10 Prototype). Ask me why bust risk is high, why FFD is fragile, or when reliability breaks down.' }
+    { 
+      sender: 'bot', 
+      text: `Hello! I am FORTRESS Explanation Assistant — Prototype. Ask me why the current point (${pointDetail ? `${pointDetail.latitude.toFixed(2)}°N, ${pointDetail.longitude.toFixed(2)}°E` : 'Selected Grid Point'}) is risky, why FFD is small, or why Self-Audit flagged this.` 
+    }
   ]);
   const [input, setInput] = useState('');
 
   const quickQuestions = [
-    'Why is bust risk high in Eastern UP?',
-    'Why is FFD small for D6?',
-    'Why did Self-Audit flag conflict?',
-    'When does reliability break down?'
+    'Why is this forecast risky?',
+    'Why is FFD small?',
+    'Why did Self-Audit flag this?',
+    'When does reliability deteriorate?'
   ];
 
   const handleSend = (textToSend?: string) => {
@@ -19,16 +27,25 @@ export const AIAssistantView: React.FC = () => {
     if (!q.trim()) return;
 
     const userMsg = { sender: 'user' as const, text: q };
-    let replyText = 'Phase 10 — AI Assistant integration pending. Full natural language generative model will be connected in Phase 10.';
+    
+    const latStr = pointDetail ? `${pointDetail.latitude.toFixed(2)}°N, ${pointDetail.longitude.toFixed(2)}°E` : 'selected grid point';
+    const bustRiskPct = pointDetail ? (pointDetail.baseline_p_bust * 100).toFixed(0) : '62';
+    const ffdVal = pointDetail ? (pointDetail.ffd_failure_found === 0 ? 'No boundary' : pointDetail.ffd.toFixed(2)) : '0.32';
+    const auditStatus = pointDetail ? pointDetail.self_audit_status : 'SUPPORTED WARNING';
+    const auditReason = pointDetail ? pointDetail.self_audit_reason : 'Ensemble disagreement exceeding 0.45 threshold';
+    const horizonDay = pointDetail ? pointDetail.trust_horizon_day : 5;
+    const breakingDay = pointDetail ? (pointDetail.breaking_point_day ?? 6) : 6;
 
-    if (q.includes('bust risk')) {
-      replyText = 'Bust risk is high in Eastern UP due to elevated moisture sensitivity (42% cells) and ensemble disagreement on D6–D8 lead days.';
-    } else if (q.includes('FFD') || q.includes('fragile')) {
-      replyText = 'FFD is 0.32 (fragile) because small moisture (+18%) and wind vector perturbations cross the bust risk failure threshold.';
-    } else if (q.includes('conflict') || q.includes('Self-Audit')) {
-      replyText = 'Self-Audit flagged SUPPORTED WARNING because AI Bust Risk (62%) is strongly supported by high ensemble spread and historical analogue bust rates (25%).';
-    } else if (q.includes('break') || q.includes('horizon')) {
-      replyText = 'Forecast reliability undergoes sustained RED degradation starting at Day 6 (Breaking Point: D6). Trust Horizon is D1–D5.';
+    let replyText = 'FORTRESS Explanation Assistant — Prototype: Model explanation rule executed.';
+
+    if (q.includes('risky')) {
+      replyText = `Forecast at ${latStr} has a Bust Risk of ${bustRiskPct}% (${pointDetail?.ai_risk_category || 'High Risk'}). This risk is driven by ${pointDetail?.primary_vulnerability || 'elevated specific humidity sensitivity'} and high ensemble spread on D${pointDetail?.lead_day || 5}.`;
+    } else if (q.includes('FFD') || q.includes('small')) {
+      replyText = `FFD at ${latStr} is ${ffdVal} (${pointDetail?.fragility_category || 'Fragile'}). This indicates small perturbation perturbations (+1.2°C temp / +15% moisture) push model forecasts across the bust risk failure threshold.`;
+    } else if (q.includes('Self-Audit') || q.includes('flag')) {
+      replyText = `Self-Audit verdict for ${latStr} is ${auditStatus}. Explanation: ${auditReason}. Trust Index is ${pointDetail?.trust_index || 78}/100.`;
+    } else if (q.includes('deteriorate') || q.includes('when')) {
+      replyText = `Forecast reliability remains usable up to Trust Horizon D${horizonDay}. Reliability deteriorates into sustained RED starting at Day ${breakingDay} (Breaking Point: D${breakingDay}).`;
     }
 
     const botMsg = { sender: 'bot' as const, text: replyText };
@@ -42,18 +59,18 @@ export const AIAssistantView: React.FC = () => {
       {/* Header */}
       <div className="bg-white border border-[#D2E5DF] rounded-xl p-4 shadow-xs flex items-center justify-between flex-shrink-0">
         <div>
-          <span className="text-[10px] font-extrabold text-[#00A878] uppercase tracking-wider">PHASE 10 — NATURAL LANGUAGE ASSISTANT</span>
+          <span className="text-[10px] font-extrabold text-[#00A878] uppercase tracking-wider">EXPLANATION ASSISTANT</span>
           <h1 className="text-xl font-extrabold text-[#102A2A] mt-0.5 tracking-tight flex items-center gap-2">
             <Bot className="w-5 h-5 text-[#00A878]" />
-            AI Assistant
+            FORTRESS Explanation Assistant — Prototype
           </h1>
           <p className="text-xs text-[#617874] mt-0.5 font-medium">
-            Natural-language audit assistant explaining model fragility, failure corridors, and self-audit verdicts.
+            Prototype rule-based explanation assistant for current grid point telemetry ({pointDetail ? `${pointDetail.latitude.toFixed(2)}°N, ${pointDetail.longitude.toFixed(2)}°E` : 'Selected Grid Point'}).
           </p>
         </div>
 
         <div className="bg-[#EAF8F3] border border-[#BDEADB] px-3 py-1.5 rounded-lg text-xs font-bold text-[#005C4B]">
-          Phase 10 Prototype
+          FORTRESS Explanation Assistant — Prototype
         </div>
       </div>
 
@@ -106,7 +123,7 @@ export const AIAssistantView: React.FC = () => {
           >
             <input
               type="text"
-              placeholder="Ask FORTRESS AI Assistant about forecast reliability, FFD, or audit verdicts..."
+              placeholder="Ask FORTRESS Explanation Assistant about current point bust risk or FFD..."
               value={input}
               onChange={(e) => setInput(e.target.value)}
               className="flex-1 bg-[#F5FAF8] border border-[#D2E5DF] rounded-lg px-3 py-2 text-xs text-[#102A2A] focus:outline-none focus:border-[#00A878]"

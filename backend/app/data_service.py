@@ -65,7 +65,15 @@ class DataService:
             "regions": self.regions,
             "forecast_init_dates": self.init_dates,
             "lead_days": self.lead_days,
-            "variables": ["Rainfall", "Bust Risk", "FFD", "Fragility", "Trust Index", "OOD", "Ensemble Disagreement"],
+            "variables": [
+                {"id": "bust_probability", "label": "Bust Risk"},
+                {"id": "rainfall", "label": "Rainfall"},
+                {"id": "ffd", "label": "FFD"},
+                {"id": "fragility_auc", "label": "Fragility"},
+                {"id": "trust_index", "label": "Trust Index"},
+                {"id": "ood_score", "label": "OOD Score"},
+                {"id": "ensemble_disagreement_score", "label": "Ensemble Disagreement"}
+            ],
             "grid_extent": {
                 "min_lat": float(self.df_self_audit['latitude'].min()),
                 "max_lat": float(self.df_self_audit['latitude'].max()),
@@ -102,7 +110,14 @@ class DataService:
                 "longitude": float(row['longitude']),
                 "value": float(row[col]),
                 "reliability_band": str(row['reliability_band']),
-                "self_audit_status": str(row['self_audit_status'])
+                "self_audit_status": str(row['self_audit_status']),
+                "rainfall": round(float(row['ensemble_mean_mm']), 2),
+                "bust_probability": round(float(row['baseline_p_bust']), 4),
+                "ffd": round(float(row['ffd']), 4),
+                "fragility_auc": round(float(row['fragility_auc']), 4),
+                "trust_index": round(float(row['trust_index']), 2),
+                "ood_score": round(float(row['ood_score']), 2),
+                "ensemble_disagreement_score": round(float(row['ensemble_disagreement_score']), 2)
             })
         return records
 

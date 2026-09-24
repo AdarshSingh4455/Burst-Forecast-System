@@ -1,5 +1,5 @@
 import React from 'react';
-import { ZapOff, ShieldAlert, Info, AlertTriangle, CheckCircle2 } from 'lucide-react';
+import { ZapOff, AlertTriangle } from 'lucide-react';
 import { TrustHorizonResponse, GridPointDetail } from '../types';
 
 interface BreakingPointViewProps {
@@ -8,8 +8,8 @@ interface BreakingPointViewProps {
 }
 
 export const BreakingPointView: React.FC<BreakingPointViewProps> = ({ trustHorizon, pointDetail }) => {
-  const breakingDay = trustHorizon ? (trustHorizon.breaking_point_day ?? 6) : 6;
-  const horizonDay = trustHorizon ? trustHorizon.trust_horizon_day : 5;
+  const breakingDay = pointDetail?.breaking_point_day ?? trustHorizon?.breaking_point_day ?? 6;
+  const horizonDay = pointDetail?.trust_horizon_day ?? trustHorizon?.trust_horizon_day ?? 5;
 
   const leadDays = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
 
@@ -23,7 +23,7 @@ export const BreakingPointView: React.FC<BreakingPointViewProps> = ({ trustHoriz
             Breaking Point Analysis
           </h2>
           <p className="text-xs text-[#617874] font-medium mt-0.5">
-            Sequence-level failure threshold identification & sustained RED persistence rule
+            Sequence-level failure threshold identification & sustained RED persistence rule ({pointDetail ? `${pointDetail.latitude.toFixed(2)}°N, ${pointDetail.longitude.toFixed(2)}°E` : 'Selected Grid Point'})
           </p>
         </div>
 
@@ -51,7 +51,7 @@ export const BreakingPointView: React.FC<BreakingPointViewProps> = ({ trustHoriz
         <div className="bg-white border border-[#D2E5DF] p-4 rounded-xl shadow-xs text-center space-y-1">
           <span className="text-xs font-extrabold text-[#617874] uppercase">Persistence Rule Status</span>
           <p className="text-xl font-black text-rose-600 mt-1">Sustained Failure</p>
-          <span className="text-[10px] font-bold text-rose-800 bg-rose-100 px-2 py-0.5 rounded">D6 & D7 Consecutively RED</span>
+          <span className="text-[10px] font-bold text-rose-800 bg-rose-100 px-2 py-0.5 rounded">D{breakingDay} & D{breakingDay + 1} Consecutively RED</span>
         </div>
       </div>
 
@@ -64,7 +64,7 @@ export const BreakingPointView: React.FC<BreakingPointViewProps> = ({ trustHoriz
         <div className="space-y-2 text-xs">
           {leadDays.map((d) => {
             const isRed = d >= breakingDay;
-            const isYellow = d === horizonDay;
+            const isYellow = d > horizonDay && d < breakingDay;
             const statusText = isRed ? 'RED (Unreliable / High Failure Risk)' : isYellow ? 'YELLOW (Fragile / Elevated Disagreement)' : 'GREEN (Reliable)';
 
             return (

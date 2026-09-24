@@ -51,12 +51,19 @@ import {
 export const App: React.FC = () => {
   const [activeTab, setActiveTab] = useState<string>('overview');
   const [metadata, setMetadata] = useState<Metadata | null>(null);
-  const [selectedRun, setSelectedRun] = useState<string>('2019-07-01 00:00:00');
-  const [selectedLead, setSelectedLead] = useState<number>(5);
-  const [selectedMetric, setSelectedMetric] = useState<'bust_risk_probability' | 'fragility_score' | 'trust_index'>('bust_risk_probability');
-  const [selectedRegion, setSelectedRegion] = useState<string>('ALL');
+  
+  // Settings & preferences persistence from localStorage
+  const savedRun = localStorage.getItem('fortress_run') || '2019-07-01 00:00:00';
+  const savedLead = parseInt(localStorage.getItem('fortress_lead') || '5', 10);
+  const savedMetric = localStorage.getItem('fortress_metric') || 'bust_probability';
+  const savedRegion = localStorage.getItem('fortress_region') || 'ALL';
 
-  // Selected Grid Point
+  const [selectedRun, setSelectedRun] = useState<string>(savedRun);
+  const [selectedLead, setSelectedLead] = useState<number>(savedLead);
+  const [selectedMetric, setSelectedMetric] = useState<string>(savedMetric);
+  const [selectedRegion, setSelectedRegion] = useState<string>(savedRegion);
+
+  // Selected Grid Point (Initial: null -> set from first valid point returned by backend)
   const [selectedLat, setSelectedLat] = useState<number | null>(null);
   const [selectedLon, setSelectedLon] = useState<number | null>(null);
 
@@ -83,7 +90,7 @@ export const App: React.FC = () => {
       .then((data) => {
         setMetadata(data);
         const runs = data.forecast_init_dates || data.forecast_runs || [];
-        if (runs.length > 0) {
+        if (runs.length > 0 && !runs.includes(selectedRun)) {
           setSelectedRun(runs[0]);
         }
       })
@@ -93,13 +100,13 @@ export const App: React.FC = () => {
       });
   }, []);
 
-  // Fetch Grid Map & Regional Summary when run/lead/region changes
+  // Fetch Grid Map & Regional Summary when run/lead/region/metric changes
   useEffect(() => {
     if (!selectedRun) return;
     setLoading(true);
 
     Promise.all([
-      fetchGridMap(selectedRun, selectedLead, selectedRegion),
+      fetchGridMap(selectedRun, selectedLead, selectedRegion, selectedMetric),
       fetchRegionalSummary(selectedRun, selectedLead, selectedRegion)
     ])
       .then(([mapRes, summaryRes]) => {
@@ -107,59 +114,61 @@ export const App: React.FC = () => {
         setGridPoints(pts);
         setRegionalSummary(summaryRes);
 
-        // Dynamically initialize grid point coordinates from first valid backend point
-        if (pts.length > 0 && selectedLat === null) {
+        // Sequence: metadata -> run -> /api/map -> select actual returned point
+        const exists = selectedLat !== null && selectedLon !== null && pts.some(
+          (p: GridPointMap) => Math.abs(p.latitude - selectedLat) < 0.01 && Math.abs(p.longitude - selectedLon) < 0.01
+        );
+
+        if (!exists && pts.length > 0) {
           setSelectedLat(pts[0].latitude);
           setSelectedLon(pts[0].longitude);
         }
       })
       .catch((err) => console.error('Map fetch error:', err))
       .finally(() => setLoading(false));
-  }, [selectedRun, selectedLead, selectedRegion]);
+  }, [selectedRun, selectedLead, selectedRegion, selectedMetric]);
 
   // Fetch Grid Detail, Stress, Corridors, Fingerprint, Passport when lat/lon/run/lead changes
   useEffect(() => {
-    const lat = selectedLat ?? 26.75;
-    const lon = selectedLon ?? 83.25;
-    if (!selectedRun) return;
+    if (selectedLat === null || selectedLon === null || !selectedRun) return;
 
-    fetchGridDetail(selectedRun, lat, lon, selectedLead)
+    fetchGridDetail(selectedRun, selectedLat, selectedLon, selectedLead)
       .then((data) => setSelectedPointDetail(data))
       .catch((err) => console.error('Point detail fetch error:', err));
 
-    fetchTrend(selectedRun, lat, lon)
+    fetchTrend(selectedRun, selectedLat, selectedLon)
       .then((res) => setTrendData(Array.isArray(res) ? res : (res?.trend || [])))
       .catch((err) => console.error('Trend fetch error:', err));
 
-    fetchStressTestData(selectedRun, lat, lon, selectedLead)
+    fetchStressTestData(selectedRun, selectedLat, selectedLon, selectedLead)
       .then((res) => setStressData(res))
       .catch((err) => console.error('Stress test fetch error:', err));
 
-    fetchFailureCorridors(selectedRun, lat, lon, selectedLead)
+    fetchFailureCorridors(selectedRun, selectedLat, selectedLon, selectedLead)
       .then((res) => setFailureCorridors(Array.isArray(res) ? res : (res?.corridors || [])))
       .catch((err) => console.error('Corridors fetch error:', err));
 
-    fetchFingerprint(selectedRun, lat, lon, selectedLead)
+    fetchFingerprint(selectedRun, selectedLat, selectedLon, selectedLead)
       .then((res) => setFingerprint(res))
       .catch((err) => console.error('Fingerprint fetch error:', err));
 
-    fetchAnalogues(selectedRun, lat, lon, selectedLead)
+    fetchAnalogues(selectedRun, selectedLat, selectedLon, selectedLead)
       .then((res) => setAnalogues(res))
       .catch((err) => console.error('Analogues fetch error:', err));
 
-    fetchFailureDNA(selectedRun, lat, lon, selectedLead)
+    fetchFailureDNA(selectedRun, selectedLat, selectedLon, selectedLead)
       .then((res) => setFailureDNA(res))
       .catch((err) => console.error('DNA fetch error:', err));
 
-    fetchSelfAuditData(selectedRun, lat, lon, selectedLead)
+    fetchSelfAuditData(selectedRun, selectedLat, selectedLon, selectedLead)
       .then((res) => setSelfAuditData(res))
       .catch((err) => console.error('Self Audit fetch error:', err));
 
-    fetchTrustHorizonData(selectedRun, lat, lon)
+    fetchTrustHorizonData(selectedRun, selectedLat, selectedLon)
       .then((res) => setTrustHorizonData(res))
       .catch((err) => console.error('Trust Horizon fetch error:', err));
 
-    fetchPassportData(selectedRun, lat, lon, selectedLead)
+    fetchPassportData(selectedRun, selectedLat, selectedLon, selectedLead)
       .then((res) => setPassportData(res))
       .catch((err) => console.error('Passport fetch error:', err));
   }, [selectedRun, selectedLat, selectedLon, selectedLead]);
@@ -184,7 +193,14 @@ export const App: React.FC = () => {
             regionalSummary={regionalSummary}
             trendData={trendData}
             onOpenPassport={() => setActiveTab('passport')}
-            onNavigateTab={(tab) => setActiveTab(tab)}
+            onNavigateTab={(tab) => {
+              if (tab === 'high_risk_map') {
+                setSelectedMetric('bust_probability');
+                setActiveTab('india_map');
+              } else {
+                setActiveTab(tab);
+              }
+            }}
           />
         );
       case 'india_map':
@@ -201,7 +217,14 @@ export const App: React.FC = () => {
                 />
               </div>
               <div className="flex-[3.8] min-h-0">
-                <TrendChart trendData={trendData} onNavigateTab={(tab) => setActiveTab(tab)} />
+                <TrendChart
+                  trendData={trendData}
+                  regionalTrend={regionalSummary ? [regionalSummary] : []}
+                  selectedLat={selectedLat}
+                  selectedLon={selectedLon}
+                  selectedMetric={selectedMetric}
+                  onNavigateTab={(tab) => setActiveTab(tab)}
+                />
               </div>
             </div>
             <div className="w-[320px] flex-shrink-0 h-full overflow-hidden rounded-lg shadow-sm border border-[#D2E5DF]">
@@ -275,7 +298,7 @@ export const App: React.FC = () => {
       case 'decision_support':
         return <DecisionSupportView />;
       case 'ai_assistant':
-        return <AIAssistantView />;
+        return <AIAssistantView pointDetail={selectedPointDetail} />;
       case 'settings':
         return <SettingsView />;
       case 'about':
@@ -317,6 +340,7 @@ export const App: React.FC = () => {
           setSelectedMetric={setSelectedMetric}
           selectedRegion={selectedRegion}
           setSelectedRegion={setSelectedRegion}
+          onSelectPoint={handlePointSelect}
         />
 
         {/* Active View Container */}

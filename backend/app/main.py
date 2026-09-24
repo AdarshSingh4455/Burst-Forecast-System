@@ -4,13 +4,15 @@ from fastapi import FastAPI, HTTPException, Query
 from fastapi.middleware.cors import CORSMiddleware
 from backend.app.data_service import data_service
 from backend.app.reservoir_service import reservoir_service
-from backend.app.schemas import ReservoirScenarioRequest
+from backend.app.agriculture_service import agriculture_service
+from backend.app.schemas import ReservoirScenarioRequest, AgricultureScenarioRequest
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     base_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", ".."))
     data_service.load_data(base_dir)
     reservoir_service.load_data(base_dir)
+    agriculture_service.load_data(base_dir)
     yield
 
 app = FastAPI(
@@ -366,4 +368,64 @@ def post_reservoir_scenario(
     if res is None:
         raise HTTPException(status_code=404, detail=f"Reservoir '{reservoir_id}' not found.")
     return res
+
+# ============================================================
+# PHASE 9B — AGRICULTURE DECISION SUPPORT ENDPOINTS
+# ============================================================
+
+@app.get("/api/agriculture")
+def get_agriculture():
+    return agriculture_service.get_agriculture_summary()
+
+@app.get("/api/agriculture/{agri_id}")
+def get_agriculture_detail(agri_id: str):
+    scen = agriculture_service.get_agriculture_detail(agri_id)
+    if scen is None:
+        raise HTTPException(status_code=404, detail=f"Agriculture scenario '{agri_id}' not found.")
+    return scen
+
+@app.get("/api/agriculture/{agri_id}/forecast-context")
+def get_agriculture_forecast_context(
+    agri_id: str,
+    forecast_init: str = Query(...)
+):
+    ctx = agriculture_service.get_forecast_context(agri_id, forecast_init)
+    if ctx is None:
+        raise HTTPException(status_code=404, detail=f"Forecast context for agriculture scenario '{agri_id}' not found.")
+    return ctx
+
+@app.get("/api/agriculture/{agri_id}/decision-support")
+def get_agriculture_decision_support(
+    agri_id: str,
+    forecast_init: str = Query(...),
+    lead_day: int = Query(1, ge=1, le=10)
+):
+    ds = agriculture_service.get_decision_support(agri_id, forecast_init, lead_day)
+    if ds is None:
+        raise HTTPException(status_code=404, detail=f"Decision support for agriculture scenario '{agri_id}' not found.")
+    return ds
+
+@app.post("/api/agriculture/{agri_id}/scenario")
+def post_agriculture_scenario(
+    agri_id: str,
+    body: AgricultureScenarioRequest,
+    forecast_init: str = Query(...),
+    lead_day: int = Query(1, ge=1, le=10)
+):
+    res = agriculture_service.process_custom_scenario(
+        agri_id,
+        crop=body.crop,
+        crop_stage=body.crop_stage,
+        field_operation=body.field_operation,
+        soil_moisture_percent=body.soil_moisture_percent,
+        rainfall_mm_override=body.rainfall_mm_override,
+        dry_spell_days_override=body.dry_spell_days_override,
+        scenario_name=body.scenario_name or "Custom What-If Scenario",
+        forecast_init=forecast_init,
+        lead_day=lead_day
+    )
+    if res is None:
+        raise HTTPException(status_code=404, detail=f"Agriculture scenario '{agri_id}' not found.")
+    return res
+
 

@@ -334,4 +334,120 @@ export interface ReservoirScenarioResponse {
   data_mode: string;
 }
 
+// Phase 9B Agriculture Decision Support Interfaces
+export interface AgricultureSummary {
+  agri_id: string;
+  name: string;
+  latitude: number;
+  longitude: number;
+  district_label: string;
+  state: string;
+  data_mode: string;
+  crop: string;
+  crop_stage: string;
+  field_operation: string;
+  soil_moisture_mode: string;
+  soil_moisture_percent: number;
+  scenario_name: string;
+  coverage_available: boolean;
+  in_pilot_coverage: boolean;
+}
+
+export interface AgricultureLeadContext {
+  lead_day: number;
+  rainfall_mm: number;
+  temperature_c: number;
+  humidity_gkg: number;
+  wind_speed_ms: number;
+  bust_probability: number;
+  ffd: number;
+  ffd_failure_found: boolean;
+  fragility_category: string;
+  trust_index: number;
+  reliability_band: 'GREEN' | 'YELLOW' | 'RED';
+  self_audit_status: string;
+  attention_status?: ('NORMAL_MONITORING' | 'FARM_ADVISORY_REVIEW' | 'WEATHER_SENSITIVE_WINDOW' | 'HIGH_UNCERTAINTY_EXPERT_REVIEW') | null;
+}
+
+export interface AgricultureForecastContextResponse {
+  agri_id: string;
+  agri_name: string;
+  forecast_init: string;
+  data_mode: string;
+  coverage_available: boolean;
+  in_pilot_coverage: boolean;
+  context_mode: string;
+  reason?: string | null;
+  forecast_context?: any;
+  lead_contexts?: AgricultureLeadContext[] | null;
+}
+
+export interface AgricultureDecisionSupportResponse {
+  agri_id: string;
+  agri_name: string;
+  data_mode: string;
+  forecast_init: string;
+  lead_day: number;
+  latitude: number;
+  longitude: number;
+  coverage_available: boolean;
+  in_pilot_coverage: boolean;
+  context_mode: string;
+  crop: string;
+  crop_stage: string;
+  field_operation: string;
+  soil_moisture_mode: string;
+  soil_moisture_percent: number;
+  scenario_name: string;
+  forecast_context?: any;
+  decision_support?: any;
+  rainfall_mm?: number | null;
+  dry_spell_days?: number | null;
+  dry_spell_source?: string | null;
+  temperature_c?: number | null;
+  humidity_gkg?: number | null;
+  wind_speed_ms?: number | null;
+  bust_probability?: number | null;
+  ffd?: number | null;
+  ffd_failure_found?: boolean | null;
+  fragility_category?: string | null;
+  ensemble_disagreement_category?: string | null;
+  ood_category?: string | null;
+  self_audit_status?: string | null;
+  self_audit_reason?: string | null;
+  trust_index?: number | null;
+  reliability_band?: ('GREEN' | 'YELLOW' | 'RED') | null;
+  trust_horizon_day?: number | null;
+  breaking_point_day?: number | null;
+  is_what_if_override?: boolean;
+  rainfall_mm_override?: number | null;
+  dry_spell_days_override?: number | null;
+  attention_status?: ('NORMAL_MONITORING' | 'FARM_ADVISORY_REVIEW' | 'WEATHER_SENSITIVE_WINDOW' | 'HIGH_UNCERTAINTY_EXPERT_REVIEW') | null;
+  weather_flags: string[];
+  reasons: string[];
+  limitations: string[];
+  disclaimer: string;
+}
+
+export interface AgricultureScenarioResponse {
+  agri_id: string;
+  scenario_name: string;
+  crop: string;
+  crop_stage: string;
+  field_operation: string;
+  soil_moisture_percent: number;
+  soil_moisture_mode?: string;
+  coverage_available: boolean;
+  is_what_if_override?: boolean;
+  actual_rainfall_mm?: number | null;
+  rainfall_mm_override?: number | null;
+  actual_dry_spell_days?: number | null;
+  dry_spell_days_override?: number | null;
+  attention_status?: ('NORMAL_MONITORING' | 'FARM_ADVISORY_REVIEW' | 'WEATHER_SENSITIVE_WINDOW' | 'HIGH_UNCERTAINTY_EXPERT_REVIEW') | null;
+  weather_flags: string[];
+  reasons: string[];
+  data_mode: string;
+}
+
+
 

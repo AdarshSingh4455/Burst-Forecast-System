@@ -1,6 +1,9 @@
 # Raw / large weather data
 data/raw/
 data/interim/
+data/phase11/raw/
+data/phase11/intermediate/
+
 
 # Weather data formats
 *.grib

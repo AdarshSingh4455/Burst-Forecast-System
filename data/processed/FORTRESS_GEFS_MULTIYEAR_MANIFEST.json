@@ -1,0 +1,92 @@
+{
+  "dataset_name": "FORTRESS_GEFS_MULTIYEAR",
+  "creation_timestamp": "2026-09-24T19:38:19.245380+00:00",
+  "region": "Eastern_UP_Pilot",
+  "grid_bounds": {
+    "lat_min": 24.5,
+    "lat_max": 28.5,
+    "lon_min": 80.0,
+    "lon_max": 84.5,
+    "resolution_deg": 0.25,
+    "unique_grid_points": 323
+  },
+  "forecast_source": "NOAA_GEFSv12_Reforecast",
+  "members": [
+    "c00",
+    "p01",
+    "p02",
+    "p03",
+    "p04"
+  ],
+  "date_range": {
+    "start": "2017-01-01",
+    "end": "2019-09-30"
+  },
+  "requested_dates_count": 20,
+  "successful_dates_count": 20,
+  "failed_dates_count": 0,
+  "failed_dates_details": [],
+  "years_covered": [
+    2017,
+    2018,
+    2019
+  ],
+  "forecast_runs_per_year": {
+    "2017": 7,
+    "2018": 1,
+    "2019": 12
+  },
+  "total_forecast_runs": 20,
+  "grid_count_per_run": 323,
+  "lead_range_days": [
+    1,
+    10
+  ],
+  "total_rows": 64600,
+  "total_columns": 39,
+  "missing_value_count": 0,
+  "duplicate_rows": 0,
+  "columns": [
+    "forecast_init",
+    "valid_time",
+    "lead_day",
+    "latitude",
+    "longitude",
+    "region",
+    "rain_c00_mm",
+    "rain_p01_mm",
+    "rain_p02_mm",
+    "rain_p03_mm",
+    "rain_p04_mm",
+    "ensemble_mean_mm",
+    "ensemble_spread_mm",
+    "ensemble_min_mm",
+    "ensemble_max_mm",
+    "member_range_mm",
+    "source",
+    "temp_2m_c_mean",
+    "temp_2m_c_std",
+    "temp_2m_c_min",
+    "temp_2m_c_max",
+    "specific_humidity_gkg_mean",
+    "specific_humidity_gkg_std",
+    "specific_humidity_gkg_min",
+    "specific_humidity_gkg_max",
+    "mslp_hpa_mean",
+    "mslp_hpa_std",
+    "mslp_hpa_min",
+    "mslp_hpa_max",
+    "pwat_mm_mean",
+    "pwat_mm_std",
+    "pwat_mm_min",
+    "pwat_mm_max",
+    "u10_mean_ms",
+    "v10_mean_ms",
+    "wind_speed_mean_ms",
+    "wind_speed_std_ms",
+    "wind_speed_min_ms",
+    "wind_speed_max_ms"
+  ],
+  "rainfall_construction": "Sum of 4 non-overlapping 6-hour accumulation windows per lead day ([6, 12, 18, 24] hours from start_hour)",
+  "pipeline_execution_time_seconds": 0.52
+}

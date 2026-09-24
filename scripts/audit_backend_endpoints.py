@@ -117,3 +117,16 @@ check_ep(f'/renewable/{zone_id}/forecast-context?{urllib.parse.urlencode({"forec
 check_ep(f'/renewable/{zone_id}/decision-support?{urllib.parse.urlencode({"forecast_init": first_run, "lead_day": 1})}')
 check_post(f'/renewable/{zone_id}/scenario?{urllib.parse.urlencode({"forecast_init": first_run, "lead_day": 1})}', {'wind_speed_multiplier': 1.5, 'temperature_offset_c': 2.0, 'humidity_offset_pct': -5.0, 'rainfall_multiplier': 1.0, 'scenario_name': 'Wind Variability What-If'})
 
+# Phase 10A Multilingual Explanation Assistant Endpoint (41)
+print('\n--- Phase 10A Multilingual Explanation Assistant Endpoint ---')
+check_post('/assistant/explain', {
+    'message': 'D5 pe forecast risky kyun hai?',
+    'language': 'hinglish',
+    'forecast_init': first_run,
+    'lead_day': 5,
+    'latitude': lat,
+    'longitude': lon,
+    'active_view': 'Overview'
+})
+
+

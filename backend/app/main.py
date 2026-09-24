@@ -7,7 +7,15 @@ from backend.app.reservoir_service import reservoir_service
 from backend.app.agriculture_service import agriculture_service
 from backend.app.disaster_service import disaster_service
 from backend.app.renewable_service import renewable_service
-from backend.app.schemas import ReservoirScenarioRequest, AgricultureScenarioRequest, DisasterScenarioRequest, RenewableScenarioRequest
+from backend.app.assistant_service import assistant_service
+from backend.app.schemas import (
+    ReservoirScenarioRequest,
+    AgricultureScenarioRequest,
+    DisasterScenarioRequest,
+    RenewableScenarioRequest,
+    AssistantExplainRequest,
+    AssistantExplainResponse
+)
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -548,6 +556,26 @@ def post_renewable_scenario(
     if res is None:
         raise HTTPException(status_code=404, detail=f"Renewable scenario '{scenario_id}' not found.")
     return res
+
+# ============================================================
+# PHASE 10A — MULTILINGUAL ASSISTANT ENDPOINT
+# ============================================================
+
+@app.post("/api/assistant/explain", response_model=AssistantExplainResponse)
+def post_assistant_explain(body: AssistantExplainRequest):
+    init_run = body.forecast_init or body.forecast_run
+    res = assistant_service.explain(
+        message=body.message,
+        language=body.language or "auto",
+        forecast_init=init_run,
+        lead_day=body.lead_day or 5,
+        latitude=body.latitude if body.latitude is not None else 25.75,
+        longitude=body.longitude if body.longitude is not None else 82.00,
+        active_view=body.active_view or "Overview",
+        scenario_id=body.scenario_id
+    )
+    return res
+
 
 
 

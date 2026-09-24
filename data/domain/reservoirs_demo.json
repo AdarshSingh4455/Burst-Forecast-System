@@ -1,0 +1,154 @@
+[
+  {
+    "reservoir_id": "RES_MEJA",
+    "name": "Meja Reservoir (Belan River)",
+    "latitude": 24.90,
+    "longitude": 82.12,
+    "state": "Uttar Pradesh",
+    "district": "Prayagraj",
+    "river": "Belan River",
+    "data_mode": "DEMO_SCENARIO",
+    "capacity_mcm": 350.0,
+    "scenarios": {
+      "NORMAL": {
+        "scenario_name": "Normal Storage",
+        "current_storage_mcm": 203.0,
+        "storage_percent": 58.0,
+        "recent_inflow_cumecs": 120.0,
+        "recent_outflow_cumecs": 100.0
+      },
+      "HIGH": {
+        "scenario_name": "High Storage",
+        "current_storage_mcm": 276.5,
+        "storage_percent": 79.0,
+        "recent_inflow_cumecs": 450.0,
+        "recent_outflow_cumecs": 220.0
+      },
+      "VERY_HIGH": {
+        "scenario_name": "Very High Storage",
+        "current_storage_mcm": 311.5,
+        "storage_percent": 89.0,
+        "recent_inflow_cumecs": 780.0,
+        "recent_outflow_cumecs": 350.0
+      }
+    },
+    "catchment_available": false,
+    "catchment_geometry_source": null,
+    "notes": "Synthetic scenario values for SIH decision-support demonstration. Located inside Eastern UP pilot coverage (24.90°N, 82.12°E).",
+    "updated_at": "2026-09-24T10:00:00Z"
+  },
+  {
+    "reservoir_id": "RES_RIHAND",
+    "name": "Rihand Reservoir (Govind Ballabh Pant Sagar)",
+    "latitude": 24.22,
+    "longitude": 83.02,
+    "state": "Uttar Pradesh",
+    "district": "Sonbhadra",
+    "river": "Rihand River",
+    "data_mode": "DEMO_SCENARIO",
+    "capacity_mcm": 10600.0,
+    "scenarios": {
+      "NORMAL": {
+        "scenario_name": "Normal Storage",
+        "current_storage_mcm": 6148.0,
+        "storage_percent": 58.0,
+        "recent_inflow_cumecs": 320.0,
+        "recent_outflow_cumecs": 280.0
+      },
+      "HIGH": {
+        "scenario_name": "High Storage",
+        "current_storage_mcm": 8374.0,
+        "storage_percent": 79.0,
+        "recent_inflow_cumecs": 850.0,
+        "recent_outflow_cumecs": 450.0
+      },
+      "VERY_HIGH": {
+        "scenario_name": "Very High Storage",
+        "current_storage_mcm": 9434.0,
+        "storage_percent": 89.0,
+        "recent_inflow_cumecs": 1420.0,
+        "recent_outflow_cumecs": 600.0
+      }
+    },
+    "catchment_available": false,
+    "catchment_geometry_source": null,
+    "notes": "Synthetic scenario values for SIH decision-support demonstration. Located outside current Eastern UP pilot coverage (Lat 24.22°N < 24.5°N).",
+    "updated_at": "2026-09-24T10:00:00Z"
+  },
+  {
+    "reservoir_id": "RES_OBRA",
+    "name": "Obra Dam & Reservoir",
+    "latitude": 24.42,
+    "longitude": 83.08,
+    "state": "Uttar Pradesh",
+    "district": "Sonbhadra",
+    "river": "Rihand River",
+    "data_mode": "DEMO_SCENARIO",
+    "capacity_mcm": 1200.0,
+    "scenarios": {
+      "NORMAL": {
+        "scenario_name": "Normal Storage",
+        "current_storage_mcm": 720.0,
+        "storage_percent": 60.0,
+        "recent_inflow_cumecs": 150.0,
+        "recent_outflow_cumecs": 140.0
+      },
+      "HIGH": {
+        "scenario_name": "High Storage",
+        "current_storage_mcm": 936.0,
+        "storage_percent": 78.0,
+        "recent_inflow_cumecs": 420.0,
+        "recent_outflow_cumecs": 200.0
+      },
+      "VERY_HIGH": {
+        "scenario_name": "Very High Storage",
+        "current_storage_mcm": 1056.0,
+        "storage_percent": 88.0,
+        "recent_inflow_cumecs": 780.0,
+        "recent_outflow_cumecs": 350.0
+      }
+    },
+    "catchment_available": false,
+    "catchment_geometry_source": null,
+    "notes": "Synthetic scenario values for SIH decision-support demonstration. Located outside current Eastern UP pilot coverage (Lat 24.42°N < 24.5°N).",
+    "updated_at": "2026-09-24T10:00:00Z"
+  },
+  {
+    "reservoir_id": "RES_MATATILA",
+    "name": "Matatila Dam & Reservoir",
+    "latitude": 25.10,
+    "longitude": 78.38,
+    "state": "Uttar Pradesh",
+    "district": "Lalitpur",
+    "river": "Betwa River",
+    "data_mode": "DEMO_SCENARIO",
+    "capacity_mcm": 1130.0,
+    "scenarios": {
+      "NORMAL": {
+        "scenario_name": "Normal Storage",
+        "current_storage_mcm": 655.4,
+        "storage_percent": 58.0,
+        "recent_inflow_cumecs": 110.0,
+        "recent_outflow_cumecs": 100.0
+      },
+      "HIGH": {
+        "scenario_name": "High Storage",
+        "current_storage_mcm": 904.0,
+        "storage_percent": 80.0,
+        "recent_inflow_cumecs": 390.0,
+        "recent_outflow_cumecs": 250.0
+      },
+      "VERY_HIGH": {
+        "scenario_name": "Very High Storage",
+        "current_storage_mcm": 1017.0,
+        "storage_percent": 90.0,
+        "recent_inflow_cumecs": 820.0,
+        "recent_outflow_cumecs": 400.0
+      }
+    },
+    "catchment_available": false,
+    "catchment_geometry_source": null,
+    "notes": "Synthetic scenario values for SIH decision-support demonstration. Located outside current Eastern UP pilot coverage (Lon 78.38°E < 80.0°E).",
+    "updated_at": "2026-09-24T10:00:00Z"
+  }
+]

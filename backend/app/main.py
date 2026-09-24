@@ -3,11 +3,14 @@ from contextlib import asynccontextmanager
 from fastapi import FastAPI, HTTPException, Query
 from fastapi.middleware.cors import CORSMiddleware
 from backend.app.data_service import data_service
+from backend.app.reservoir_service import reservoir_service
+from backend.app.schemas import ReservoirScenarioRequest
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     base_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", ".."))
     data_service.load_data(base_dir)
+    reservoir_service.load_data(base_dir)
     yield
 
 app = FastAPI(
@@ -307,3 +310,60 @@ def get_passport(
     if passport is None:
         raise HTTPException(status_code=404, detail="Reliability passport data not found.")
     return passport
+
+# ============================================================
+# PHASE 9A — RESERVOIR DECISION SUPPORT ENDPOINTS
+# ============================================================
+
+@app.get("/api/reservoirs")
+def get_reservoirs():
+    return reservoir_service.get_reservoirs_summary()
+
+@app.get("/api/reservoirs/{reservoir_id}")
+def get_reservoir_detail(reservoir_id: str):
+    res = reservoir_service.get_reservoir_detail(reservoir_id)
+    if res is None:
+        raise HTTPException(status_code=404, detail=f"Reservoir '{reservoir_id}' not found.")
+    return res
+
+@app.get("/api/reservoirs/{reservoir_id}/forecast-context")
+def get_reservoir_forecast_context(
+    reservoir_id: str,
+    forecast_init: str = Query(...)
+):
+    ctx = reservoir_service.get_forecast_context(reservoir_id, forecast_init)
+    if ctx is None:
+        raise HTTPException(status_code=404, detail=f"Forecast context for reservoir '{reservoir_id}' not found.")
+    return ctx
+
+@app.get("/api/reservoirs/{reservoir_id}/decision-support")
+def get_reservoir_decision_support(
+    reservoir_id: str,
+    forecast_init: str = Query(...),
+    lead_day: int = Query(1, ge=1, le=10),
+    scenario: str = Query("NORMAL")
+):
+    ds = reservoir_service.get_decision_support(reservoir_id, forecast_init, lead_day, scenario)
+    if ds is None:
+        raise HTTPException(status_code=404, detail=f"Decision support for reservoir '{reservoir_id}' not found.")
+    return ds
+
+@app.post("/api/reservoirs/{reservoir_id}/scenario")
+def post_reservoir_scenario(
+    reservoir_id: str,
+    body: ReservoirScenarioRequest,
+    forecast_init: str = Query(...),
+    lead_day: int = Query(1, ge=1, le=10)
+):
+    res = reservoir_service.process_custom_scenario(
+        reservoir_id,
+        storage_percent=body.storage_percent,
+        recent_inflow_cumecs=body.recent_inflow_cumecs or 300.0,
+        scenario_name=body.scenario_name or "Custom What-If Scenario",
+        forecast_init=forecast_init,
+        lead_day=lead_day
+    )
+    if res is None:
+        raise HTTPException(status_code=404, detail=f"Reservoir '{reservoir_id}' not found.")
+    return res
+

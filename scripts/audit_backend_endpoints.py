@@ -3,7 +3,7 @@ import json
 import urllib.parse
 
 base = 'http://127.0.0.1:8000/api'
-print('=== AUDITING ALL FASTAPI ENDPOINTS ===')
+print('=== AUDITING ALL FASTAPI ENDPOINTS (INCLUDING PHASE 9A RESERVOIR ENDPOINTS) ===')
 
 def check_ep(url_path):
     url = f'{base}{url_path}'
@@ -21,6 +21,24 @@ def check_ep(url_path):
         print(f'[FAIL] {url_path} -> Error: {e}')
         return None
 
+def check_post(url_path, payload):
+    url = f'{base}{url_path}'
+    try:
+        data_bytes = json.dumps(payload).encode('utf-8')
+        req = urllib.request.Request(url, data=data_bytes, headers={'Content-Type': 'application/json'})
+        with urllib.request.urlopen(req) as resp:
+            status = resp.status
+            body = resp.read().decode('utf-8')
+            data = json.loads(body)
+            has_nan = 'NaN' in body
+            has_inf = 'Infinity' in body
+            print(f'[PASS] POST {url_path} -> HTTP {status} | Valid JSON | NaN: {has_nan} | Inf: {has_inf}')
+            return data
+    except Exception as e:
+        print(f'[FAIL] POST {url_path} -> Error: {e}')
+        return None
+
+# Core Endpoints (1-20)
 health = check_ep('/health')
 meta = check_ep('/metadata')
 regions_resp = check_ep('/regions')
@@ -57,3 +75,13 @@ check_ep(f'/self-audit?{q_grid}')
 check_ep(f'/trust-horizon?{q_point}')
 check_ep(f'/trust-horizon/{urllib.parse.quote(first_region)}?{urllib.parse.urlencode({"forecast_init": first_run})}')
 check_ep(f'/passport?{q_grid}')
+
+# Phase 9A Reservoir Endpoints (21-25)
+print('\n--- Phase 9A Reservoir Endpoints ---')
+res_list = check_ep('/reservoirs')
+res_id = res_list[0]['reservoir_id'] if res_list and isinstance(res_list, list) else 'RES_RIHAND'
+
+check_ep(f'/reservoirs/{res_id}')
+check_ep(f'/reservoirs/{res_id}/forecast-context?{urllib.parse.urlencode({"forecast_init": first_run})}')
+check_ep(f'/reservoirs/{res_id}/decision-support?{urllib.parse.urlencode({"forecast_init": first_run, "lead_day": 1, "scenario": "NORMAL"})}')
+check_post(f'/reservoirs/{res_id}/scenario?{urllib.parse.urlencode({"forecast_init": first_run, "lead_day": 1})}', {'storage_percent': 88.0, 'recent_inflow_cumecs': 1200.0, 'scenario_name': 'High Storage What-If'})

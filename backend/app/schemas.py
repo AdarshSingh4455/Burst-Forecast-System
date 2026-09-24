@@ -114,3 +114,104 @@ class PassportResponse(BaseModel):
     breaking_point_day: Optional[int] = None
     primary_vulnerability: str
     disclaimer: str
+
+class ReservoirSummary(BaseModel):
+    reservoir_id: str
+    name: str
+    latitude: float
+    longitude: float
+    state: str
+    district: str
+    river: str
+    data_mode: str
+    capacity_mcm: float
+    current_storage_mcm: float
+    storage_percent: float
+    recent_inflow_cumecs: float
+    recent_outflow_cumecs: float
+    coverage_available: bool = True
+    in_pilot_coverage: bool = True
+
+class ReservoirLeadContext(BaseModel):
+    lead_day: int
+    rainfall_mm: float
+    bust_probability: float
+    ffd: float
+    ffd_failure_found: bool
+    fragility_category: str
+    trust_index: float
+    reliability_band: str
+    self_audit_status: str
+    attention_status: Optional[str] = None
+
+class ReservoirForecastContextResponse(BaseModel):
+    reservoir_id: str
+    reservoir_name: str
+    forecast_init: str
+    data_mode: str
+    coverage_available: bool = True
+    in_pilot_coverage: bool = True
+    context_mode: str
+    reason: Optional[str] = None
+    forecast_context: Optional[Any] = None
+    lead_contexts: Optional[List[ReservoirLeadContext]] = None
+
+class ReservoirDecisionSupportResponse(BaseModel):
+    reservoir_id: str
+    reservoir_name: str
+    data_mode: str
+    forecast_init: str
+    lead_day: int
+    latitude: float
+    longitude: float
+    coverage_available: bool = True
+    in_pilot_coverage: bool = True
+    context_mode: str
+    
+    # Reservoir state
+    capacity_mcm: float
+    current_storage_mcm: float
+    storage_percent: float
+    recent_inflow_cumecs: float
+    scenario_name: str
+    
+    # Weather evidence (Suppressed if coverage_available is False)
+    forecast_context: Optional[Any] = None
+    decision_support: Optional[Any] = None
+    rainfall_mm: Optional[float] = None
+    bust_probability: Optional[float] = None
+    ffd: Optional[float] = None
+    ffd_failure_found: Optional[bool] = None
+    fragility_category: Optional[str] = None
+    ensemble_disagreement_category: Optional[str] = None
+    ood_category: Optional[str] = None
+    self_audit_status: Optional[str] = None
+    self_audit_reason: Optional[str] = None
+    trust_index: Optional[float] = None
+    reliability_band: Optional[str] = None
+    trust_horizon_day: Optional[int] = None
+    breaking_point_day: Optional[int] = None
+    
+    # Decision output (Suppressed if coverage_available is False)
+    attention_status: Optional[str] = None
+    reasons: List[str]
+    limitations: List[str]
+    disclaimer: str
+
+class ReservoirScenarioRequest(BaseModel):
+    scenario_name: Optional[str] = "Custom What-If Scenario"
+    storage_percent: float
+    recent_inflow_cumecs: Optional[float] = 300.0
+
+class ReservoirScenarioResponse(BaseModel):
+    reservoir_id: str
+    scenario_name: str
+    storage_percent: float
+    current_storage_mcm: float
+    recent_inflow_cumecs: float
+    coverage_available: bool = True
+    attention_status: Optional[str] = None
+    reasons: List[str]
+    data_mode: str
+
+

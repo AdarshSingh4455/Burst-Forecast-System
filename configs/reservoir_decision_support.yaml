@@ -1,0 +1,29 @@
+# FORTRESS Phase 9A — Reservoir Decision Support Heuristic Configuration
+# WARNING: These parameters represent PROTOTYPE DECISION-SUPPORT HEURISTICS for SIH26079 demonstration.
+# They are NOT official dam safety or operational release thresholds.
+
+storage:
+  heightened_monitoring_percent: 75.0
+  operator_review_percent: 85.0
+
+rainfall:
+  moderate_mm: 15.0
+  high_mm: 35.0
+
+inflow:
+  elevated_cumecs: 500.0
+
+trust:
+  low_trust_index: 50.0
+  moderate_trust_index: 70.0
+
+bust:
+  elevated_probability: 0.40
+  high_probability: 0.60
+
+spatial:
+  pilot_min_lat: 24.5
+  pilot_max_lat: 28.5
+  pilot_min_lon: 80.0
+  pilot_max_lon: 84.5
+  max_snap_dist_deg: 0.75

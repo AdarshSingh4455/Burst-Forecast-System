@@ -293,7 +293,13 @@ export const App: React.FC = () => {
       case 'disaster':
       case 'grid':
       case 'decision_support':
-        return <DecisionSupportView />;
+        return (
+          <DecisionSupportView
+            selectedRun={selectedRun}
+            selectedLead={selectedLead}
+            onOpenAssistant={() => setIsAiOpen(true)}
+          />
+        );
       case 'ai_assistant':
         return <AIAssistantView pointDetail={selectedPointDetail} />;
       case 'settings':

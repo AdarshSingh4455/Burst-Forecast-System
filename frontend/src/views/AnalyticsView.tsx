@@ -1,8 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import { fetchRegionalTrend } from '../lib/api';
 import { RegionalTrendItem, GridPointMap } from '../types';
-import { BarChart3, TrendingUp, Layers, CheckCircle2 } from 'lucide-react';
-import { ResponsiveContainer, LineChart, Line, XAxis, YAxis, Tooltip, CartesianGrid } from 'recharts';
+import { BarChart3, TrendingUp, Layers } from 'lucide-react';
+import { ResponsiveContainer, LineChart, Line, XAxis, YAxis, Tooltip, CartesianGrid, Legend } from 'recharts';
 
 interface AnalyticsViewProps {
   selectedRun: string;
@@ -13,7 +13,7 @@ interface AnalyticsViewProps {
 
 export const AnalyticsView: React.FC<AnalyticsViewProps> = ({ selectedRun, selectedRegion = 'ALL' }) => {
   const [regionalTrend, setRegionalTrend] = useState<RegionalTrendItem[]>([]);
-  const [activeMetric, setActiveMetric] = useState<'bust' | 'rain' | 'ffd' | 'trust'>('bust');
+  const [activeMetric, setActiveMetric] = useState<'all' | 'bust' | 'rain' | 'ffd' | 'trust'>('all');
 
   useEffect(() => {
     fetchRegionalTrend(selectedRun, selectedRegion).then(res => setRegionalTrend(res)).catch(() => {});
@@ -75,14 +75,20 @@ export const AnalyticsView: React.FC<AnalyticsViewProps> = ({ selectedRun, selec
         </div>
       </div>
 
-      {/* Switchable Metric Chart */}
+      {/* Multi-Line Degradation Chart (All Lines Show By Default) */}
       <div className="bg-white border border-[#C8EAD9] p-4 rounded-xl shadow-xs space-y-3">
         <div className="flex items-center justify-between border-b border-[#C8EAD9] pb-2">
           <h3 className="font-extrabold text-[#044E3A] text-sm flex items-center gap-2">
             <TrendingUp className="w-4 h-4 text-[#059669]" />
-            Lead-wise Forecast Metrics (D1–D10)
+            Lead-wise Forecast Degradation Trends (D1–D10)
           </h3>
           <div className="flex items-center gap-1.5 text-xs font-bold">
+            <button
+              onClick={() => setActiveMetric('all')}
+              className={`px-3 py-1 rounded-md transition-colors ${activeMetric === 'all' ? 'bg-[#059669] text-white font-extrabold' : 'bg-[#EEF9F4] text-[#044E3A] border border-[#C8EAD9]'}`}
+            >
+              All Metrics
+            </button>
             <button
               onClick={() => setActiveMetric('bust')}
               className={`px-3 py-1 rounded-md transition-colors ${activeMetric === 'bust' ? 'bg-[#059669] text-white font-extrabold' : 'bg-[#EEF9F4] text-[#044E3A] border border-[#C8EAD9]'}`}
@@ -110,17 +116,27 @@ export const AnalyticsView: React.FC<AnalyticsViewProps> = ({ selectedRun, selec
           </div>
         </div>
 
-        <div className="h-64 w-full">
+        <div className="h-72 w-full">
           <ResponsiveContainer width="100%" height="100%">
             <LineChart data={chartData} margin={{ top: 10, right: 10, left: -10, bottom: 0 }}>
               <CartesianGrid strokeDasharray="3 3" stroke="#E2E8F0" />
               <XAxis dataKey="name" stroke="#047857" tick={{ fontSize: 11 }} />
               <YAxis stroke="#047857" tick={{ fontSize: 11 }} />
               <Tooltip contentStyle={{ backgroundColor: '#044E3A', color: '#fff', borderRadius: '8px', fontSize: '11px' }} />
-              {activeMetric === 'bust' && <Line type="monotone" dataKey="Bust Risk (%)" stroke="#EF4444" strokeWidth={2.5} dot={{ r: 4 }} />}
-              {activeMetric === 'rain' && <Line type="monotone" dataKey="Rainfall (mm)" stroke="#059669" strokeWidth={2.5} dot={{ r: 4 }} />}
-              {activeMetric === 'ffd' && <Line type="monotone" dataKey="FFD" stroke="#F59E0B" strokeWidth={2.5} dot={{ r: 4 }} />}
-              {activeMetric === 'trust' && <Line type="monotone" dataKey="Trust Index" stroke="#0284C7" strokeWidth={2.5} dot={{ r: 4 }} />}
+              <Legend wrapperStyle={{ fontSize: '11px', paddingTop: '8px' }} />
+
+              {(activeMetric === 'all' || activeMetric === 'bust') && (
+                <Line type="monotone" dataKey="Bust Risk (%)" stroke="#EF4444" strokeWidth={2.5} dot={{ r: 4 }} />
+              )}
+              {(activeMetric === 'all' || activeMetric === 'rain') && (
+                <Line type="monotone" dataKey="Rainfall (mm)" stroke="#059669" strokeWidth={2.5} dot={{ r: 4 }} />
+              )}
+              {(activeMetric === 'all' || activeMetric === 'ffd') && (
+                <Line type="monotone" dataKey="FFD" stroke="#F59E0B" strokeWidth={2.5} dot={{ r: 4 }} />
+              )}
+              {(activeMetric === 'all' || activeMetric === 'trust') && (
+                <Line type="monotone" dataKey="Trust Index" stroke="#0284C7" strokeWidth={2.5} dot={{ r: 4 }} />
+              )}
             </LineChart>
           </ResponsiveContainer>
         </div>

@@ -3,7 +3,7 @@ import json
 import urllib.parse
 
 base = 'http://127.0.0.1:8000/api'
-print('=== AUDITING ALL FASTAPI ENDPOINTS (INCLUDING PHASE 9A RESERVOIR & PHASE 9B AGRICULTURE ENDPOINTS) ===')
+print('=== AUDITING ALL FASTAPI ENDPOINTS (INCLUDING PHASE 9A, 9B, AND 9C ENDPOINTS) ===')
 
 def check_ep(url_path):
     url = f'{base}{url_path}'
@@ -95,3 +95,13 @@ check_ep(f'/agriculture/{agri_id}')
 check_ep(f'/agriculture/{agri_id}/forecast-context?{urllib.parse.urlencode({"forecast_init": first_run})}')
 check_ep(f'/agriculture/{agri_id}/decision-support?{urllib.parse.urlencode({"forecast_init": first_run, "lead_day": 1})}')
 check_post(f'/agriculture/{agri_id}/scenario?{urllib.parse.urlencode({"forecast_init": first_run, "lead_day": 1})}', {'crop': 'Wheat', 'crop_stage': 'SOWING', 'field_operation': 'SOWING_WINDOW', 'soil_moisture_percent': 25.0, 'scenario_name': 'Rabi Sowing What-If'})
+
+# Phase 9C Disaster Endpoints (31-35)
+print('\n--- Phase 9C Disaster Management Endpoints ---')
+disaster_list = check_ep('/disaster')
+disaster_id = disaster_list[0]['scenario_id'] if disaster_list and isinstance(disaster_list, list) else 'DISASTER_EUP_01'
+
+check_ep(f'/disaster/{disaster_id}')
+check_ep(f'/disaster/{disaster_id}/forecast-context?{urllib.parse.urlencode({"forecast_init": first_run})}')
+check_ep(f'/disaster/{disaster_id}/decision-support?{urllib.parse.urlencode({"forecast_init": first_run, "lead_day": 1})}')
+check_post(f'/disaster/{disaster_id}/scenario?{urllib.parse.urlencode({"forecast_init": first_run, "lead_day": 1})}', {'hazard_context': 'FLOOD_PREPAREDNESS', 'preparedness_mode': 'RESOURCE_REVIEW', 'vulnerability_level': 'HIGH', 'exposure_level': 'HIGH', 'rainfall_mm_override': 65.0, 'scenario_name': 'Heavy Rain What-If'})

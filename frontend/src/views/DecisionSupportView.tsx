@@ -13,7 +13,11 @@ import {
   fetchAgricultureScenarios,
   fetchAgricultureForecastContext,
   fetchAgricultureDecisionSupport,
-  postAgricultureScenario
+  postAgricultureScenario,
+  fetchDisasterScenarios,
+  fetchDisasterForecastContext,
+  fetchDisasterDecisionSupport,
+  postDisasterScenario
 } from '../lib/api';
 import { 
   ReservoirSummary, 
@@ -23,7 +27,11 @@ import {
   AgricultureSummary,
   AgricultureForecastContextResponse,
   AgricultureDecisionSupportResponse,
-  AgricultureScenarioResponse
+  AgricultureScenarioResponse,
+  DisasterSummary,
+  DisasterForecastContextResponse,
+  DisasterDecisionSupportResponse,
+  DisasterScenarioResponse
 } from '../types';
 
 interface DecisionSupportViewProps {
@@ -67,6 +75,19 @@ export const DecisionSupportView: React.FC<DecisionSupportViewProps> = ({
   const [agriForecastContext, setAgriForecastContext] = useState<AgricultureForecastContextResponse | null>(null);
   const [whatIfAgriResult, setWhatIfAgriResult] = useState<AgricultureScenarioResponse | null>(null);
 
+  // State for Disaster Management Decision Support (Phase 9C)
+  const [disasterScenarios, setDisasterScenarios] = useState<DisasterSummary[]>([]);
+  const [selectedDisasterId, setSelectedDisasterId] = useState<string>('DISASTER_EUP_01');
+  const [disasterHazard, setDisasterHazard] = useState<string>('FLOOD_PREPAREDNESS');
+  const [disasterMode, setDisasterMode] = useState<string>('RESOURCE_REVIEW');
+  const [disasterVuln, setDisasterVuln] = useState<string>('HIGH');
+  const [disasterExp, setDisasterExp] = useState<string>('HIGH');
+  const [whatIfDisasterRainOverride, setWhatIfDisasterRainOverride] = useState<number | undefined>(undefined);
+  const [whatIfDisasterWindOverride, setWhatIfDisasterWindOverride] = useState<number | undefined>(undefined);
+  const [disasterDecisionSupport, setDisasterDecisionSupport] = useState<DisasterDecisionSupportResponse | null>(null);
+  const [disasterForecastContext, setDisasterForecastContext] = useState<DisasterForecastContextResponse | null>(null);
+  const [whatIfDisasterResult, setWhatIfDisasterResult] = useState<DisasterScenarioResponse | null>(null);
+
   // Global UI states
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
@@ -80,13 +101,15 @@ export const DecisionSupportView: React.FC<DecisionSupportViewProps> = ({
     async function initData() {
       try {
         setLoading(true);
-        const [resList, agriList, runs] = await Promise.all([
+        const [resList, agriList, disList, runs] = await Promise.all([
           fetchReservoirs(),
           fetchAgricultureScenarios(),
+          fetchDisasterScenarios(),
           fetchForecastRuns()
         ]);
         setReservoirs(resList);
         setAgricultureScenarios(agriList);
+        setDisasterScenarios(disList);
         setForecastRuns(runs);
 
         if (resList.length > 0) {
@@ -100,6 +123,14 @@ export const DecisionSupportView: React.FC<DecisionSupportViewProps> = ({
           setAgriStage(agriList[0].crop_stage);
           setAgriOperation(agriList[0].field_operation);
           setAgriSoilMoisture(agriList[0].soil_moisture_percent);
+        }
+
+        if (disList.length > 0) {
+          setSelectedDisasterId(disList[0].scenario_id);
+          setDisasterHazard(disList[0].hazard_context);
+          setDisasterMode(disList[0].preparedness_mode);
+          setDisasterVuln(disList[0].vulnerability_level);
+          setDisasterExp(disList[0].exposure_level);
         }
 
         if (runs.length > 0) {
@@ -174,6 +205,36 @@ export const DecisionSupportView: React.FC<DecisionSupportViewProps> = ({
     loadAgriData();
   }, [activeSector, selectedAgriId, forecastInit, leadDay]);
 
+  // Fetch Disaster Data
+  useEffect(() => {
+    if (activeSector !== 'disaster' || !selectedDisasterId || !forecastInit) return;
+
+    async function loadDisasterData() {
+      try {
+        setLoading(true);
+        setError(null);
+        const [dsData, ctxData] = await Promise.all([
+          fetchDisasterDecisionSupport(selectedDisasterId, forecastInit, leadDay),
+          fetchDisasterForecastContext(selectedDisasterId, forecastInit)
+        ]);
+        setDisasterDecisionSupport(dsData);
+        setDisasterForecastContext(ctxData);
+        setDisasterHazard(dsData.hazard_context);
+        setDisasterMode(dsData.preparedness_mode);
+        setDisasterVuln(dsData.vulnerability_level);
+        setDisasterExp(dsData.exposure_level);
+        setWhatIfDisasterRainOverride(undefined);
+        setWhatIfDisasterWindOverride(undefined);
+        setWhatIfDisasterResult(null);
+      } catch (err: any) {
+        setError(err.message || 'Failed to load disaster decision support data.');
+      } finally {
+        setLoading(false);
+      }
+    }
+    loadDisasterData();
+  }, [activeSector, selectedDisasterId, forecastInit, leadDay]);
+
   // Dam What-If Simulation
   const handleRunDamWhatIf = async () => {
     if (!selectedReservoirId || !forecastInit) return;
@@ -240,8 +301,46 @@ export const DecisionSupportView: React.FC<DecisionSupportViewProps> = ({
     setWhatIfAgriResult(null);
   };
 
+  // Disaster What-If Simulation
+  const handleRunDisasterWhatIf = async () => {
+    if (!selectedDisasterId || !forecastInit) return;
+    try {
+      setSimulating(true);
+      const res = await postDisasterScenario(
+        selectedDisasterId,
+        forecastInit,
+        leadDay,
+        disasterHazard,
+        disasterMode,
+        disasterVuln,
+        disasterExp,
+        whatIfDisasterRainOverride,
+        whatIfDisasterWindOverride,
+        `What-If ${disasterHazard} (${disasterMode}) (DEMO WHAT-IF OVERRIDE)`
+      );
+      setWhatIfDisasterResult(res);
+    } catch (err: any) {
+      alert(`Simulation error: ${err.message}`);
+    } finally {
+      setSimulating(false);
+    }
+  };
+
+  const handleResetDisasterWhatIf = () => {
+    if (disasterDecisionSupport) {
+      setDisasterHazard(disasterDecisionSupport.hazard_context);
+      setDisasterMode(disasterDecisionSupport.preparedness_mode);
+      setDisasterVuln(disasterDecisionSupport.vulnerability_level);
+      setDisasterExp(disasterDecisionSupport.exposure_level);
+      setWhatIfDisasterRainOverride(undefined);
+      setWhatIfDisasterWindOverride(undefined);
+    }
+    setWhatIfDisasterResult(null);
+  };
+
   const activeReservoir = reservoirs.find(r => r.reservoir_id === selectedReservoirId);
   const activeAgri = agricultureScenarios.find(a => a.agri_id === selectedAgriId);
+  const activeDisaster = disasterScenarios.find(d => d.scenario_id === selectedDisasterId);
 
   // Status Badge Helper
   const renderStatusBadge = (status: string | null | undefined) => {
@@ -263,6 +362,7 @@ export const DecisionSupportView: React.FC<DecisionSupportViewProps> = ({
         );
       case 'HEIGHTENED_MONITORING':
       case 'FARM_ADVISORY_REVIEW':
+      case 'PREPAREDNESS_REVIEW':
         return (
           <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-extrabold bg-amber-100 text-amber-900 border border-amber-300">
             <AlertCircle className="w-3.5 h-3.5 text-amber-600" />
@@ -271,6 +371,7 @@ export const DecisionSupportView: React.FC<DecisionSupportViewProps> = ({
         );
       case 'OPERATOR_REVIEW_ADVISED':
       case 'WEATHER_SENSITIVE_WINDOW':
+      case 'HEIGHTENED_PREPAREDNESS':
         return (
           <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-extrabold bg-rose-100 text-rose-900 border border-rose-300">
             <AlertTriangle className="w-3.5 h-3.5 text-rose-600" />
@@ -296,21 +397,39 @@ export const DecisionSupportView: React.FC<DecisionSupportViewProps> = ({
         <div>
           <div className="flex items-center gap-2">
             <span className="text-[10px] font-extrabold text-[#059669] uppercase tracking-wider">
-              {activeSector === 'dam' ? 'FORTRESS PHASE 9A — RESERVOIR DECISION SUPPORT' : 'FORTRESS PHASE 9B — AGRICULTURE DECISION SUPPORT'}
+              {activeSector === 'dam' 
+                ? 'FORTRESS PHASE 9A — RESERVOIR DECISION SUPPORT' 
+                : activeSector === 'agri' 
+                ? 'FORTRESS PHASE 9B — AGRICULTURE DECISION SUPPORT' 
+                : activeSector === 'disaster' 
+                ? 'FORTRESS PHASE 9C — DISASTER MANAGEMENT DECISION SUPPORT' 
+                : 'FORTRESS PHASE 9D — RENEWABLE GRID DECISION SUPPORT'}
             </span>
             <span className="bg-emerald-100 border border-emerald-300 text-emerald-800 text-[10px] font-bold px-2 py-0.5 rounded-full flex items-center gap-1">
               <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
-              {activeSector === 'dam' ? 'DEMO SCENARIO DATA' : 'DEMO AGRICULTURE SCENARIO'}
+              {activeSector === 'dam' ? 'DEMO SCENARIO DATA' : activeSector === 'agri' ? 'DEMO AGRICULTURE SCENARIO' : activeSector === 'disaster' ? 'DEMO DISASTER SCENARIO' : 'PLANNED SHELL'}
             </span>
           </div>
           <h1 className="text-xl font-extrabold text-[#044E3A] mt-0.5 tracking-tight flex items-center gap-2">
-            {activeSector === 'dam' ? <Waves className="w-6 h-6 text-[#059669]" /> : <Sprout className="w-6 h-6 text-[#059669]" />}
-            <span>{activeSector === 'dam' ? 'Reservoir & Dam Decision Support System' : 'Agriculture Decision Support System'}</span>
+            {activeSector === 'dam' ? <Waves className="w-6 h-6 text-[#059669]" /> : activeSector === 'agri' ? <Sprout className="w-6 h-6 text-[#059669]" /> : activeSector === 'disaster' ? <AlertTriangle className="w-6 h-6 text-[#059669]" /> : <Zap className="w-6 h-6 text-[#059669]" />}
+            <span>
+              {activeSector === 'dam' 
+                ? 'Reservoir & Dam Decision Support System' 
+                : activeSector === 'agri' 
+                ? 'Agriculture Decision Support System' 
+                : activeSector === 'disaster' 
+                ? 'Disaster Management Decision Support System' 
+                : 'Renewable Grid Decision Support System'}
+            </span>
           </h1>
           <p className="text-xs text-[#065F46] mt-0.5 font-medium">
             {activeSector === 'dam' 
               ? 'Hydrometeorological reliability context translation for dam safety monitoring and flood risk mitigation.'
-              : 'Forecast reliability context for crop-stage and field-operation planning.'}
+              : activeSector === 'agri'
+              ? 'Forecast reliability context for crop-stage and field-operation planning.'
+              : activeSector === 'disaster'
+              ? 'Forecast reliability context for weather-driven preparedness and expert review.'
+              : 'Renewable energy dispatch and grid stability context.'}
           </p>
         </div>
 
@@ -351,7 +470,7 @@ export const DecisionSupportView: React.FC<DecisionSupportViewProps> = ({
           }`}
         >
           <AlertTriangle className="w-4 h-4" />
-          <span>Disaster Management (Phase 9 Shell)</span>
+          <span>Disaster Management (Phase 9C Active)</span>
         </button>
         <button
           onClick={() => setActiveSector('grid')}
@@ -365,18 +484,13 @@ export const DecisionSupportView: React.FC<DecisionSupportViewProps> = ({
       </div>
 
       {/* Main Content Area */}
-      {activeSector === 'disaster' || activeSector === 'grid' ? (
-        /* Disaster / Renewable Shells */
+      {activeSector === 'grid' ? (
+        /* Renewable Grid Shell (Phase 9D) */
         <div className="bg-white border border-[#C8EAD9] rounded-b-xl p-6 shadow-xs space-y-4">
           <div className="flex items-center justify-between border-b border-[#C8EAD9] pb-3">
             <h3 className="font-extrabold text-[#044E3A] text-base capitalize flex items-center gap-2">
-              {activeSector === 'disaster' && <AlertTriangle className="w-5 h-5 text-rose-600" />}
-              {activeSector === 'grid' && <Zap className="w-5 h-5 text-amber-600" />}
-              <span>
-                {activeSector === 'disaster'
-                  ? 'Disaster Mitigation & Flood Evacuation Readiness'
-                  : 'Renewable Energy Grid Dispatch & Backup Allocation'}
-              </span>
+              <Zap className="w-5 h-5 text-amber-600" />
+              <span>Renewable Energy Grid Dispatch & Backup Allocation</span>
             </h3>
             <span className="text-xs bg-amber-100 text-amber-900 font-extrabold px-2.5 py-1 rounded-md border border-amber-200">
               Planned Phase 9 module — not implemented in current build.
@@ -389,9 +503,657 @@ export const DecisionSupportView: React.FC<DecisionSupportViewProps> = ({
               <span>Planned Phase 9 module — not implemented in current build.</span>
             </p>
             <p className="text-amber-800 leading-relaxed">
-              The decision support engine for <strong>{activeSector === 'disaster' ? 'Disaster Mitigation' : 'Renewable Grid'}</strong> is scheduled for future Phase 9 extensions. No fake metrics or automated recommendations are generated.
+              The decision support engine for <strong>Renewable Grid</strong> is scheduled for future Phase 9 extensions. No fake metrics or automated recommendations are generated.
             </p>
           </div>
+        </div>
+      ) : activeSector === 'disaster' ? (
+        /* PHASE 9C — DISASTER MANAGEMENT DECISION SUPPORT VIEW */
+        <div className="space-y-4">
+          {loading ? (
+            <div className="bg-white border border-[#C8EAD9] rounded-xl p-8 text-center text-xs font-bold text-[#044E3A]">
+              Loading Phase 9C Disaster Management Decision Support Data...
+            </div>
+          ) : error ? (
+            <div className="bg-rose-50 border border-rose-200 text-rose-800 rounded-xl p-6 text-xs font-bold">
+              Error loading disaster decision support: {error}
+            </div>
+          ) : disasterDecisionSupport ? (
+            <div className="space-y-4">
+              {/* Controls Bar */}
+              <div className="bg-white border border-[#C8EAD9] rounded-xl p-4 shadow-xs space-y-3">
+                <div className="grid grid-cols-1 md:grid-cols-6 gap-3 text-xs font-bold text-[#044E3A]">
+                  {/* Scenario Selector */}
+                  <div className="col-span-2">
+                    <label className="block mb-1">Preparedness Scenario</label>
+                    <select
+                      value={selectedDisasterId}
+                      onChange={(e) => setSelectedDisasterId(e.target.value)}
+                      className="w-full bg-[#F4FAF6] border border-[#C8EAD9] p-2 rounded-lg text-xs font-extrabold text-[#033A2B]"
+                    >
+                      {disasterScenarios.map((d) => (
+                        <option key={d.scenario_id} value={d.scenario_id}>
+                          {d.name} {!d.in_pilot_coverage ? '(Outside Pilot)' : '(Inside Pilot)'}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+
+                  {/* Hazard Context */}
+                  <div>
+                    <label className="block mb-1">Hazard Context</label>
+                    <select
+                      value={disasterHazard}
+                      onChange={(e) => setDisasterHazard(e.target.value)}
+                      className="w-full bg-[#F4FAF6] border border-[#C8EAD9] p-2 rounded-lg text-xs font-bold text-[#033A2B]"
+                    >
+                      <option value="FLOOD_PREPAREDNESS">Flood Preparedness</option>
+                      <option value="HEAVY_RAINFALL">Heavy Rainfall</option>
+                      <option value="STRONG_WIND">Strong Wind</option>
+                      <option value="MULTI_HAZARD_WEATHER">Multi-Hazard Weather</option>
+                      <option value="GENERAL_MONITORING">General Monitoring</option>
+                    </select>
+                  </div>
+
+                  {/* Preparedness Mode */}
+                  <div>
+                    <label className="block mb-1">Preparedness Mode</label>
+                    <select
+                      value={disasterMode}
+                      onChange={(e) => setDisasterMode(e.target.value)}
+                      className="w-full bg-[#F4FAF6] border border-[#C8EAD9] p-2 rounded-lg text-xs font-bold text-[#033A2B]"
+                    >
+                      <option value="GENERAL_MONITORING">General Monitoring</option>
+                      <option value="FIELD_TEAM_READINESS">Field Team Readiness</option>
+                      <option value="RESOURCE_REVIEW">Resource Review</option>
+                      <option value="CRITICAL_ASSET_MONITORING">Critical Asset Monitoring</option>
+                      <option value="EMERGENCY_COORDINATION_REVIEW">Emergency Coordination Review</option>
+                    </select>
+                  </div>
+
+                  {/* Forecast Init Run */}
+                  <div>
+                    <label className="block mb-1">Forecast Initialization</label>
+                    <select
+                      value={forecastInit}
+                      onChange={(e) => setForecastInit(e.target.value)}
+                      className="w-full bg-[#F4FAF6] border border-[#C8EAD9] p-2 rounded-lg text-xs font-bold text-[#033A2B]"
+                    >
+                      {forecastRuns.map((run) => (
+                        <option key={run} value={run}>
+                          {run}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+
+                  {/* Lead Day Selector */}
+                  <div>
+                    <label className="block mb-1">Lead Horizon (D1–D10)</label>
+                    <select
+                      value={leadDay}
+                      onChange={(e) => setLeadDay(parseInt(e.target.value))}
+                      className="w-full bg-[#F4FAF6] border border-[#C8EAD9] p-2 rounded-lg text-xs font-bold text-[#033A2B]"
+                    >
+                      {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((d) => (
+                        <option key={d} value={d}>
+                          Lead D{d}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                </div>
+
+                {/* Lead Horizon Quick Chips */}
+                <div className="flex flex-wrap items-center gap-1.5 pt-1 border-t border-[#C8EAD9]">
+                  <span className="text-[11px] font-bold text-[#065F46] mr-2">Quick Horizon:</span>
+                  {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((d) => (
+                    <button
+                      key={d}
+                      onClick={() => setLeadDay(d)}
+                      className={`px-2.5 py-1 rounded-md text-xs font-extrabold transition-all ${
+                        leadDay === d
+                          ? 'bg-[#059669] text-white shadow-xs'
+                          : 'bg-[#F4FAF6] text-[#044E3A] border border-[#C8EAD9] hover:bg-[#EEF9F4]'
+                      }`}
+                    >
+                      D{d}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {/* DEMO SCENARIO WARNING BANNER */}
+              <div className="bg-[#F4FAF6] border-2 border-[#059669]/40 rounded-xl p-3 shadow-xs flex items-center justify-between gap-3 text-xs">
+                <div className="flex items-center gap-2 font-bold text-[#044E3A]">
+                  <span className="px-2 py-0.5 rounded bg-[#059669] text-white text-[10px] font-black uppercase">
+                    DEMO DISASTER SCENARIO
+                  </span>
+                  <span>{disasterDecisionSupport.scenario_name} — {disasterDecisionSupport.data_mode}</span>
+                </div>
+                <div className="text-[11px] font-semibold text-[#065F46]">
+                  Vulnerability: <span className="font-extrabold">{disasterDecisionSupport.vulnerability_level} (DEMO)</span> | Exposure: <span className="font-extrabold">{disasterDecisionSupport.exposure_level} (DEMO)</span>
+                </div>
+              </div>
+
+              {/* Outside Pilot Warning Banner */}
+              {!disasterDecisionSupport.coverage_available && (
+                <div className="bg-amber-50 border-2 border-amber-400 p-4 rounded-xl text-xs text-amber-950 space-y-1 shadow-xs">
+                  <div className="font-extrabold text-amber-900 flex items-center gap-2 text-sm uppercase tracking-wider">
+                    <AlertTriangle className="w-5 h-5 text-amber-600 flex-shrink-0" />
+                    <span>OUTSIDE SCIENTIFIC PILOT COVERAGE</span>
+                  </div>
+                  <p className="text-amber-900 leading-relaxed font-semibold">
+                    {disasterDecisionSupport.reasons[0] || 'FORTRESS reliability analysis is unavailable outside the current Eastern UP pilot coverage.'}
+                  </p>
+                </div>
+              )}
+
+              {/* Top KPI Metric Cards */}
+              <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-3 text-xs">
+                <div className="bg-white border border-[#C8EAD9] p-3 rounded-xl shadow-xs">
+                  <span className="text-[10px] font-bold text-slate-500 block uppercase">Rainfall (GEFS)</span>
+                  <span className="text-lg font-extrabold text-[#044E3A]">
+                    {disasterDecisionSupport.coverage_available ? `${disasterDecisionSupport.rainfall_mm} mm` : 'N/A'}
+                  </span>
+                  <span className="text-[10px] text-[#065F46] block font-semibold">Ensemble Mean</span>
+                </div>
+
+                <div className="bg-white border border-[#C8EAD9] p-3 rounded-xl shadow-xs">
+                  <span className="text-[10px] font-bold text-slate-500 block uppercase">D1-D3 Accumulation</span>
+                  <span className="text-lg font-extrabold text-[#044E3A]">
+                    {disasterDecisionSupport.coverage_available ? `${disasterDecisionSupport.multi_day_rainfall_mm} mm` : 'N/A'}
+                  </span>
+                  <span className="text-[10px] text-[#065F46] block font-semibold">Forecast Series</span>
+                </div>
+
+                <div className="bg-white border border-[#C8EAD9] p-3 rounded-xl shadow-xs">
+                  <span className="text-[10px] font-bold text-slate-500 block uppercase">Wind Speed</span>
+                  <span className="text-lg font-extrabold text-[#044E3A]">
+                    {disasterDecisionSupport.coverage_available ? `${disasterDecisionSupport.wind_speed_ms} m/s` : 'N/A'}
+                  </span>
+                  <span className="text-[10px] text-[#065F46] block font-semibold">GEFS 10m Wind</span>
+                </div>
+
+                <div className="bg-white border border-[#C8EAD9] p-3 rounded-xl shadow-xs">
+                  <span className="text-[10px] font-bold text-slate-500 block uppercase">Bust Risk %</span>
+                  <span className={`text-lg font-extrabold ${
+                    (disasterDecisionSupport.bust_probability || 0) >= 0.4 ? 'text-rose-600' : 'text-[#044E3A]'
+                  }`}>
+                    {disasterDecisionSupport.coverage_available && disasterDecisionSupport.bust_probability != null ? `${(disasterDecisionSupport.bust_probability * 100).toFixed(1)}%` : 'N/A'}
+                  </span>
+                  <span className="text-[10px] text-[#065F46] block font-semibold">Baseline Model</span>
+                </div>
+
+                <div className="bg-white border border-[#C8EAD9] p-3 rounded-xl shadow-xs">
+                  <span className="text-[10px] font-bold text-slate-500 block uppercase">FFD Index</span>
+                  <span className="text-lg font-extrabold text-[#044E3A]">
+                    {disasterDecisionSupport.coverage_available && disasterDecisionSupport.ffd != null ? disasterDecisionSupport.ffd.toFixed(2) : 'N/A'}
+                  </span>
+                  <span className="text-[10px] text-[#065F46] block font-semibold">{disasterDecisionSupport.fragility_category || 'N/A'} Fragility</span>
+                </div>
+
+                <div className="bg-white border border-[#C8EAD9] p-3 rounded-xl shadow-xs">
+                  <span className="text-[10px] font-bold text-slate-500 block uppercase">Trust Index</span>
+                  <span className="text-lg font-extrabold text-[#044E3A]">
+                    {disasterDecisionSupport.coverage_available && disasterDecisionSupport.trust_index != null ? `${disasterDecisionSupport.trust_index.toFixed(1)}/100` : 'N/A'}
+                  </span>
+                  <span className="text-[10px] text-[#065F46] block font-semibold">{disasterDecisionSupport.reliability_band || 'N/A'} Band</span>
+                </div>
+
+                <div className="bg-white border border-[#C8EAD9] p-3 rounded-xl shadow-xs">
+                  <span className="text-[10px] font-bold text-slate-500 block uppercase">Vulnerability</span>
+                  <span className="text-lg font-extrabold text-amber-700">
+                    {disasterDecisionSupport.vulnerability_level}
+                  </span>
+                  <span className="text-[10px] text-slate-500 block font-bold">DEMO Level</span>
+                </div>
+
+                <div className="bg-white border border-[#C8EAD9] p-3 rounded-xl shadow-xs flex flex-col justify-between">
+                  <span className="text-[10px] font-bold text-slate-500 block uppercase">Attention Status</span>
+                  {renderStatusBadge(disasterDecisionSupport.attention_status)}
+                </div>
+              </div>
+
+              {/* Main 2-Column Section: Preparedness Context & Weather Reliability Context */}
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+                {/* Preparedness & Critical Asset Context Card */}
+                <div className="bg-white border border-[#C8EAD9] rounded-xl p-5 shadow-xs space-y-4">
+                  <h3 className="text-sm font-extrabold text-[#044E3A] border-b border-[#C8EAD9] pb-2 flex items-center gap-2">
+                    <ShieldAlert className="w-4 h-4 text-[#059669]" />
+                    <span>Disaster Preparedness & Critical Asset Context</span>
+                  </h3>
+
+                  <div className="grid grid-cols-2 gap-3 text-xs">
+                    <div className="bg-[#F4FAF6] p-2.5 rounded-lg border border-[#C8EAD9]">
+                      <span className="text-[10px] font-bold text-slate-500 block">Scenario Name</span>
+                      <span className="font-extrabold text-[#044E3A]">{disasterDecisionSupport.scenario_name}</span>
+                    </div>
+
+                    <div className="bg-[#F4FAF6] p-2.5 rounded-lg border border-[#C8EAD9]">
+                      <span className="text-[10px] font-bold text-slate-500 block">Hazard Context</span>
+                      <span className="font-extrabold text-[#044E3A]">{disasterDecisionSupport.hazard_context}</span>
+                    </div>
+
+                    <div className="bg-[#F4FAF6] p-2.5 rounded-lg border border-[#C8EAD9]">
+                      <span className="text-[10px] font-bold text-slate-500 block">Preparedness Mode</span>
+                      <span className="font-extrabold text-[#044E3A]">{disasterDecisionSupport.preparedness_mode}</span>
+                    </div>
+
+                    <div className="bg-[#F4FAF6] p-2.5 rounded-lg border border-[#C8EAD9]">
+                      <span className="text-[10px] font-bold text-slate-500 block">Population Exposure</span>
+                      <span className="font-extrabold text-[#044E3A]">
+                        {disasterDecisionSupport.population_exposure_value.toLocaleString()} ({disasterDecisionSupport.population_exposure_mode})
+                      </span>
+                    </div>
+                  </div>
+
+                  <div className="bg-[#F4FAF6] p-3 rounded-lg border border-[#C8EAD9] text-xs space-y-1">
+                    <span className="text-[10px] font-bold text-slate-500 block uppercase">Critical Infrastructure / Assets Context</span>
+                    <p className="font-extrabold text-[#044E3A]">{disasterDecisionSupport.critical_assets}</p>
+                  </div>
+                </div>
+
+                {/* Weather Forecast Reliability Card */}
+                <div className="bg-white border border-[#C8EAD9] rounded-xl p-5 shadow-xs space-y-4">
+                  <h3 className="text-sm font-extrabold text-[#044E3A] border-b border-[#C8EAD9] pb-2 flex items-center gap-2">
+                    <CheckCircle2 className="w-4 h-4 text-[#059669]" />
+                    <span>FORTRESS Weather Forecast Reliability Evidence</span>
+                  </h3>
+
+                  {disasterDecisionSupport.coverage_available ? (
+                    <div className="grid grid-cols-2 gap-3 text-xs">
+                      <div className="bg-[#F4FAF6] p-2.5 rounded-lg border border-[#C8EAD9]">
+                        <span className="text-[10px] font-bold text-slate-500 block">Self-Audit Status</span>
+                        <span className="font-extrabold text-[#044E3A]">{disasterDecisionSupport.self_audit_status || 'N/A'}</span>
+                      </div>
+
+                      <div className="bg-[#F4FAF6] p-2.5 rounded-lg border border-[#C8EAD9]">
+                        <span className="text-[10px] font-bold text-slate-500 block">Reliability Band</span>
+                        <span className={`font-extrabold ${
+                          disasterDecisionSupport.reliability_band === 'GREEN' ? 'text-emerald-700' :
+                          disasterDecisionSupport.reliability_band === 'YELLOW' ? 'text-amber-700' :
+                          'text-rose-700'
+                        }`}>
+                          {disasterDecisionSupport.reliability_band || 'N/A'}
+                        </span>
+                      </div>
+
+                      <div className="bg-[#F4FAF6] p-2.5 rounded-lg border border-[#C8EAD9]">
+                        <span className="text-[10px] font-bold text-slate-500 block">Trust Horizon</span>
+                        <span className="font-extrabold text-[#044E3A]">
+                          Forecast reliability stronger through ~D{disasterDecisionSupport.trust_horizon_day || 5}
+                        </span>
+                      </div>
+
+                      <div className="bg-[#F4FAF6] p-2.5 rounded-lg border border-[#C8EAD9]">
+                        <span className="text-[10px] font-bold text-slate-500 block">OOD Novelty Category</span>
+                        <span className="font-extrabold text-[#044E3A]">{disasterDecisionSupport.ood_category || 'NORMAL'}</span>
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="bg-slate-50 p-4 rounded-lg text-xs font-semibold text-slate-700">
+                      Scientific forecast reliability context suppressed for outside-pilot location.
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              {/* Attention Status & WHY THIS STATUS Card */}
+              <div className="bg-white border-2 border-[#C8EAD9] rounded-xl p-5 shadow-xs space-y-3">
+                <div className="flex items-center justify-between border-b border-[#C8EAD9] pb-3">
+                  <div>
+                    <span className="text-[10px] font-extrabold text-[#059669] uppercase tracking-wider block">DISASTER ATTENTION STATUS</span>
+                    <div className="mt-1">{renderStatusBadge(disasterDecisionSupport.attention_status)}</div>
+                  </div>
+                  {onOpenAssistant && (
+                    <button
+                      onClick={() => onOpenAssistant(`Explain disaster decision support for ${disasterDecisionSupport.scenario_name} (Status: ${disasterDecisionSupport.attention_status})`)}
+                      className="bg-[#059669] hover:bg-[#044E3A] text-white text-xs font-extrabold px-3 py-1.5 rounded-lg transition-colors flex items-center gap-1.5"
+                    >
+                      <HelpCircle className="w-3.5 h-3.5" />
+                      <span>Ask Explanation Assistant</span>
+                    </button>
+                  )}
+                </div>
+
+                <div className="space-y-2">
+                  <h4 className="text-xs font-extrabold text-[#044E3A] uppercase tracking-wider">WHY THIS STATUS? (SCIENTIFIC REASONING)</h4>
+                  <ul className="space-y-1.5 pl-1">
+                    {disasterDecisionSupport.reasons.map((r, idx) => (
+                      <li key={idx} className="text-xs text-[#065F46] font-medium flex items-start gap-2">
+                        <ArrowRight className="w-3.5 h-3.5 text-[#059669] flex-shrink-0 mt-0.5" />
+                        <span>{r}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              </div>
+
+              {/* D1-D10 Horizon Outlook Timeline Table */}
+              {disasterForecastContext && disasterForecastContext.lead_contexts && (
+                <div className="bg-white border border-[#C8EAD9] rounded-xl p-5 shadow-xs space-y-3">
+                  <h3 className="text-sm font-extrabold text-[#044E3A] flex items-center gap-2 border-b border-[#C8EAD9] pb-2">
+                    <FileText className="w-4 h-4 text-[#059669]" />
+                    <span>D1–D10 Lead Horizon Disaster Preparedness Timeline</span>
+                  </h3>
+
+                  <div className="overflow-x-auto">
+                    <table className="w-full text-left text-xs">
+                      <thead>
+                        <tr className="bg-[#F4FAF6] border-b border-[#C8EAD9] text-[#044E3A] font-extrabold">
+                          <th className="p-2.5">Lead</th>
+                          <th className="p-2.5">Rainfall</th>
+                          <th className="p-2.5">D1-D3 Accum.</th>
+                          <th className="p-2.5">Wind</th>
+                          <th className="p-2.5">Bust Risk</th>
+                          <th className="p-2.5">FFD</th>
+                          <th className="p-2.5">Trust Index</th>
+                          <th className="p-2.5">Reliability</th>
+                          <th className="p-2.5">Self-Audit</th>
+                          <th className="p-2.5">Preparedness Status</th>
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-[#C8EAD9]">
+                        {disasterForecastContext.lead_contexts.map((ctx) => (
+                          <tr
+                            key={ctx.lead_day}
+                            onClick={() => setLeadDay(ctx.lead_day)}
+                            className={`cursor-pointer transition-colors ${
+                              leadDay === ctx.lead_day ? 'bg-[#EEF9F4] font-extrabold' : 'hover:bg-[#F4FAF6]'
+                            }`}
+                          >
+                            <td className="p-2.5 text-[#044E3A]">D{ctx.lead_day}</td>
+                            <td className="p-2.5">{ctx.rainfall_mm} mm</td>
+                            <td className="p-2.5">{ctx.multi_day_rainfall_mm} mm</td>
+                            <td className="p-2.5">{ctx.wind_speed_ms} m/s</td>
+                            <td className="p-2.5">{(ctx.bust_probability * 100).toFixed(1)}%</td>
+                            <td className="p-2.5">{ctx.ffd}</td>
+                            <td className="p-2.5">{ctx.trust_index.toFixed(1)}</td>
+                            <td className="p-2.5">
+                              <span className={`px-2 py-0.5 rounded text-[10px] font-bold ${
+                                ctx.reliability_band === 'GREEN' ? 'bg-emerald-100 text-emerald-800' :
+                                ctx.reliability_band === 'YELLOW' ? 'bg-amber-100 text-amber-800' :
+                                'bg-rose-100 text-rose-800'
+                              }`}>
+                                {ctx.reliability_band}
+                              </span>
+                            </td>
+                            <td className="p-2.5 text-slate-700">{ctx.self_audit_status}</td>
+                            <td className="p-2.5">{renderStatusBadge(ctx.attention_status)}</td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              )}
+
+              {/* What-If Simulator & Map Grid */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {/* What-If Simulator */}
+                <div className="bg-white border border-[#C8EAD9] rounded-xl p-5 shadow-xs space-y-4">
+                  <div className="flex items-center justify-between border-b border-[#C8EAD9] pb-2">
+                    <h3 className="text-sm font-extrabold text-[#044E3A] flex items-center gap-2">
+                      <Sliders className="w-4 h-4 text-[#059669]" />
+                      <span>Disaster Preparedness What-If Simulator</span>
+                    </h3>
+                    <button
+                      onClick={handleResetDisasterWhatIf}
+                      className="text-[11px] text-[#059669] hover:underline flex items-center gap-1 font-bold"
+                    >
+                      <RefreshCw className="w-3 h-3" />
+                      <span>Reset</span>
+                    </button>
+                  </div>
+
+                  <div className="space-y-3 text-xs">
+                    <div className="grid grid-cols-2 gap-2">
+                      <div>
+                        <label className="block font-bold text-[#044E3A] mb-1">Simulated Hazard:</label>
+                        <select
+                          value={disasterHazard}
+                          onChange={(e) => setDisasterHazard(e.target.value)}
+                          className="w-full bg-[#F4FAF6] border border-[#C8EAD9] p-2 rounded-lg font-bold text-[#033A2B]"
+                        >
+                          <option value="FLOOD_PREPAREDNESS">Flood Preparedness</option>
+                          <option value="HEAVY_RAINFALL">Heavy Rainfall</option>
+                          <option value="STRONG_WIND">Strong Wind</option>
+                          <option value="MULTI_HAZARD_WEATHER">Multi-Hazard Weather</option>
+                          <option value="GENERAL_MONITORING">General Monitoring</option>
+                        </select>
+                      </div>
+
+                      <div>
+                        <label className="block font-bold text-[#044E3A] mb-1">Simulated Mode:</label>
+                        <select
+                          value={disasterMode}
+                          onChange={(e) => setDisasterMode(e.target.value)}
+                          className="w-full bg-[#F4FAF6] border border-[#C8EAD9] p-2 rounded-lg font-bold text-[#033A2B]"
+                        >
+                          <option value="GENERAL_MONITORING">General Monitoring</option>
+                          <option value="FIELD_TEAM_READINESS">Field Team Readiness</option>
+                          <option value="RESOURCE_REVIEW">Resource Review</option>
+                          <option value="CRITICAL_ASSET_MONITORING">Critical Asset Monitoring</option>
+                          <option value="EMERGENCY_COORDINATION_REVIEW">Emergency Coordination Review</option>
+                        </select>
+                      </div>
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-2">
+                      <div>
+                        <label className="block font-bold text-[#044E3A] mb-1">Vulnerability Level:</label>
+                        <select
+                          value={disasterVuln}
+                          onChange={(e) => setDisasterVuln(e.target.value)}
+                          className="w-full bg-[#F4FAF6] border border-[#C8EAD9] p-2 rounded-lg font-bold text-[#033A2B]"
+                        >
+                          <option value="LOW">LOW</option>
+                          <option value="MEDIUM">MEDIUM</option>
+                          <option value="HIGH">HIGH</option>
+                        </select>
+                      </div>
+
+                      <div>
+                        <label className="block font-bold text-[#044E3A] mb-1">Exposure Level:</label>
+                        <select
+                          value={disasterExp}
+                          onChange={(e) => setDisasterExp(e.target.value)}
+                          className="w-full bg-[#F4FAF6] border border-[#C8EAD9] p-2 rounded-lg font-bold text-[#033A2B]"
+                        >
+                          <option value="LOW">LOW</option>
+                          <option value="MEDIUM">MEDIUM</option>
+                          <option value="HIGH">HIGH</option>
+                        </select>
+                      </div>
+                    </div>
+
+                    <div className="bg-[#F4FAF6] border border-[#C8EAD9] p-2.5 rounded-lg space-y-2">
+                      <span className="text-[10px] font-extrabold text-[#059669] uppercase tracking-wider block">
+                        DEMO WEATHER WHAT-IF OVERRIDES (Optional)
+                      </span>
+                      <div className="grid grid-cols-2 gap-2">
+                        <div>
+                          <label className="block text-[11px] font-bold text-[#044E3A]">Rainfall Override (mm):</label>
+                          <input
+                            type="number"
+                            placeholder={`Actual: ${disasterDecisionSupport?.rainfall_mm ?? 0} mm`}
+                            value={whatIfDisasterRainOverride !== undefined ? whatIfDisasterRainOverride : ''}
+                            onChange={(e) => setWhatIfDisasterRainOverride(e.target.value !== '' ? parseFloat(e.target.value) : undefined)}
+                            className="w-full bg-white border border-[#C8EAD9] p-1.5 rounded font-bold text-[#033A2B] text-xs"
+                          />
+                        </div>
+                        <div>
+                          <label className="block text-[11px] font-bold text-[#044E3A]">Wind Override (m/s):</label>
+                          <input
+                            type="number"
+                            placeholder={`Actual: ${disasterDecisionSupport?.wind_speed_ms ?? 0} m/s`}
+                            value={whatIfDisasterWindOverride !== undefined ? whatIfDisasterWindOverride : ''}
+                            onChange={(e) => setWhatIfDisasterWindOverride(e.target.value !== '' ? parseFloat(e.target.value) : undefined)}
+                            className="w-full bg-white border border-[#C8EAD9] p-1.5 rounded font-bold text-[#033A2B] text-xs"
+                          />
+                        </div>
+                      </div>
+                      <p className="text-[10px] text-slate-500 italic">
+                        Actual GEFS / FORTRESS forecast values remain read-only. Synthetic overrides apply to What-If simulation only.
+                      </p>
+                    </div>
+
+                    <button
+                      onClick={handleRunDisasterWhatIf}
+                      disabled={simulating}
+                      className="w-full bg-[#059669] hover:bg-[#044E3A] text-white font-extrabold py-2.5 rounded-lg transition-colors shadow-xs flex items-center justify-center gap-2"
+                    >
+                      {simulating ? 'Simulating...' : 'Recalculate Disaster Scenario'}
+                    </button>
+
+                    {whatIfDisasterResult && (
+                      <div className="bg-[#F4FAF6] border-2 border-[#059669] p-4 rounded-xl space-y-2.5 mt-2">
+                        <div className="flex justify-between items-center border-b border-[#C8EAD9] pb-2">
+                          <div className="flex items-center gap-2">
+                            <span className="text-[10px] font-extrabold text-[#059669] uppercase">SIMULATION RESULT</span>
+                            <span className="px-1.5 py-0.5 rounded text-[10px] font-black bg-[#059669] text-white">DEMO / WHAT-IF</span>
+                          </div>
+                          {renderStatusBadge(whatIfDisasterResult.attention_status)}
+                        </div>
+
+                        <div className="grid grid-cols-2 gap-2 text-[11px] bg-white p-2 rounded border border-[#C8EAD9]">
+                          <div>
+                            <span className="text-[10px] font-bold text-slate-500 block">ACTUAL GEFS FORECAST</span>
+                            <span className="font-extrabold text-slate-800">Rainfall: {disasterDecisionSupport?.rainfall_mm ?? 0} mm</span>
+                            <span className="block text-[10px] text-slate-500">Wind: {disasterDecisionSupport?.wind_speed_ms ?? 0} m/s</span>
+                          </div>
+                          <div>
+                            <span className="text-[10px] font-bold text-[#059669] block">DEMO WHAT-IF OVERRIDE</span>
+                            <span className="font-extrabold text-[#044E3A]">
+                              Rainfall: {whatIfDisasterResult.rainfall_mm_override !== null && whatIfDisasterResult.rainfall_mm_override !== undefined ? `${whatIfDisasterResult.rainfall_mm_override} mm` : 'None (Used Actual)'}
+                            </span>
+                            <span className="block text-[10px] text-[#059669] font-bold">
+                              Vulnerability: {whatIfDisasterResult.vulnerability_level} (DEMO) | Exposure: {whatIfDisasterResult.exposure_level} (DEMO)
+                            </span>
+                          </div>
+                        </div>
+
+                        <p className="font-bold text-[#044E3A] text-xs">
+                          Simulated Hazard: {whatIfDisasterResult.hazard_context} — Mode: {whatIfDisasterResult.preparedness_mode}
+                        </p>
+
+                        <ul className="space-y-1">
+                          {whatIfDisasterResult.reasons.map((r, i) => (
+                            <li key={i} className="text-[11px] text-[#065F46] font-medium flex items-start gap-1.5">
+                              <ArrowRight className="w-3 h-3 text-[#059669] flex-shrink-0 mt-0.5" />
+                              <span>{r}</span>
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
+                    )}
+                  </div>
+                </div>
+
+                {/* Location Map */}
+                <div className="bg-white border border-[#C8EAD9] rounded-xl p-5 shadow-xs space-y-3">
+                  <h3 className="text-sm font-extrabold text-[#044E3A] border-b border-[#C8EAD9] pb-2 flex items-center gap-2">
+                    <MapPin className="w-4 h-4 text-[#059669]" />
+                    <span>Disaster Preparedness Spatial Context</span>
+                  </h3>
+
+                  {activeDisaster && (
+                    <div className="space-y-3">
+                      <div className="h-48 w-full rounded-xl overflow-hidden border border-[#C8EAD9]">
+                        <MapContainer
+                          center={[activeDisaster.latitude, activeDisaster.longitude]}
+                          zoom={8}
+                          scrollWheelZoom={false}
+                          style={{ height: '100%', width: '100%' }}
+                        >
+                          <TileLayer
+                            url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+                            attribution="&copy; OpenStreetMap"
+                          />
+                          <Rectangle
+                            bounds={pilotBounds}
+                            pathOptions={{ color: '#059669', weight: 2, fillOpacity: 0.05, dashArray: '4,4' }}
+                          />
+                          <CircleMarker
+                            center={[activeDisaster.latitude, activeDisaster.longitude]}
+                            radius={8}
+                            pathOptions={{ 
+                              color: activeDisaster.in_pilot_coverage ? '#15803d' : '#d97706', 
+                              fillColor: activeDisaster.in_pilot_coverage ? '#22c55e' : '#f59e0b', 
+                              fillOpacity: 0.9, 
+                              weight: 2 
+                            }}
+                          >
+                            <Tooltip permanent={false}>
+                              <div className="font-bold text-xs">
+                                {activeDisaster.name} {!activeDisaster.in_pilot_coverage ? '(Outside Pilot)' : ''}
+                              </div>
+                            </Tooltip>
+                          </CircleMarker>
+                          {disasterDecisionSupport.coverage_available && (
+                            <CircleMarker
+                              center={[disasterDecisionSupport.latitude, disasterDecisionSupport.longitude]}
+                              radius={5}
+                              pathOptions={{ color: '#7e22ce', fillColor: '#a855f7', fillOpacity: 0.9, weight: 1.5 }}
+                            >
+                              <Tooltip permanent={false}>
+                                <div className="font-bold text-xs">Nearest Pilot Grid Point</div>
+                              </Tooltip>
+                            </CircleMarker>
+                          )}
+                        </MapContainer>
+                      </div>
+
+                      <div className="grid grid-cols-2 gap-2 text-xs">
+                        <div className="bg-[#F4FAF6] p-2 rounded-lg border border-[#C8EAD9]">
+                          <span className="text-[10px] text-[#065F46] font-bold block">District & State</span>
+                          <span className="font-extrabold text-[#044E3A]">{activeDisaster.district_label}, {activeDisaster.state}</span>
+                        </div>
+
+                        <div className="bg-[#F4FAF6] p-2 rounded-lg border border-[#C8EAD9]">
+                          <span className="text-[10px] text-[#065F46] font-bold block">Coverage Status</span>
+                          <span className="font-extrabold text-[#044E3A]">
+                            {activeDisaster.in_pilot_coverage ? 'INSIDE PILOT (24.5-28.5 N, 80.0-84.5 E)' : 'OUTSIDE PILOT COVERAGE'}
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              {/* Data Provenance & Limitations */}
+              <div className="bg-white border border-[#C8EAD9] rounded-xl p-5 shadow-xs space-y-2 text-xs">
+                <h4 className="font-extrabold text-[#044E3A] uppercase tracking-wider text-[11px] flex items-center gap-1.5">
+                  <Info className="w-4 h-4 text-[#059669]" />
+                  <span>Data Provenance & Disaster Management System Limitations</span>
+                </h4>
+                <ul className="space-y-1 pl-2 text-[#065F46] font-medium">
+                  {disasterDecisionSupport.limitations.map((lim, idx) => (
+                    <li key={idx} className="flex items-start gap-2">
+                      <span className="w-1.5 h-1.5 rounded-full bg-[#059669] mt-1.5 flex-shrink-0"></span>
+                      <span>{lim}</span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+
+              {/* Mandatory Legal Disclaimer Box */}
+              <div className="bg-amber-50 border-2 border-amber-400 p-4 rounded-xl text-xs text-amber-950 space-y-1 shadow-xs">
+                <div className="font-extrabold text-amber-900 flex items-center gap-2 text-sm uppercase tracking-wider">
+                  <ShieldAlert className="w-5 h-5 text-amber-600 flex-shrink-0" />
+                  <span>MANDATORY OPERATIONAL DISCLAIMER</span>
+                </div>
+                <p className="text-amber-900 leading-relaxed font-semibold">
+                  {disasterDecisionSupport.disclaimer}
+                </p>
+                <p className="text-amber-800 text-[11px] italic font-medium">
+                  Use official IMD / CWC / NDMA / SDMA / state / local authority warnings for operational emergency decisions.
+                </p>
+              </div>
+            </div>
+          ) : null}
         </div>
       ) : activeSector === 'agri' ? (
         /* PHASE 9B — AGRICULTURE DECISION SUPPORT VIEW */

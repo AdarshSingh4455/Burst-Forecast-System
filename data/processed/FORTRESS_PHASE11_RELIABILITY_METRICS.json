@@ -1,0 +1,83 @@
+{
+  "phase": "11F + 11G + 11H",
+  "sample_size": 348840,
+  "regions_count": 3,
+  "ffd_summary": {
+    "failure_found_count": 43233,
+    "failure_found_rate_pct": 12.393360853113174,
+    "no_failure_count": 305607,
+    "no_failure_rate_pct": 87.60663914688682,
+    "median_ffd": 0.6293800520934472
+  },
+  "corridor_summary": {
+    "selected_k": 4,
+    "silhouette_scores": {
+      "2": 0.7750181059272049,
+      "3": 0.7849643722279421,
+      "4": 0.7902593007609163
+    },
+    "best_silhouette_score": 0.7902593007609163
+  },
+  "evidence_summary": {
+    "analogue_availability_pct": 97.22222222222221,
+    "highly_novel_ood_rate_pct": 22.805010893246187,
+    "dna_high_match_rate_pct": 97.22222222222221
+  },
+  "trust_band_metrics_held_out_2019_test": {
+    "GREEN": {
+      "N": 55532,
+      "bust_count": 3163,
+      "observed_bust_rate": 5.695815025570842,
+      "mean_p_bust": 0.04986253704675193
+    },
+    "YELLOW": {
+      "N": 0,
+      "bust_count": 0,
+      "observed_bust_rate": 0.0,
+      "mean_p_bust": 0.0
+    },
+    "RED": {
+      "N": 60748,
+      "bust_count": 22468,
+      "observed_bust_rate": 36.98557977217357,
+      "mean_p_bust": 0.38990748578378176
+    }
+  },
+  "self_audit_status_metrics_held_out_2019_test": {
+    "SUPPORTED RELIABILITY": {
+      "N": 55532,
+      "bust_count": 3163,
+      "observed_bust_rate": 5.695815025570842,
+      "mean_p_bust": 0.04986253704675193
+    },
+    "CONFLICT / POSSIBLE BLIND SPOT": {
+      "N": 18928,
+      "bust_count": 2640,
+      "observed_bust_rate": 13.947590870667796,
+      "mean_p_bust": 0.12034623218340831
+    },
+    "EXPERT REVIEW": {
+      "N": 37009,
+      "bust_count": 18514,
+      "observed_bust_rate": 50.025669431759844,
+      "mean_p_bust": 0.5328326313508682
+    },
+    "SUPPORTED WARNING": {
+      "N": 4811,
+      "bust_count": 1314,
+      "observed_bust_rate": 27.312409062564956,
+      "mean_p_bust": 0.35098391393916806
+    }
+  },
+  "trust_horizon_summary": {
+    "total_sequences": 34884,
+    "average_trust_horizon_days": 6.959580323357413,
+    "median_trust_horizon_days": 10.0,
+    "pct_sequences_reaching_d10_without_red": 44.52471046898292
+  },
+  "breaking_point_summary": {
+    "sequences_with_breaking_point": 14396,
+    "sequences_without_breaking_point": 20488,
+    "median_breaking_point_lead": 2.0
+  }
+}

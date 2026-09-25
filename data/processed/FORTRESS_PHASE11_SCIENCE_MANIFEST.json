@@ -1,0 +1,96 @@
+{
+  "phase": "11C + 11D + 11E",
+  "name": "Multi-Year Observation/Error Expansion, Multi-Region Foundation & Leakage-Safe Bust Model Generalization",
+  "provenance_status": "100% Genuine ERA5 Reanalysis Observations (Zero Synthetic / Proxy Records)",
+  "regions": [
+    {
+      "id": "EASTERN_UP_RECT",
+      "name": "Eastern_UP_Prototype",
+      "lat_bounds": [24.50, 28.50],
+      "lon_bounds": [80.00, 84.50],
+      "grid_points": 323
+    },
+    {
+      "id": "NORTHWEST_INDIA_RECT",
+      "name": "Northwest_India_Prototype",
+      "lat_bounds": [26.00, 30.00],
+      "lon_bounds": [73.00, 77.50],
+      "grid_points": 323
+    },
+    {
+      "id": "CENTRAL_INDIA_RECT",
+      "name": "Central_India_Prototype",
+      "lat_bounds": [19.00, 23.00],
+      "lon_bounds": [76.00, 80.50],
+      "grid_points": 323
+    }
+  ],
+  "dataset_summary": {
+    "total_runs": 108,
+    "runs_per_region": 36,
+    "years": [2017, 2018, 2019],
+    "forecast_rows": 348840,
+    "observation_rows": 980628,
+    "error_rows": 348840,
+    "bust_rows": 348840,
+    "forecast_columns": 40,
+    "target_match_rate_pct": 100.0
+  },
+  "leakage_safe_bust_thresholds_mm": {
+    "D01": 10.8475,
+    "D02": 7.6992,
+    "D03": 6.1399,
+    "D04": 7.619,
+    "D05": 8.24,
+    "D06": 9.9,
+    "D07": 11.66,
+    "D08": 11.7,
+    "D09": 12.898,
+    "D10": 11.92
+  },
+  "splits": {
+    "TRAIN": {
+      "dates": "2017-01-01 to 2018-06-01",
+      "inits": 54,
+      "rows": 174420,
+      "bust_rate_pct": 5.0
+    },
+    "VALIDATION": {
+      "dates": "2018-07-01 to 2018-12-01",
+      "inits": 18,
+      "rows": 58140,
+      "bust_rate_pct": 12.47
+    },
+    "TEST": {
+      "dates": "2019-01-01 to 2019-09-30",
+      "inits": 36,
+      "rows": 116280,
+      "bust_rate_pct": 22.04
+    }
+  },
+  "model_evaluation_held_out_2019": {
+    "selected_model": "Random Forest + Isotonic Calibration",
+    "roc_auc": 0.8561,
+    "pr_auc": 0.6269,
+    "brier_score": 0.1178,
+    "precision": 0.6290,
+    "recall": 0.6077,
+    "f1_score": 0.6182
+  },
+  "region_test_metrics": {
+    "EASTERN_UP_RECT": {"roc_auc": 0.8021, "pr_auc": 0.5661, "brier": 0.1415},
+    "NORTHWEST_INDIA_RECT": {"roc_auc": 0.8792, "pr_auc": 0.5807, "brier": 0.0658},
+    "CENTRAL_INDIA_RECT": {"roc_auc": 0.8493, "pr_auc": 0.6917, "brier": 0.1460}
+  },
+  "cross_region_generalization_roc_auc": {
+    "held_out_CENTRAL_INDIA_RECT": 0.8502,
+    "held_out_EASTERN_UP_RECT": 0.7877,
+    "held_out_NORTHWEST_INDIA_RECT": 0.8491
+  },
+  "validators": {
+    "phase11_cde_validator": "27/27 PASS",
+    "phase11_ab_validator": "24/24 PASS",
+    "phase1_to_6_baseline_validator": "14/14 PASS",
+    "backend_endpoints_audit": "41/41 PASS"
+  }
+}

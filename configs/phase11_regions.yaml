@@ -1,0 +1,30 @@
+regions:
+  EASTERN_UP_RECT:
+    name: Eastern_UP_Prototype
+    lat_min: 24.5
+    lat_max: 28.5
+    lon_min: 80.0
+    lon_max: 84.5
+    resolution_deg: 0.25
+    expected_grid_points: 323
+    description: "Northeastern Gangetic Plain & Himalayan Foothills boundary prototype rectangle"
+
+  NORTHWEST_INDIA_RECT:
+    name: Northwest_India_Prototype
+    lat_min: 26.0
+    lat_max: 30.0
+    lon_min: 73.0
+    lon_max: 77.5
+    resolution_deg: 0.25
+    expected_grid_points: 323
+    description: "Northwest India / Thar Desert border to Upper Indo-Gangetic Plain prototype rectangle"
+
+  CENTRAL_INDIA_RECT:
+    name: Central_India_Prototype
+    lat_min: 19.0
+    lat_max: 23.0
+    lon_min: 76.0
+    lon_max: 80.5
+    resolution_deg: 0.25
+    expected_grid_points: 323
+    description: "Central India / Deccan Plateau & Narmada Basin prototype rectangle"

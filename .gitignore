@@ -1,8 +1,7 @@
 # Raw / large weather data
 data/raw/
 data/interim/
-data/phase11/raw/
-data/phase11/intermediate/
+data/phase11/
 
 
 # Weather data formats

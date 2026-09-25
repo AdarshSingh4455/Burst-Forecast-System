@@ -129,4 +129,15 @@ check_post('/assistant/explain', {
     'active_view': 'Overview'
 })
 
+# Phase 11 Multi-Region Endpoints (42-48)
+print('\n--- Phase 11 Multi-Region Endpoints ---')
+check_ep('/phase11/regions')
+check_ep('/phase11/summary')
+check_ep('/phase11/forecast-context?region_id=CENTRAL_INDIA_RECT')
+check_ep('/phase11/reliability?region_id=CENTRAL_INDIA_RECT')
+check_ep('/phase11/trust-horizon?region_id=ALL')
+check_ep('/phase11/region-metrics')
+check_ep('/phase11/lead-metrics')
+
+
 

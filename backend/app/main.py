@@ -7,6 +7,7 @@ from backend.app.reservoir_service import reservoir_service
 from backend.app.agriculture_service import agriculture_service
 from backend.app.disaster_service import disaster_service
 from backend.app.renewable_service import renewable_service
+from backend.app.phase11_service import phase11_service
 from backend.app.assistant_service import assistant_service
 from backend.app.schemas import (
     ReservoirScenarioRequest,
@@ -25,6 +26,7 @@ async def lifespan(app: FastAPI):
     agriculture_service.load_data(base_dir)
     disaster_service.load_data(base_dir)
     renewable_service.load_data(base_dir)
+    phase11_service.load_data(base_dir)
     yield
 
 app = FastAPI(
@@ -575,6 +577,51 @@ def post_assistant_explain(body: AssistantExplainRequest):
         scenario_id=body.scenario_id
     )
     return res
+
+# ============================================================
+# PHASE 11I — MULTI-REGION API ENDPOINTS
+# ============================================================
+
+@app.get("/api/phase11/regions")
+def get_phase11_regions():
+    return phase11_service.get_regions()
+
+@app.get("/api/phase11/summary")
+def get_phase11_summary():
+    return phase11_service.get_summary()
+
+@app.get("/api/phase11/forecast-context")
+def get_phase11_forecast_context(
+    region_id: str = Query("CENTRAL_INDIA_RECT"),
+    forecast_init: str = Query(None),
+    lead_day: int = Query(1, ge=1, le=10)
+):
+    return phase11_service.get_forecast_context(region_id, forecast_init, lead_day)
+
+@app.get("/api/phase11/reliability")
+def get_phase11_reliability(
+    region_id: str = Query("CENTRAL_INDIA_RECT"),
+    forecast_init: str = Query(None),
+    lead_day: int = Query(1, ge=1, le=10),
+    latitude: float = Query(None),
+    longitude: float = Query(None)
+):
+    return phase11_service.get_reliability(region_id, forecast_init, lead_day, latitude, longitude)
+
+@app.get("/api/phase11/trust-horizon")
+def get_phase11_trust_horizon(
+    region_id: str = Query("ALL")
+):
+    return phase11_service.get_trust_horizon(region_id)
+
+@app.get("/api/phase11/region-metrics")
+def get_phase11_region_metrics():
+    return phase11_service.get_region_metrics()
+
+@app.get("/api/phase11/lead-metrics")
+def get_phase11_lead_metrics():
+    return phase11_service.get_lead_metrics()
+
 
 
 

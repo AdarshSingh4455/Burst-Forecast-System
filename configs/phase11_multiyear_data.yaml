@@ -1,0 +1,79 @@
+dataset_name: FORTRESS_GEFS_MULTIYEAR
+region_name: Eastern_UP_Pilot
+
+region:
+  lat_min: 24.5
+  lat_max: 28.5
+  lon_min: 80.0
+  lon_max: 84.5
+  resolution_deg: 0.25
+  expected_grid_points: 323
+
+forecast:
+  source: NOAA_GEFSv12_Reforecast
+  bucket: noaa-gefs-retrospective
+  members:
+    - c00
+    - p01
+    - p02
+    - p03
+    - p04
+  lead_days:
+    start: 1
+    end: 10
+  expected_rows_per_run: 3230
+
+history:
+  mode: explicit
+  years:
+    - 2017
+    - 2018
+    - 2019
+  frequency: monthly
+  explicit_dates:
+    - "2017010100"
+    - "2017020100"
+    - "2017030100"
+    - "2017040100"
+    - "2017050100"
+    - "2017060100"
+    - "2017070100"
+    - "2017080100"
+    - "2017090100"
+    - "2017100100"
+    - "2017110100"
+    - "2017120100"
+    - "2018010100"
+    - "2018020100"
+    - "2018030100"
+    - "2018040100"
+    - "2018050100"
+    - "2018060100"
+    - "2018070100"
+    - "2018080100"
+    - "2018090100"
+    - "2018100100"
+    - "2018110100"
+    - "2018120100"
+    - "2019010100"
+    - "2019060100"
+    - "2019061500"
+    - "2019070100"
+    - "2019071500"
+    - "2019073100"
+    - "2019080100"
+    - "2019081500"
+    - "2019083000"
+    - "2019090100"
+    - "2019091500"
+    - "2019093000"
+
+paths:
+  raw_dir: data/phase11/raw
+  intermediate_dir: data/phase11/intermediate
+  output_path: data/processed/FORTRESS_GEFS_MULTIYEAR.parquet
+  manifest_path: data/processed/FORTRESS_GEFS_MULTIYEAR_MANIFEST.json
+
+pipeline:
+  resume_mode: true
+  validation_mode: strict

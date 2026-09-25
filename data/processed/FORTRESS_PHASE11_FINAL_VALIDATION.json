@@ -1,0 +1,257 @@
+{
+  "phase": "Phase 11 (11A to 11K Complete)",
+  "generation_timestamp": "2026-09-25T06:23:31.456127Z",
+  "status": "ACCEPTED",
+  "artifact_hashes": {
+    "FORTRESS_GEFS_MULTIYEAR_MULTIREGION.parquet": "047050bef7f2f6ec2679dc9c028b0c9766fcd24fb00ff23c7636902bb8fdb0d4",
+    "FORTRESS_OBS_MULTIYEAR_MULTIREGION.parquet": "d863c578bbef09b9fe88ffb2b0fdf079b40d53b42705b7550fdf3a37be25de16",
+    "FORTRESS_BUST_MULTIYEAR_MULTIREGION.parquet": "3fb188520699cf683d4117b9481f97f23e811594861d4086de669900a4a01919",
+    "models/fortress_bust_model_phase11.pkl": "f522d05549c32668e33760fd3d1fbdf4f3b90d8cc4ad2da4d16033a96c824ab6",
+    "FORTRESS_FFD_PHASE11.parquet": "ffb2cdb79a1f54cb41e5c78937b7d89a96ef2924eeccd9d30ce1cf8d7b04d84c",
+    "FORTRESS_FAILURE_FINGERPRINT_PHASE11.parquet": "bf7d7918d492a86daaefbb3348af51755161eb4ba5b7960dc40a7fa488705f03",
+    "FORTRESS_INDEPENDENT_EVIDENCE_PHASE11.parquet": "c8a45fd46bc1c85616e265b580e40cb3c407c0d5490f3ff9c32718b58b238373",
+    "FORTRESS_SELF_AUDIT_PHASE11.parquet": "b2043f2efb76a805c8270dfa1e10c41685a1296927be54152f4dd4fd2bdeb2f2",
+    "FORTRESS_TRUST_HORIZON_PHASE11.parquet": "407b49b30619c56a4b489f3494390c3de623312cd6865b0901aad9f1382b4591",
+    "FORTRESS_PHASE11_RELIABILITY_METRICS.json": "12ec4cd18ec1e659a0c2565b9e187bc7abdc78c1eabf793f9c628eb58fb11a9f"
+  },
+  "data_coverage": {
+    "forecast_rows": 348840,
+    "regions_count": 3,
+    "regions": [
+      "CENTRAL_INDIA_RECT",
+      "NORTHWEST_INDIA_RECT",
+      "EASTERN_UP_RECT"
+    ],
+    "initializations_per_region": 36,
+    "observation_coverage_pct": 100.0,
+    "years": [
+      2017,
+      2018,
+      2019
+    ]
+  },
+  "held_out_2019_model_metrics": {
+    "ROC_AUC": 0.8561401572262568,
+    "PR_AUC": 0.6269318219282984,
+    "Brier": 0.11776802295100415,
+    "Precision": 0.6289775480536263,
+    "Recall": 0.6077016113300301,
+    "F1": 0.6181565631511062
+  },
+  "region_metrics": {
+    "EASTERN_UP_RECT": {
+      "ROC_AUC": 0.8021095027170263,
+      "PR_AUC": 0.5661466296915217,
+      "Brier": 0.1414636920085947,
+      "N": 38760,
+      "BustRate": 0.24156346749226007
+    },
+    "NORTHWEST_INDIA_RECT": {
+      "ROC_AUC": 0.8792432909352965,
+      "PR_AUC": 0.5806755168172332,
+      "Brier": 0.06583312103569885,
+      "N": 38760,
+      "BustRate": 0.1130546955624355
+    },
+    "CENTRAL_INDIA_RECT": {
+      "ROC_AUC": 0.849346892649679,
+      "PR_AUC": 0.6916707310193417,
+      "Brier": 0.1460072558087189,
+      "N": 38760,
+      "BustRate": 0.306656346749226
+    }
+  },
+  "lead_metrics": {
+    "D1": {
+      "ROC_AUC": 0.8647178950329472,
+      "Brier": 0.11227289345522865,
+      "N": 11628,
+      "BustRate": 0.2039903680770554
+    },
+    "D2": {
+      "ROC_AUC": 0.8632415741515747,
+      "Brier": 0.12270049277718147,
+      "N": 11628,
+      "BustRate": 0.24234606123151015
+    },
+    "D3": {
+      "ROC_AUC": 0.8848319987181869,
+      "Brier": 0.12764286752337337,
+      "N": 11628,
+      "BustRate": 0.30830753353973167
+    },
+    "D4": {
+      "ROC_AUC": 0.8751223444278542,
+      "Brier": 0.12501470566073045,
+      "N": 11628,
+      "BustRate": 0.2793257653938768
+    },
+    "D5": {
+      "ROC_AUC": 0.8520623997007215,
+      "Brier": 0.12876230598764032,
+      "N": 11628,
+      "BustRate": 0.2455280357757138
+    },
+    "D6": {
+      "ROC_AUC": 0.8417667668080601,
+      "Brier": 0.11689092717606966,
+      "N": 11628,
+      "BustRate": 0.20227038183694532
+    },
+    "D7": {
+      "ROC_AUC": 0.8477403318862313,
+      "Brier": 0.11503434757177013,
+      "N": 11628,
+      "BustRate": 0.2005503955968352
+    },
+    "D8": {
+      "ROC_AUC": 0.843210795329723,
+      "Brier": 0.11793307243717474,
+      "N": 11628,
+      "BustRate": 0.2024423804609563
+    },
+    "D9": {
+      "ROC_AUC": 0.8654696890298306,
+      "Brier": 0.09509800699578458,
+      "N": 11628,
+      "BustRate": 0.14017887856897146
+    },
+    "D10": {
+      "ROC_AUC": 0.8086864679900218,
+      "Brier": 0.11633060992508813,
+      "N": 11628,
+      "BustRate": 0.17930856553147576
+    }
+  },
+  "cross_region_experiments": {
+    "CENTRAL_INDIA_RECT": {
+      "Train_Regions": [
+        "EASTERN_UP_RECT",
+        "NORTHWEST_INDIA_RECT"
+      ],
+      "HeldOut_Test_Region": "CENTRAL_INDIA_RECT",
+      "ROC_AUC": 0.8501522664063283,
+      "PR_AUC": 0.6897411523009307,
+      "Brier": 0.14828665281946563,
+      "N": 38760
+    },
+    "EASTERN_UP_RECT": {
+      "Train_Regions": [
+        "CENTRAL_INDIA_RECT",
+        "NORTHWEST_INDIA_RECT"
+      ],
+      "HeldOut_Test_Region": "EASTERN_UP_RECT",
+      "ROC_AUC": 0.7877114308178603,
+      "PR_AUC": 0.5322478282477378,
+      "Brier": 0.14541553717070405,
+      "N": 38760
+    },
+    "NORTHWEST_INDIA_RECT": {
+      "Train_Regions": [
+        "CENTRAL_INDIA_RECT",
+        "EASTERN_UP_RECT"
+      ],
+      "HeldOut_Test_Region": "NORTHWEST_INDIA_RECT",
+      "ROC_AUC": 0.8490862348440761,
+      "PR_AUC": 0.5054355147241669,
+      "Brier": 0.08231709717069852,
+      "N": 38760
+    }
+  },
+  "reliability_revalidation_metrics": {
+    "phase": "11F + 11G + 11H",
+    "sample_size": 348840,
+    "regions_count": 3,
+    "ffd_summary": {
+      "failure_found_count": 43233,
+      "failure_found_rate_pct": 12.393360853113174,
+      "no_failure_count": 305607,
+      "no_failure_rate_pct": 87.60663914688682,
+      "median_ffd": 0.6293800520934472
+    },
+    "corridor_summary": {
+      "selected_k": 4,
+      "silhouette_scores": {
+        "2": 0.7750181059272049,
+        "3": 0.7849643722279421,
+        "4": 0.7902593007609163
+      },
+      "best_silhouette_score": 0.7902593007609163
+    },
+    "evidence_summary": {
+      "analogue_availability_pct": 97.22222222222221,
+      "highly_novel_ood_rate_pct": 22.805010893246187,
+      "dna_high_match_rate_pct": 97.22222222222221
+    },
+    "trust_band_metrics_held_out_2019_test": {
+      "GREEN": {
+        "N": 55532,
+        "bust_count": 3163,
+        "observed_bust_rate": 5.695815025570842,
+        "mean_p_bust": 0.04986253704675193
+      },
+      "YELLOW": {
+        "N": 0,
+        "bust_count": 0,
+        "observed_bust_rate": 0.0,
+        "mean_p_bust": 0.0
+      },
+      "RED": {
+        "N": 60748,
+        "bust_count": 22468,
+        "observed_bust_rate": 36.98557977217357,
+        "mean_p_bust": 0.38990748578378176
+      }
+    },
+    "self_audit_status_metrics_held_out_2019_test": {
+      "SUPPORTED RELIABILITY": {
+        "N": 55532,
+        "bust_count": 3163,
+        "observed_bust_rate": 5.695815025570842,
+        "mean_p_bust": 0.04986253704675193
+      },
+      "CONFLICT / POSSIBLE BLIND SPOT": {
+        "N": 18928,
+        "bust_count": 2640,
+        "observed_bust_rate": 13.947590870667796,
+        "mean_p_bust": 0.12034623218340831
+      },
+      "EXPERT REVIEW": {
+        "N": 37009,
+        "bust_count": 18514,
+        "observed_bust_rate": 50.025669431759844,
+        "mean_p_bust": 0.5328326313508682
+      },
+      "SUPPORTED WARNING": {
+        "N": 4811,
+        "bust_count": 1314,
+        "observed_bust_rate": 27.312409062564956,
+        "mean_p_bust": 0.35098391393916806
+      }
+    },
+    "trust_horizon_summary": {
+      "total_sequences": 34884,
+      "average_trust_horizon_days": 6.959580323357413,
+      "median_trust_horizon_days": 10.0,
+      "pct_sequences_reaching_d10_without_red": 44.52471046898292
+    },
+    "breaking_point_summary": {
+      "sequences_with_breaking_point": 14396,
+      "sequences_without_breaking_point": 20488,
+      "median_breaking_point_lead": 2.0
+    }
+  },
+  "limitations": [
+    "3 rectangular analysis domains in India only",
+    "36 initialization dates / region",
+    "ERA5 reanalysis reference target observations",
+    "Q95 empirical upper-tail error bust definitions",
+    "Prototype diagnostic stress indicators"
+  ],
+  "validator_results": {
+    "phase11_fgh": "28/28 PASSED",
+    "phase11_cde": "27/27 PASSED",
+    "phase11_multiyear_data": "24/24 PASSED",
+    "phase1_to_phase6": "14/14 PASSED"
+  }
+}

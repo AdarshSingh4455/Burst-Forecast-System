@@ -1,0 +1,479 @@
+{
+  "phase": "Phase 12A",
+  "timestamp": "2026-09-25T07:39:30.513044Z",
+  "total_cases": 8,
+  "cases": [
+    {
+      "case_id": "CASE_01_SUPPORTED_RELIABILITY",
+      "description": "Supported Reliability / GREEN (Central India, D2)",
+      "forecast_context": {
+        "region_id": "CENTRAL_INDIA_RECT",
+        "forecast_init": "2019-01-01 00:00:00",
+        "valid_time": "2019-01-03 00:00:00",
+        "lead_day": 2,
+        "latitude": 19.0,
+        "longitude": 76.0
+      },
+      "forecast_state": {
+        "ensemble_mean_mm": 0.0,
+        "ensemble_spread_mm": 0.0,
+        "specific_humidity_gkg": 3.57,
+        "temp_2m_c": 21.0,
+        "mslp_hpa": 1018.04,
+        "wind_speed_ms": 1.85
+      },
+      "bust_risk_ai": {
+        "baseline_p_bust": 0.0
+      },
+      "observed_reference": {
+        "observed_rain_mm": 0.0,
+        "absolute_error_mm": 0.0,
+        "retrospective_bust_label": 0
+      },
+      "stress_lab_ffd": {
+        "ffd": null,
+        "failure_found": false,
+        "dominant_dimension": "NONE",
+        "status_text": "No failure found within tested perturbation range."
+      },
+      "failure_intelligence": {
+        "corridor_label": "Corridor 4",
+        "fingerprint_6d": {
+          "moisture": 39.95,
+          "temperature": 46.04,
+          "pressure": 41.06,
+          "wind": 43.13,
+          "ensemble": 20.17,
+          "novelty": 80.38
+        }
+      },
+      "independent_evidence": {
+        "analogue_available": true,
+        "analogue_mean_bust_rate": 0.0,
+        "failure_dna_max_sim": 1.0,
+        "ensemble_disagreement_score": 24.58,
+        "ensemble_disagreement_category": "LOW",
+        "ood_score": 40.46,
+        "ood_category": "FAMILIAR"
+      },
+      "self_audit": {
+        "self_audit_status": "SUPPORTED RELIABILITY",
+        "trust_index": 90.0,
+        "reliability_band": "GREEN"
+      }
+    },
+    {
+      "case_id": "CASE_02_SUPPORTED_WARNING",
+      "description": "Supported Warning / RED (Northwest India, D5)",
+      "forecast_context": {
+        "region_id": "NORTHWEST_INDIA_RECT",
+        "forecast_init": "2019-08-15 00:00:00",
+        "valid_time": "2019-08-20 00:00:00",
+        "lead_day": 5,
+        "latitude": 26.0,
+        "longitude": 77.0
+      },
+      "forecast_state": {
+        "ensemble_mean_mm": 10.64,
+        "ensemble_spread_mm": 5.9,
+        "specific_humidity_gkg": 18.54,
+        "temp_2m_c": 24.94,
+        "mslp_hpa": 1002.38,
+        "wind_speed_ms": 2.46
+      },
+      "bust_risk_ai": {
+        "baseline_p_bust": 0.4024
+      },
+      "observed_reference": {
+        "observed_rain_mm": 2.9,
+        "absolute_error_mm": 7.74,
+        "retrospective_bust_label": 0
+      },
+      "stress_lab_ffd": {
+        "ffd": 0.9223379772532969,
+        "failure_found": true,
+        "dominant_dimension": "Pressure",
+        "status_text": "Failure found at FFD = 0.9223"
+      },
+      "failure_intelligence": {
+        "corridor_label": "Corridor 3",
+        "fingerprint_6d": {
+          "moisture": 39.95,
+          "temperature": 46.04,
+          "pressure": 41.06,
+          "wind": 43.13,
+          "ensemble": 80.17,
+          "novelty": 67.84
+        }
+      },
+      "independent_evidence": {
+        "analogue_available": true,
+        "analogue_mean_bust_rate": 0.4,
+        "failure_dna_max_sim": 1.0,
+        "ensemble_disagreement_score": 83.02,
+        "ensemble_disagreement_category": "MODERATE",
+        "ood_score": 88.66,
+        "ood_category": "UNUSUAL"
+      },
+      "self_audit": {
+        "self_audit_status": "SUPPORTED WARNING",
+        "trust_index": 43.91,
+        "reliability_band": "RED"
+      }
+    },
+    {
+      "case_id": "CASE_03_CONFLICT_BLIND_SPOT",
+      "description": "Conflict / Possible Blind Spot (Eastern UP, D3)",
+      "forecast_context": {
+        "region_id": "EASTERN_UP_RECT",
+        "forecast_init": "2019-01-01 00:00:00",
+        "valid_time": "2019-01-04 00:00:00",
+        "lead_day": 3,
+        "latitude": 28.0,
+        "longitude": 83.5
+      },
+      "forecast_state": {
+        "ensemble_mean_mm": 0.7,
+        "ensemble_spread_mm": 0.55,
+        "specific_humidity_gkg": 5.65,
+        "temp_2m_c": 10.1,
+        "mslp_hpa": 1020.68,
+        "wind_speed_ms": 1.77
+      },
+      "bust_risk_ai": {
+        "baseline_p_bust": 0.0007
+      },
+      "observed_reference": {
+        "observed_rain_mm": 0.0,
+        "absolute_error_mm": 0.7,
+        "retrospective_bust_label": 0
+      },
+      "stress_lab_ffd": {
+        "ffd": null,
+        "failure_found": false,
+        "dominant_dimension": "NONE",
+        "status_text": "No failure found within tested perturbation range."
+      },
+      "failure_intelligence": {
+        "corridor_label": "Corridor 3",
+        "fingerprint_6d": {
+          "moisture": 39.95,
+          "temperature": 46.04,
+          "pressure": 41.06,
+          "wind": 90.48,
+          "ensemble": 53.82,
+          "novelty": 97.03
+        }
+      },
+      "independent_evidence": {
+        "analogue_available": true,
+        "analogue_mean_bust_rate": 0.0,
+        "failure_dna_max_sim": 0.9998,
+        "ensemble_disagreement_score": 59.38,
+        "ensemble_disagreement_category": "LOW",
+        "ood_score": 91.14,
+        "ood_category": "HIGHLY NOVEL"
+      },
+      "self_audit": {
+        "self_audit_status": "CONFLICT / POSSIBLE BLIND SPOT",
+        "trust_index": 74.97,
+        "reliability_band": "RED"
+      }
+    },
+    {
+      "case_id": "CASE_04_EXPERT_REVIEW",
+      "description": "Expert Review / Novel State (Central India, D6)",
+      "forecast_context": {
+        "region_id": "CENTRAL_INDIA_RECT",
+        "forecast_init": "2019-07-01 00:00:00",
+        "valid_time": "2019-07-07 00:00:00",
+        "lead_day": 6,
+        "latitude": 19.0,
+        "longitude": 76.25
+      },
+      "forecast_state": {
+        "ensemble_mean_mm": 9.48,
+        "ensemble_spread_mm": 6.12,
+        "specific_humidity_gkg": 16.69,
+        "temp_2m_c": 26.37,
+        "mslp_hpa": 1001.71,
+        "wind_speed_ms": 7.35
+      },
+      "bust_risk_ai": {
+        "baseline_p_bust": 0.3226
+      },
+      "observed_reference": {
+        "observed_rain_mm": 0.6,
+        "absolute_error_mm": 8.88,
+        "retrospective_bust_label": 0
+      },
+      "stress_lab_ffd": {
+        "ffd": null,
+        "failure_found": false,
+        "dominant_dimension": "NONE",
+        "status_text": "No failure found within tested perturbation range."
+      },
+      "failure_intelligence": {
+        "corridor_label": "Corridor 3",
+        "fingerprint_6d": {
+          "moisture": 39.95,
+          "temperature": 46.04,
+          "pressure": 41.06,
+          "wind": 43.13,
+          "ensemble": 80.84,
+          "novelty": 95.19
+        }
+      },
+      "independent_evidence": {
+        "analogue_available": true,
+        "analogue_mean_bust_rate": 0.2,
+        "failure_dna_max_sim": 1.0,
+        "ensemble_disagreement_score": 81.66,
+        "ensemble_disagreement_category": "MODERATE",
+        "ood_score": 92.85,
+        "ood_category": "HIGHLY NOVEL"
+      },
+      "self_audit": {
+        "self_audit_status": "EXPERT REVIEW",
+        "trust_index": 47.1,
+        "reliability_band": "RED"
+      }
+    },
+    {
+      "case_id": "CASE_05_HIGH_OOD_NOVELTY",
+      "description": "High OOD Novelty (Northwest India, D8)",
+      "forecast_context": {
+        "region_id": "NORTHWEST_INDIA_RECT",
+        "forecast_init": "2019-07-01 00:00:00",
+        "valid_time": "2019-07-09 00:00:00",
+        "lead_day": 8,
+        "latitude": 26.0,
+        "longitude": 73.0
+      },
+      "forecast_state": {
+        "ensemble_mean_mm": 0.0,
+        "ensemble_spread_mm": 0.0,
+        "specific_humidity_gkg": 16.1,
+        "temp_2m_c": 33.2,
+        "mslp_hpa": 995.04,
+        "wind_speed_ms": 11.12
+      },
+      "bust_risk_ai": {
+        "baseline_p_bust": 0.0101
+      },
+      "observed_reference": {
+        "observed_rain_mm": 0.0,
+        "absolute_error_mm": 0.0,
+        "retrospective_bust_label": 0
+      },
+      "stress_lab_ffd": {
+        "ffd": null,
+        "failure_found": false,
+        "dominant_dimension": "NONE",
+        "status_text": "No failure found within tested perturbation range."
+      },
+      "failure_intelligence": {
+        "corridor_label": "Corridor 4",
+        "fingerprint_6d": {
+          "moisture": 39.95,
+          "temperature": 93.83,
+          "pressure": 41.06,
+          "wind": 43.13,
+          "ensemble": 20.17,
+          "novelty": 99.98
+        }
+      },
+      "independent_evidence": {
+        "analogue_available": true,
+        "analogue_mean_bust_rate": 0.0,
+        "failure_dna_max_sim": 1.0,
+        "ensemble_disagreement_score": 18.05,
+        "ensemble_disagreement_category": "LOW",
+        "ood_score": 94.64,
+        "ood_category": "HIGHLY NOVEL"
+      },
+      "self_audit": {
+        "self_audit_status": "CONFLICT / POSSIBLE BLIND SPOT",
+        "trust_index": 74.6,
+        "reliability_band": "RED"
+      }
+    },
+    {
+      "case_id": "CASE_06_LOW_FFD_FRAGILE",
+      "description": "Low FFD / Fragile State (Eastern UP, D4)",
+      "forecast_context": {
+        "region_id": "EASTERN_UP_RECT",
+        "forecast_init": "2019-07-31 00:00:00",
+        "valid_time": "2019-08-04 00:00:00",
+        "lead_day": 4,
+        "latitude": 25.25,
+        "longitude": 83.5
+      },
+      "forecast_state": {
+        "ensemble_mean_mm": 25.42,
+        "ensemble_spread_mm": 21.33,
+        "specific_humidity_gkg": 20.13,
+        "temp_2m_c": 29.81,
+        "mslp_hpa": 995.51,
+        "wind_speed_ms": 3.23
+      },
+      "bust_risk_ai": {
+        "baseline_p_bust": 0.6667
+      },
+      "observed_reference": {
+        "observed_rain_mm": 14.3,
+        "absolute_error_mm": 11.12,
+        "retrospective_bust_label": 1
+      },
+      "stress_lab_ffd": {
+        "ffd": 0.6293800520934472,
+        "failure_found": true,
+        "dominant_dimension": "Wind",
+        "status_text": "Failure found at FFD = 0.6294"
+      },
+      "failure_intelligence": {
+        "corridor_label": "Corridor 3",
+        "fingerprint_6d": {
+          "moisture": 39.95,
+          "temperature": 46.04,
+          "pressure": 41.06,
+          "wind": 43.13,
+          "ensemble": 98.15,
+          "novelty": 93.81
+        }
+      },
+      "independent_evidence": {
+        "analogue_available": true,
+        "analogue_mean_bust_rate": 1.0,
+        "failure_dna_max_sim": 1.0,
+        "ensemble_disagreement_score": 97.59,
+        "ensemble_disagreement_category": "HIGH",
+        "ood_score": 99.2,
+        "ood_category": "HIGHLY NOVEL"
+      },
+      "self_audit": {
+        "self_audit_status": "EXPERT REVIEW",
+        "trust_index": 3.33,
+        "reliability_band": "RED"
+      }
+    },
+    {
+      "case_id": "CASE_07_NO_FAILURE_FOUND_FFD",
+      "description": "No-Failure-Found FFD / Robust State (Central India, D1)",
+      "forecast_context": {
+        "region_id": "CENTRAL_INDIA_RECT",
+        "forecast_init": "2019-01-01 00:00:00",
+        "valid_time": "2019-01-02 00:00:00",
+        "lead_day": 1,
+        "latitude": 19.0,
+        "longitude": 76.0
+      },
+      "forecast_state": {
+        "ensemble_mean_mm": 0.0,
+        "ensemble_spread_mm": 0.0,
+        "specific_humidity_gkg": 3.26,
+        "temp_2m_c": 19.92,
+        "mslp_hpa": 1018.47,
+        "wind_speed_ms": 2.4
+      },
+      "bust_risk_ai": {
+        "baseline_p_bust": 0.0
+      },
+      "observed_reference": {
+        "observed_rain_mm": 0.0,
+        "absolute_error_mm": 0.0,
+        "retrospective_bust_label": 0
+      },
+      "stress_lab_ffd": {
+        "ffd": null,
+        "failure_found": false,
+        "dominant_dimension": "NONE",
+        "status_text": "No failure found within tested perturbation range."
+      },
+      "failure_intelligence": {
+        "corridor_label": "Corridor 1",
+        "fingerprint_6d": {
+          "moisture": 39.95,
+          "temperature": 46.04,
+          "pressure": 41.06,
+          "wind": 43.13,
+          "ensemble": 20.17,
+          "novelty": 81.45
+        }
+      },
+      "independent_evidence": {
+        "analogue_available": true,
+        "analogue_mean_bust_rate": 0.0,
+        "failure_dna_max_sim": 1.0,
+        "ensemble_disagreement_score": 21.56,
+        "ensemble_disagreement_category": "LOW",
+        "ood_score": 51.37,
+        "ood_category": "FAMILIAR"
+      },
+      "self_audit": {
+        "self_audit_status": "SUPPORTED RELIABILITY",
+        "trust_index": 90.0,
+        "reliability_band": "GREEN"
+      }
+    },
+    {
+      "case_id": "CASE_08_LATE_LEAD_D10",
+      "description": "Late Lead Sequence Case (Northwest India, D10)",
+      "forecast_context": {
+        "region_id": "NORTHWEST_INDIA_RECT",
+        "forecast_init": "2019-01-01 00:00:00",
+        "valid_time": "2019-01-11 00:00:00",
+        "lead_day": 10,
+        "latitude": 26.0,
+        "longitude": 73.0
+      },
+      "forecast_state": {
+        "ensemble_mean_mm": 0.0,
+        "ensemble_spread_mm": 0.0,
+        "specific_humidity_gkg": 3.14,
+        "temp_2m_c": 16.13,
+        "mslp_hpa": 1017.52,
+        "wind_speed_ms": 3.45
+      },
+      "bust_risk_ai": {
+        "baseline_p_bust": 0.0
+      },
+      "observed_reference": {
+        "observed_rain_mm": 0.0,
+        "absolute_error_mm": 0.0,
+        "retrospective_bust_label": 0
+      },
+      "stress_lab_ffd": {
+        "ffd": null,
+        "failure_found": false,
+        "dominant_dimension": "NONE",
+        "status_text": "No failure found within tested perturbation range."
+      },
+      "failure_intelligence": {
+        "corridor_label": "Corridor 4",
+        "fingerprint_6d": {
+          "moisture": 39.95,
+          "temperature": 46.04,
+          "pressure": 41.06,
+          "wind": 43.13,
+          "ensemble": 20.17,
+          "novelty": 84.03
+        }
+      },
+      "independent_evidence": {
+        "analogue_available": true,
+        "analogue_mean_bust_rate": 0.0,
+        "failure_dna_max_sim": 1.0,
+        "ensemble_disagreement_score": 15.7,
+        "ensemble_disagreement_category": "LOW",
+        "ood_score": 57.84,
+        "ood_category": "FAMILIAR"
+      },
+      "self_audit": {
+        "self_audit_status": "SUPPORTED RELIABILITY",
+        "trust_index": 90.0,
+        "reliability_band": "GREEN"
+      }
+    }
+  ]
+}

@@ -1,0 +1,93 @@
+{
+  "phase": "Phase 12C",
+  "sample_size": 116280,
+  "split": "HELD-OUT 2019 TEST",
+  "ablations": [
+    {
+      "ablation_id": "Full FORTRESS",
+      "GREEN_pct": 47.76,
+      "RED_pct": 52.24,
+      "GREEN_observed_bust_rate_pct": 5.7,
+      "RED_observed_bust_rate_pct": 36.99,
+      "separation_ratio": 6.49,
+      "conflict_rate_pct": 16.28,
+      "expert_review_rate_pct": 31.83
+    },
+    {
+      "ablation_id": "Minus FFD",
+      "GREEN_pct": 47.76,
+      "RED_pct": 52.24,
+      "GREEN_observed_bust_rate_pct": 5.7,
+      "RED_observed_bust_rate_pct": 36.99,
+      "separation_ratio": 6.49,
+      "conflict_rate_pct": 16.28,
+      "expert_review_rate_pct": 31.83
+    },
+    {
+      "ablation_id": "Minus Historical Analogues",
+      "GREEN_pct": 51.71,
+      "RED_pct": 48.29,
+      "GREEN_observed_bust_rate_pct": 6.58,
+      "RED_observed_bust_rate_pct": 38.6,
+      "separation_ratio": 5.86,
+      "conflict_rate_pct": 12.33,
+      "expert_review_rate_pct": 31.83
+    },
+    {
+      "ablation_id": "Minus Failure DNA",
+      "GREEN_pct": 60.47,
+      "RED_pct": 39.53,
+      "GREEN_observed_bust_rate_pct": 7.4,
+      "RED_observed_bust_rate_pct": 44.44,
+      "separation_ratio": 6.0,
+      "conflict_rate_pct": 3.57,
+      "expert_review_rate_pct": 28.19
+    },
+    {
+      "ablation_id": "Minus Ensemble Disagreement",
+      "GREEN_pct": 48.75,
+      "RED_pct": 51.25,
+      "GREEN_observed_bust_rate_pct": 5.88,
+      "RED_observed_bust_rate_pct": 37.42,
+      "separation_ratio": 6.36,
+      "conflict_rate_pct": 15.28,
+      "expert_review_rate_pct": 31.83
+    },
+    {
+      "ablation_id": "Minus OOD / Novelty",
+      "GREEN_pct": 55.52,
+      "RED_pct": 44.48,
+      "GREEN_observed_bust_rate_pct": 6.57,
+      "RED_observed_bust_rate_pct": 41.36,
+      "separation_ratio": 6.3,
+      "conflict_rate_pct": 8.51,
+      "expert_review_rate_pct": 0.0
+    },
+    {
+      "ablation_id": "Minus All Independent Evidence",
+      "GREEN_pct": 64.04,
+      "RED_pct": 35.96,
+      "GREEN_observed_bust_rate_pct": 7.79,
+      "RED_observed_bust_rate_pct": 47.41,
+      "separation_ratio": 6.08,
+      "conflict_rate_pct": 0.0,
+      "expert_review_rate_pct": 0.0
+    },
+    {
+      "ablation_id": "Bust Risk AI Only",
+      "GREEN_pct": 64.04,
+      "RED_pct": 35.96,
+      "GREEN_observed_bust_rate_pct": 7.79,
+      "RED_observed_bust_rate_pct": 47.41,
+      "separation_ratio": 6.08,
+      "conflict_rate_pct": 0.0,
+      "expert_review_rate_pct": 0.0
+    }
+  ],
+  "key_findings": [
+    "Full FORTRESS framework achieves the highest RED-vs-GREEN retrospective bust-rate separation among the tested trust-framework ablations (6.49x ratio).",
+    "Minus FFD produced identical final trust-band/status metrics to Full FORTRESS on this held-out sample (5.70% GREEN bust rate, 36.99% RED bust rate, 6.49x separation), acting as a stress-based fragility/explainability diagnostic.",
+    "OOD / Novelty removal changed EXPERT REVIEW from 31.83% to 0.00%, showing strong dependency under present prototype rules.",
+    "Failure DNA and Historical Analogues drive the CONFLICT / POSSIBLE BLIND SPOT pathway (Conflict rate drops from 16.28% to 3.57% without DNA and 12.33% without Analogues)."
+  ]
+}

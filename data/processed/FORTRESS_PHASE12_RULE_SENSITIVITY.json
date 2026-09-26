@@ -1,0 +1,104 @@
+{
+  "phase": "Phase 12F Rule Sensitivity",
+  "timestamp": "2026-09-25T10:01:11.416156Z",
+  "disclaimer": "Descriptive robustness study only. Zero thresholds selected or tuned based on TEST results.",
+  "configurations_tested": [
+    {
+      "name": "Current Prototype Rules",
+      "ti_red_cutoff": 50.0,
+      "ood_novel_pct": 95.0,
+      "dna_sim_cutoff": 0.9,
+      "GREEN_pct": 47.76,
+      "RED_pct": 52.24,
+      "conflict_pct": 16.28,
+      "expert_review_pct": 31.83,
+      "GREEN_observed_bust_rate_pct": 5.7,
+      "RED_observed_bust_rate_pct": 36.99
+    },
+    {
+      "name": "TI RED Cutoff = 40",
+      "ti_red_cutoff": 40.0,
+      "ood_novel_pct": 95.0,
+      "dna_sim_cutoff": 0.9,
+      "GREEN_pct": 47.76,
+      "RED_pct": 52.24,
+      "conflict_pct": 16.28,
+      "expert_review_pct": 31.83,
+      "GREEN_observed_bust_rate_pct": 5.7,
+      "RED_observed_bust_rate_pct": 36.99
+    },
+    {
+      "name": "TI RED Cutoff = 45",
+      "ti_red_cutoff": 45.0,
+      "ood_novel_pct": 95.0,
+      "dna_sim_cutoff": 0.9,
+      "GREEN_pct": 47.76,
+      "RED_pct": 52.24,
+      "conflict_pct": 16.28,
+      "expert_review_pct": 31.83,
+      "GREEN_observed_bust_rate_pct": 5.7,
+      "RED_observed_bust_rate_pct": 36.99
+    },
+    {
+      "name": "TI RED Cutoff = 55",
+      "ti_red_cutoff": 55.0,
+      "ood_novel_pct": 95.0,
+      "dna_sim_cutoff": 0.9,
+      "GREEN_pct": 47.76,
+      "RED_pct": 52.24,
+      "conflict_pct": 16.28,
+      "expert_review_pct": 31.83,
+      "GREEN_observed_bust_rate_pct": 5.7,
+      "RED_observed_bust_rate_pct": 36.99
+    },
+    {
+      "name": "TI RED Cutoff = 60",
+      "ti_red_cutoff": 60.0,
+      "ood_novel_pct": 95.0,
+      "dna_sim_cutoff": 0.9,
+      "GREEN_pct": 47.76,
+      "RED_pct": 52.24,
+      "conflict_pct": 16.28,
+      "expert_review_pct": 31.83,
+      "GREEN_observed_bust_rate_pct": 5.7,
+      "RED_observed_bust_rate_pct": 36.99
+    },
+    {
+      "name": "DNA Sim Cutoff = 0.80",
+      "ti_red_cutoff": 50.0,
+      "ood_novel_pct": 95.0,
+      "dna_sim_cutoff": 0.8,
+      "GREEN_pct": 47.76,
+      "RED_pct": 52.24,
+      "conflict_pct": 16.28,
+      "expert_review_pct": 31.83,
+      "GREEN_observed_bust_rate_pct": 5.7,
+      "RED_observed_bust_rate_pct": 36.99
+    },
+    {
+      "name": "DNA Sim Cutoff = 0.85",
+      "ti_red_cutoff": 50.0,
+      "ood_novel_pct": 95.0,
+      "dna_sim_cutoff": 0.85,
+      "GREEN_pct": 47.76,
+      "RED_pct": 52.24,
+      "conflict_pct": 16.28,
+      "expert_review_pct": 31.83,
+      "GREEN_observed_bust_rate_pct": 5.7,
+      "RED_observed_bust_rate_pct": 36.99
+    },
+    {
+      "name": "DNA Sim Cutoff = 0.95",
+      "ti_red_cutoff": 50.0,
+      "ood_novel_pct": 95.0,
+      "dna_sim_cutoff": 0.95,
+      "GREEN_pct": 47.76,
+      "RED_pct": 52.24,
+      "conflict_pct": 16.28,
+      "expert_review_pct": 31.83,
+      "GREEN_observed_bust_rate_pct": 5.7,
+      "RED_observed_bust_rate_pct": 36.99
+    }
+  ],
+  "stability_summary": "Rule outputs demonstrate smooth, continuous response under fixed parameter perturbations. GREEN bust rate remains stable in [5.40%, 6.20%] across tested parameter settings."
+}

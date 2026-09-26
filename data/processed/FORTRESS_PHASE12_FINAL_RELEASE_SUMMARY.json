@@ -1,0 +1,53 @@
+{
+  "project": "FORTRESS — Forecast Reliability Stress-Testing & Self-Audit System",
+  "sih_id": "SIH26079",
+  "phase": "Phase 12 (Final Release Freeze)",
+  "date": "2026-09-26",
+  "dataset_sizes": {
+    "total_multi_region_rows": 348840,
+    "train_rows": 174420,
+    "validation_rows": 58140,
+    "held_out_test_rows": 116280,
+    "total_sequences": 34884,
+    "grid_points_per_region_run": 323
+  },
+  "regions": [
+    "EASTERN_UP_RECT",
+    "NORTHWEST_INDIA_RECT",
+    "CENTRAL_INDIA_RECT"
+  ],
+  "model_metrics": {
+    "model_type": "LightGBM + Isotonic Calibrator Bundle",
+    "uncalibrated_held_out_roc_auc": 0.8567,
+    "uncalibrated_held_out_pr_auc": 0.6408,
+    "uncalibrated_held_out_brier": 0.1173,
+    "calibrated_held_out_roc_auc": 0.8561,
+    "calibrated_held_out_pr_auc": 0.6408,
+    "calibrated_held_out_brier": 0.1178,
+    "green_band_observed_bust_rate_pct": 5.7,
+    "red_band_observed_bust_rate_pct": 37.02,
+    "retrospective_separation_ratio": 6.49,
+    "test_mean_trust_horizon_days": 4.65,
+    "test_median_trust_horizon_days": 4.0,
+    "full_corpus_mean_trust_horizon_days": 6.96
+  },
+  "validation_results": {
+    "phase12_final": "30/30 PASSED",
+    "phase12_def": "43/43 PASSED",
+    "phase12_abc": "20/20 PASSED",
+    "phase11_final": "30/30 PASSED",
+    "phase11_fgh": "28/28 PASSED",
+    "phase11_cde": "27/27 PASSED",
+    "phase11_multiyear_data": "24/24 PASSED",
+    "phase1_to_6": "14/14 PASSED",
+    "backend_endpoints": "48/48 RESPONSIVE",
+    "frontend_build": "0 ERRORS"
+  },
+  "accepted_commits": {
+    "phase11_merge": "949a0b0",
+    "phase12_abc": "516d047",
+    "phase12_def": "de32c4b"
+  },
+  "science_hash_status": "FROZEN_AND_UNCHANGED",
+  "release_status": "FINAL_FREEZE_READY"
+}

@@ -1,0 +1,66 @@
+{
+  "phase": "Phase 12B",
+  "sample_size": 116280,
+  "split": "HELD-OUT 2019 TEST",
+  "baselines": {
+    "baseline_1_ensemble_spread": {
+      "ROC_AUC": 0.8169,
+      "PR_AUC": 0.56,
+      "Brier": null,
+      "Precision": 0.5306,
+      "Recall": 0.5306,
+      "F1": 0.5306
+    },
+    "baseline_2_lead_day": {
+      "ROC_AUC": 0.4492,
+      "PR_AUC": 0.2283,
+      "Brier": null,
+      "Precision": 0.174,
+      "Recall": 0.2368,
+      "F1": 0.2006
+    },
+    "baseline_3_lead_climatology": {
+      "ROC_AUC": 0.5053,
+      "PR_AUC": 0.5755,
+      "Brier": 0.2009,
+      "Precision": 0.0,
+      "Recall": 0.0,
+      "F1": 0.0
+    },
+    "baseline_4_uncalibrated_bust_ai": {
+      "ROC_AUC": 0.8567,
+      "PR_AUC": 0.6408,
+      "Brier": 0.1173,
+      "Precision": 0.6621,
+      "Recall": 0.531,
+      "F1": 0.5893
+    },
+    "baseline_5_calibrated_bust_ai": {
+      "ROC_AUC": 0.8561,
+      "PR_AUC": 0.6408,
+      "Brier": 0.1178,
+      "Precision": 0.629,
+      "Recall": 0.6077,
+      "F1": 0.6182
+    },
+    "full_fortress_trust_framework": {
+      "ROC_AUC": 0.8507,
+      "PR_AUC": 0.6361,
+      "Brier": null,
+      "Precision": 0.6126,
+      "Recall": 0.6212,
+      "F1": 0.6169
+    }
+  },
+  "calibration_analysis": {
+    "uncalibrated_roc_auc": 0.8567,
+    "calibrated_roc_auc": 0.8561,
+    "uncalibrated_brier": 0.1173,
+    "calibrated_brier": 0.1178,
+    "uncalibrated_recall": 0.531,
+    "calibrated_recall": 0.6077,
+    "uncalibrated_f1": 0.5893,
+    "calibrated_f1": 0.6182,
+    "interpretation": "Isotonic calibration changed the probability mapping and, at the fixed 0.50 threshold, increased recall from 0.5310 to 0.6077 and F1 from 0.5893 to 0.6182. Brier score changed slightly from 0.1173 to 0.1178, so the held-out sample does not show a Brier-score improvement from calibration."
+  }
+}

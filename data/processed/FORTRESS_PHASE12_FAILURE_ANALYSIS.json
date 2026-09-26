@@ -1,0 +1,259 @@
+{
+  "phase": "Phase 12F",
+  "timestamp": "2026-09-25T10:01:10.866170Z",
+  "confusion_matrix_at_0_50": {
+    "overall": {
+      "TP": 15576,
+      "FP": 9188,
+      "TN": 81461,
+      "FN": 10055,
+      "FPR": 0.1014,
+      "FNR": 0.3923
+    },
+    "by_region": {
+      "EASTERN_UP_RECT": {
+        "TP": 4709,
+        "FP": 3023,
+        "TN": 26374,
+        "FN": 4654,
+        "FPR": 0.1028,
+        "FNR": 0.4971
+      },
+      "NORTHWEST_INDIA_RECT": {
+        "TP": 2356,
+        "FP": 1023,
+        "TN": 33355,
+        "FN": 2026,
+        "FPR": 0.0298,
+        "FNR": 0.4623
+      },
+      "CENTRAL_INDIA_RECT": {
+        "TP": 8511,
+        "FP": 5142,
+        "TN": 21732,
+        "FN": 3375,
+        "FPR": 0.1913,
+        "FNR": 0.2839
+      }
+    }
+  },
+  "green_band_bust_analysis": {
+    "N": 3163,
+    "region_distribution": {
+      "CENTRAL_INDIA_RECT": 1299,
+      "EASTERN_UP_RECT": 1121,
+      "NORTHWEST_INDIA_RECT": 743
+    },
+    "lead_distribution": {
+      "D1": 289,
+      "D2": 425,
+      "D3": 454,
+      "D4": 355,
+      "D5": 252,
+      "D6": 311,
+      "D7": 291,
+      "D8": 326,
+      "D9": 130,
+      "D10": 330
+    },
+    "p_bust_stats": {
+      "mean": 0.1025,
+      "min": 0.0,
+      "max": 0.1873
+    },
+    "ffd_stats": {
+      "failure_found_rate_pct": 0.0,
+      "mean_ffd_when_found": null
+    },
+    "analogue_evidence": {
+      "analogue_availability_pct": 100.0,
+      "mean_analogue_bust_rate": 0.0377
+    },
+    "failure_dna": {
+      "mean_max_similarity": 0.9998,
+      "high_match_pct_ge_090": 100.0
+    },
+    "ensemble_disagreement": {
+      "MODERATE": 2335,
+      "LOW": 828
+    },
+    "ood_category": {
+      "UNUSUAL": 2582,
+      "FAMILIAR": 581
+    },
+    "trust_index_stats": {
+      "mean": 76.24,
+      "min": 62.51,
+      "max": 90.0
+    }
+  },
+  "red_band_non_bust_analysis": {
+    "N": 38280,
+    "region_distribution": {
+      "EASTERN_UP_RECT": 15652,
+      "CENTRAL_INDIA_RECT": 11528,
+      "NORTHWEST_INDIA_RECT": 11100
+    },
+    "lead_distribution": {
+      "D1": 3456,
+      "D2": 2774,
+      "D3": 2561,
+      "D4": 3139,
+      "D5": 3504,
+      "D6": 4020,
+      "D7": 4322,
+      "D8": 4584,
+      "D9": 5059,
+      "D10": 4861
+    },
+    "status_distribution": {
+      "EXPERT REVIEW": 18495,
+      "CONFLICT / POSSIBLE BLIND SPOT": 16288,
+      "SUPPORTED WARNING": 3497
+    },
+    "p_bust_stats": {
+      "mean": 0.3017,
+      "median": 0.2593
+    },
+    "ood_category": {
+      "HIGHLY NOVEL": 29671,
+      "UNUSUAL": 7886,
+      "FAMILIAR": 723
+    },
+    "analogue_availability_pct": 100.0,
+    "ffd_failure_found_rate_pct": 28.46,
+    "ensemble_disagreement": {
+      "MODERATE": 17705,
+      "HIGH": 15828,
+      "LOW": 4747
+    }
+  },
+  "conflict_status_analysis": {
+    "N": 18928,
+    "observed_bust_rate_pct": 13.95,
+    "p_bust_stats": {
+      "mean": 0.1203,
+      "median": 0.1106,
+      "min": 0.0,
+      "max": 0.1957
+    },
+    "ood_rate_pct": 67.52,
+    "analogue_availability_pct": 100.0,
+    "failure_dna_high_match_pct_ge_090": 100.0,
+    "ensemble_disagreement_high_pct": 19.37,
+    "ffd_failure_found_rate_pct": 0.0,
+    "region_distribution": {
+      "NORTHWEST_INDIA_RECT": 7862,
+      "EASTERN_UP_RECT": 6731,
+      "CENTRAL_INDIA_RECT": 4335
+    },
+    "lead_distribution": {
+      "D1": 1645,
+      "D2": 1039,
+      "D3": 1404,
+      "D4": 1687,
+      "D5": 1894,
+      "D6": 2028,
+      "D7": 2070,
+      "D8": 2006,
+      "D9": 2439,
+      "D10": 2716
+    }
+  },
+  "code_logic_inspections": {
+    "expert_review_ood_dependency": "Rule inspection confirms OOD (`ood_cat == 'HIGHLY NOVEL'`) is an explicit mandatory conjunct in get_status() line 106. Consequently, setting OOD to FAMILIAR makes EXPERT REVIEW rate drop to 0.00%.",
+    "ffd_decision_role": "Rule inspection confirms FFD acts as a risk/stability vote modifier in get_status() and a continuous score penalty (-10/-20) in trust_index. In the 2019 test set, removing FFD altered vote counts but no row crossed a status threshold, yielding identical trust band assignments while acting as a diagnostic fragility signal.",
+    "failure_dna_decision_role": "Rule inspection confirms Failure DNA similarity (>= 0.90) adds a contradicting risk vote. For LOW AI risk predictions, having >= 2 risk votes triggers CONFLICT / POSSIBLE BLIND SPOT. Removing Failure DNA caused Conflict rate to drop from 16.28% to 3.57%."
+  },
+  "edge_cases": {
+    "p_bust_near_050": {
+      "criteria": "0.48 <= P(Bust) <= 0.52",
+      "N": 2011,
+      "observed_bust_rate_pct": 43.96
+    },
+    "trust_index_near_boundary": {
+      "criteria": "48.0 <= Trust Index <= 52.0",
+      "N": 1963,
+      "reliability_band_distribution": {
+        "RED": 1963
+      }
+    },
+    "ood_near_cutoff": {
+      "criteria": "OOD score near 95th percentile",
+      "N": 49790,
+      "status_distribution": {
+        "EXPERT REVIEW": 37009,
+        "CONFLICT / POSSIBLE BLIND SPOT": 12781
+      }
+    },
+    "dna_near_085": {
+      "criteria": "0.83 <= Failure DNA max sim <= 0.87",
+      "N": 0,
+      "dna_evidence_counts": {}
+    },
+    "ffd_near_085": {
+      "criteria": "0.83 <= FFD <= 0.87 (failure found)",
+      "N": 135,
+      "status_distribution": {
+        "EXPERT REVIEW": 111,
+        "SUPPORTED WARNING": 24
+      }
+    },
+    "no_analogue_available": {
+      "criteria": "analogue_available == 0",
+      "N": 0,
+      "status_distribution": {}
+    },
+    "no_ffd_failure_found": {
+      "criteria": "ffd_failure_found == 0",
+      "N": 88775,
+      "status_distribution": {
+        "SUPPORTED RELIABILITY": 55532,
+        "CONFLICT / POSSIBLE BLIND SPOT": 18928,
+        "EXPERT REVIEW": 10803,
+        "SUPPORTED WARNING": 3512
+      }
+    }
+  },
+  "statistical_uncertainty_95ci": {
+    "bootstrap_iterations": 50,
+    "seed": 42,
+    "overall_roc_auc_ci": {
+      "mean": 0.8554,
+      "ci_lower": 0.8459,
+      "ci_upper": 0.8657
+    },
+    "region_roc_auc_ci": {
+      "EASTERN_UP_RECT": {
+        "mean": 0.8024,
+        "ci_lower": 0.7742,
+        "ci_upper": 0.822
+      },
+      "NORTHWEST_INDIA_RECT": {
+        "mean": 0.8798,
+        "ci_lower": 0.8573,
+        "ci_upper": 0.908
+      },
+      "CENTRAL_INDIA_RECT": {
+        "mean": 0.8488,
+        "ci_lower": 0.8356,
+        "ci_upper": 0.8653
+      }
+    },
+    "green_bust_rate_ci": {
+      "mean": 5.7856,
+      "ci_lower": 4.9757,
+      "ci_upper": 6.6175
+    },
+    "red_bust_rate_ci": {
+      "mean": 37.0224,
+      "ci_lower": 35.3704,
+      "ci_upper": 39.3935
+    },
+    "trust_horizon_mean_ci": {
+      "mean": 4.6476,
+      "ci_lower": 4.5598,
+      "ci_upper": 4.7104
+    }
+  }
+}

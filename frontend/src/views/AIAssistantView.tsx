@@ -161,7 +161,7 @@ export const AIAssistantView: React.FC<AIAssistantViewProps> = ({
   };
 
   return (
-    <div className="h-full w-full overflow-hidden p-4 space-y-3 bg-[#F5FAF8] text-[#102A2A] select-none flex flex-col justify-between">
+    <div className="h-full w-full overflow-hidden p-4 space-y-3 bg-[#F5FAF8] text-[#102A2A] flex flex-col justify-between">
       {/* Header Bar */}
       <div className="bg-white border border-[#D2E5DF] rounded-xl p-3.5 shadow-xs flex items-center justify-between flex-shrink-0">
         <div className="flex items-center gap-3">
@@ -171,7 +171,7 @@ export const AIAssistantView: React.FC<AIAssistantViewProps> = ({
           <div>
             <span className="text-[10px] font-extrabold text-[#00A878] uppercase tracking-wider">CONTEXT-GROUNDED VOICE & MULTILINGUAL ENGINE</span>
             <h1 className="text-lg font-extrabold text-[#102A2A] mt-0.5 tracking-tight flex items-center gap-2">
-              FORTRESS Explanation Assistant — Phase 10B Voice
+              FORTRESS Explanation Assistant — Multilingual &amp; Voice
             </h1>
             <p className="text-xs text-[#617874] mt-0.5 font-medium">
               Multilingual context-grounded forecast reliability explanation with browser-native speech input & synthesis.

@@ -31,7 +31,7 @@ async def lifespan(app: FastAPI):
 
 app = FastAPI(
     title="FORTRESS Backend API",
-    description="Forecast Reliability Stress-Testing & Self-Audit System (SIH26079)",
+    description="Forecast Reliability Stress-Testing & Self-Audit System",
     version="1.0.0",
     lifespan=lifespan
 )

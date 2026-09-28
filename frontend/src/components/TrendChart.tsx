@@ -67,7 +67,7 @@ export const TrendChart: React.FC<TrendChartProps> = ({
   };
 
   return (
-    <div className="bg-white border border-[#C8EAD9] rounded-t-xl shadow-md flex flex-col h-full select-none text-[#033A2B]">
+    <div className="bg-white border border-[#C8EAD9] rounded-t-xl shadow-md flex flex-col h-full text-[#033A2B]">
       {/* Top Bar: Ultra Light Green Header Tabs + Level View Toggle */}
       <div className="px-4 py-1.5 border-b border-[#C8EAD9] flex items-center justify-between bg-[#F4FAF6] rounded-t-xl">
         {/* Left Metric Tabs */}

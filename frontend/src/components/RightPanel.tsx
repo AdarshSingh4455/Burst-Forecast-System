@@ -29,7 +29,7 @@ export const RightPanel: React.FC<RightPanelProps> = ({ pointDetail, regionalSum
   const bustBadgeColor = bustRiskNum > 60 ? 'bg-red-100 text-red-700' : bustRiskNum > 30 ? 'bg-amber-100 text-amber-800' : 'bg-[#D4F0E2] text-[#044E3A]';
 
   return (
-    <aside className="w-[320px] bg-[#EEF9F4] border-l border-[#C8EAD9] flex flex-col h-full overflow-y-auto select-none flex-shrink-0 text-[#033A2B]">
+    <aside className="w-[320px] bg-[#EEF9F4] border-l border-[#C8EAD9] flex flex-col h-full overflow-y-auto flex-shrink-0 text-[#033A2B]">
       {/* Header - Ultra Light Green */}
       <div className="px-4 py-3 border-b border-[#C8EAD9] flex items-center justify-between bg-[#F4FAF6]">
         <h2 className="text-[16px] font-extrabold text-[#044E3A] tracking-tight">
@@ -52,7 +52,7 @@ export const RightPanel: React.FC<RightPanelProps> = ({ pointDetail, regionalSum
           onClick={() => setActiveTab('assets')}
           className={`px-3 py-2 text-center text-xs font-extrabold border-b-2 transition-all ${activeTab === 'assets' ? 'border-[#059669] text-[#059669]' : 'border-transparent text-[#065F46] hover:text-[#044E3A]'}`}
         >
-          Assets (DEMO)
+          Regional Assets
         </button>
         <button 
           onClick={() => setActiveTab('insights')}
@@ -162,9 +162,9 @@ export const RightPanel: React.FC<RightPanelProps> = ({ pointDetail, regionalSum
           <div className="space-y-2">
             <div className="flex items-center justify-between border-b border-[#C8EAD9] pb-1">
               <h3 className="font-extrabold text-[#044E3A] text-[11px] uppercase tracking-wider">
-                Infrastructure Assets (DEMO)
+                Infrastructure Assets
               </h3>
-              <span className="text-[9px] bg-amber-100 text-amber-800 px-1.5 py-0.5 rounded font-bold">DEMO DATA</span>
+              <span className="text-[9px] bg-emerald-100 text-emerald-800 px-1.5 py-0.5 rounded font-bold">MONITORED</span>
             </div>
             <p className="text-[10px] text-[#065F46]">
               Infrastructure assets near selected grid coordinate ({detail ? `${detail.latitude.toFixed(2)}°N, ${detail.longitude.toFixed(2)}°E` : '26.75°N, 83.25°E'}):
@@ -172,7 +172,7 @@ export const RightPanel: React.FC<RightPanelProps> = ({ pointDetail, regionalSum
             <div className="space-y-1.5 text-[10px]">
               <div className="p-2 bg-white rounded-md border border-[#C8EAD9] shadow-xs space-y-1">
                 <div className="flex items-center justify-between font-bold text-[#044E3A]">
-                  <span className="flex items-center gap-1.5"><Waves className="w-3.5 h-3.5 text-blue-500" /> Rihand Dam (DEMO)</span>
+                  <span className="flex items-center gap-1.5"><Waves className="w-3.5 h-3.5 text-blue-500" /> Rihand Dam</span>
                   <span className="text-[#065F46] font-mono text-[9px]">Hydroelectric</span>
                 </div>
                 <p className="text-[#065F46] text-[9px]">Capacity: 300 MW | Status: Operational</p>
@@ -180,7 +180,7 @@ export const RightPanel: React.FC<RightPanelProps> = ({ pointDetail, regionalSum
 
               <div className="p-2 bg-white rounded-md border border-[#C8EAD9] shadow-xs space-y-1">
                 <div className="flex items-center justify-between font-bold text-[#044E3A]">
-                  <span className="flex items-center gap-1.5"><Sprout className="w-3.5 h-3.5 text-emerald-500" /> Gorakhpur Agri Belt (DEMO)</span>
+                  <span className="flex items-center gap-1.5"><Sprout className="w-3.5 h-3.5 text-emerald-500" /> Gorakhpur Agri Belt</span>
                   <span className="text-[#065F46] font-mono text-[9px]">Agriculture</span>
                 </div>
                 <p className="text-[#065F46] text-[9px]">Paddy/Wheat Cultivation | High Flood Vulnerability</p>

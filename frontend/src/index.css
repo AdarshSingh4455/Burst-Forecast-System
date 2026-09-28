@@ -2,15 +2,540 @@
 @tailwind components;
 @tailwind utilities;
 
-body {
-  margin: 0;
-  padding: 0;
-  overflow-x: hidden;
+/* ========================================================
+   FORTRESS — GLOBAL TYPOGRAPHY & ANTI-BLUR FOUNDATION
+   ======================================================== */
+
+@layer base {
+  *, *::before, *::after {
+    box-sizing: border-box;
+  }
+
+  html {
+    font-size: 14px;
+    -webkit-text-size-adjust: 100%;
+  }
+
+  body {
+    margin: 0;
+    padding: 0;
+    overflow-x: hidden;
+    font-family: "Inter", "Manrope", "Source Sans 3", system-ui, -apple-system,
+      BlinkMacSystemFont, "Segoe UI", sans-serif;
+    font-synthesis: none;
+    text-rendering: optimizeLegibility;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    background-color: #F7FAF9;
+    color: #334155;
+    font-size: 14px;
+    line-height: 1.5;
+  }
+
+  /* Prevent text from being scaled by sub-pixel issues */
+  h1, h2, h3, h4, h5, h6, p, span, label, td, th, li, button, input, select, textarea {
+    font-synthesis: none;
+    text-rendering: optimizeLegibility;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  /* Tabular numbers for data */
+  .tabular-nums, td, .font-mono {
+    font-variant-numeric: tabular-nums;
+  }
 }
+
+/* ========================================================
+   LEAFLET / MAP — SHARP MAP RENDERING
+   ======================================================== */
 
 .leaflet-container {
   width: 100%;
   height: 100%;
   z-index: 10;
-  border-radius: 0.5rem;
+  border-radius: 0;
+  font-family: "Inter", system-ui, sans-serif !important;
+  font-synthesis: none;
+  -webkit-font-smoothing: antialiased;
 }
+
+.leaflet-tile {
+  image-rendering: -webkit-optimize-contrast;
+  image-rendering: crisp-edges;
+}
+
+.leaflet-popup-content-wrapper {
+  border-radius: 10px !important;
+  box-shadow: 0 4px 20px rgba(15, 39, 71, 0.12) !important;
+  font-family: "Inter", system-ui, sans-serif !important;
+  font-synthesis: none;
+  -webkit-font-smoothing: antialiased;
+}
+
+.leaflet-popup-content {
+  margin: 0 !important;
+  font-family: "Inter", system-ui, sans-serif !important;
+}
+
+.leaflet-tooltip {
+  font-family: "Inter", system-ui, sans-serif !important;
+  font-synthesis: none;
+  -webkit-font-smoothing: antialiased;
+  border-radius: 6px !important;
+}
+
+/* ========================================================
+   FORTRESS — RAINFALL / MONSOON INTELLIGENCE DESIGN TOKENS
+   MONSOON BLUE + AQUA + STORM NAVY
+   ======================================================== */
+
+:root, [data-theme="light"] {
+  /* Surface & backgrounds */
+  --app-bg: #F4F9FC;
+  --surface: #FFFFFF;
+  --surface-soft: #EAF5FA;
+  --surface-secondary: #EDF7FB;
+  --surface-blue: #EDF7FB;
+
+  --header-bg: #FFFFFF;
+  --sidebar-bg: #F2F8FB;
+  --sidebar-active-bg: #E2F2F9;
+  --sidebar-active-text: #0F5F91;
+  --sidebar-active-accent: #1677B8;
+  --sidebar-hover: #EAF4F9;
+  --sidebar-text: #334E68;
+  --sidebar-text-muted: #6B8193;
+
+  /* Primary Brand: Monsoon Blue */
+  --primary: #1677B8;
+  --primary-hover: #0F5F91;
+  --primary-light: #EDF7FB;
+  --primary-border: #B9E1F2;
+
+  /* Secondary: Aqua */
+  --secondary: #21B6B7;
+  --secondary-hover: #15999A;
+  --secondary-light: #EAF8F8;
+
+  /* Typography */
+  --heading: #102A43;
+  --text-primary: #243B53;
+  --text-body: #334E68;
+  --text-secondary: #6B8193;
+  --text-muted: #8DA2AF;
+
+  /* Borders */
+  --border: #D5E7EF;
+  --border-soft: #E5F0F4;
+  --border-strong: #BCCFDC;
+
+  /* Status Colors (Scientific Semantics Preserved) */
+  --status-green: #22C55E;
+  --status-yellow: #FBBF24;
+  --status-red: #EF4444;
+  --status-purple: #8B5CF6;
+  --status-gray: #94A3B8;
+
+  /* Chart Colors */
+  --chart-grid: #E5F0F4;
+  --chart-axis: #6B8193;
+  --chart-primary: #1677B8;
+  --chart-secondary: #21B6B7;
+
+  /* Backward Compatibility Aliases */
+  --fortress-bg: #F4F9FC;
+  --fortress-card: #FFFFFF;
+  --fortress-section-bg: #EAF5FA;
+  --fortress-emerald: #1677B8;
+  --fortress-emerald-hover: #0F5F91;
+  --fortress-emerald-light: #EDF7FB;
+  --fortress-emerald-border: #B9E1F2;
+  --fortress-blue: #1677B8;
+  --fortress-navy: #102A43;
+  --fortress-text-primary: #243B53;
+  --fortress-text-secondary: #6B8193;
+  --fortress-text-muted: #8DA2AF;
+  --fortress-text-heading: #102A43;
+  --fortress-border: #D5E7EF;
+  --fortress-border-soft: #E5F0F4;
+  --fortress-green: #22C55E;
+  --fortress-yellow: #FBBF24;
+  --fortress-red: #EF4444;
+  --fortress-purple: #8B5CF6;
+  --fortress-gray: #94A3B8;
+}
+
+[data-theme="dark"], .dark {
+  /* Surface & backgrounds */
+  --app-bg: #071923;
+  --surface: #0D2530;
+  --surface-soft: #102C39;
+  --surface-secondary: #123441;
+  --surface-blue: #133947;
+
+  --header-bg: #091E29;
+  --sidebar-bg: #0A202B;
+  --sidebar-active-bg: #123949;
+  --sidebar-active-text: #D6E6ED;
+  --sidebar-active-accent: #38A9E0;
+  --sidebar-hover: #0F2D3C;
+  --sidebar-text: #D6E6ED;
+  --sidebar-text-muted: #708995;
+
+  /* Primary Brand: Bright Rain Blue */
+  --primary: #38A9E0;
+  --primary-hover: #5CBCE8;
+  --primary-light: #123949;
+  --primary-border: #264653;
+
+  /* Secondary: Aqua */
+  --secondary: #2DD4BF;
+  --secondary-hover: #5EEAD4;
+  --secondary-light: #10363C;
+
+  /* Typography */
+  --heading: #F1F8FB;
+  --text-primary: #E4F0F5;
+  --text-body: #D6E6ED;
+  --text-secondary: #91AAB6;
+  --text-muted: #708995;
+
+  /* Borders */
+  --border: #264653;
+  --border-soft: #1D3944;
+  --border-strong: #335968;
+
+  /* Status Colors */
+  --status-green: #34D399;
+  --status-yellow: #FBBF24;
+  --status-red: #F87171;
+  --status-purple: #A78BFA;
+  --status-gray: #94A3B8;
+
+  /* Chart Colors */
+  --chart-grid: #1F3E4B;
+  --chart-axis: #91AAB6;
+  --chart-primary: #38A9E0;
+  --chart-secondary: #2DD4BF;
+
+  /* Backward Compatibility Aliases */
+  --fortress-bg: #071923;
+  --fortress-card: #0D2530;
+  --fortress-section-bg: #123441;
+  --fortress-emerald: #38A9E0;
+  --fortress-emerald-hover: #5CBCE8;
+  --fortress-emerald-light: #123949;
+  --fortress-emerald-border: #264653;
+  --fortress-blue: #38A9E0;
+  --fortress-navy: #F1F8FB;
+  --fortress-text-primary: #E4F0F5;
+  --fortress-text-secondary: #91AAB6;
+  --fortress-text-muted: #708995;
+  --fortress-text-heading: #F1F8FB;
+  --fortress-border: #264653;
+  --fortress-border-soft: #1D3944;
+  --fortress-green: #34D399;
+  --fortress-yellow: #FBBF24;
+  --fortress-red: #F87171;
+  --fortress-purple: #A78BFA;
+  --fortress-gray: #94A3B8;
+}
+
+/* ========================================================
+   FORTRESS — CARD SYSTEM
+   ======================================================== */
+
+.fortress-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  box-shadow: 0 1px 2px rgba(7, 25, 35, 0.06);
+  transition: box-shadow 150ms ease, background-color 180ms ease, border-color 180ms ease;
+}
+
+.fortress-card:hover {
+  box-shadow: 0 4px 14px rgba(7, 25, 35, 0.12);
+}
+
+/* ========================================================
+   FORTRESS — SCROLLBAR (Subtle)
+   ======================================================== */
+
+::-webkit-scrollbar {
+  width: 4px;
+  height: 4px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #CBD5E1;
+  border-radius: 2px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #94A3B8;
+}
+
+/* ========================================================
+   FORTRESS — ANTI-BLUR GUARD
+   No filter, no backdrop-filter, no text-shadow on text
+   ======================================================== */
+
+/* Remove any accidental blur on text-containing elements */
+.recharts-text, .recharts-label, .recharts-legend-item-text {
+  font-family: "Inter", system-ui, sans-serif !important;
+  font-synthesis: none !important;
+  -webkit-font-smoothing: antialiased !important;
+}
+
+/* Recharts sharp SVG */
+.recharts-surface {
+  shape-rendering: geometricPrecision;
+}
+
+/* ========================================================
+   FORTRESS — STATUS BADGES
+   ======================================================== */
+
+.badge-green {
+  background: var(--status-green-bg, #ECFDF5);
+  color: var(--status-green-text, #15803D);
+  border-radius: 6px;
+  font-size: 11px;
+  font-weight: 600;
+  padding: 2px 8px;
+}
+
+.badge-yellow {
+  background: var(--status-yellow-bg, #FFFBEB);
+  color: var(--status-yellow-text, #B45309);
+  border-radius: 6px;
+  font-size: 11px;
+  font-weight: 600;
+  padding: 2px 8px;
+}
+
+.badge-red {
+  background: var(--status-red-bg, #FEF2F2);
+  color: var(--status-red-text, #B91C1C);
+  border-radius: 6px;
+  font-size: 11px;
+  font-weight: 600;
+  padding: 2px 8px;
+}
+
+.badge-purple {
+  background: var(--status-purple-bg, #F5F3FF);
+  color: var(--status-purple-text, #6D28D9);
+  border-radius: 6px;
+  font-size: 11px;
+  font-weight: 600;
+  padding: 2px 8px;
+}
+
+.badge-gray {
+  background: var(--status-gray-bg, #F1F5F9);
+  color: var(--status-gray-text, #64748B);
+  border-radius: 6px;
+  font-size: 11px;
+  font-weight: 600;
+  padding: 2px 8px;
+}
+
+[data-theme="dark"] .badge-green, .dark .badge-green {
+  background: rgba(34, 197, 94, 0.18);
+  color: #34D399;
+}
+[data-theme="dark"] .badge-yellow, .dark .badge-yellow {
+  background: rgba(251, 191, 36, 0.18);
+  color: #FBBF24;
+}
+[data-theme="dark"] .badge-red, .dark .badge-red {
+  background: rgba(239, 68, 68, 0.20);
+  color: #F87171;
+}
+[data-theme="dark"] .badge-purple, .dark .badge-purple {
+  background: rgba(139, 92, 246, 0.20);
+  color: #A78BFA;
+}
+[data-theme="dark"] .badge-gray, .dark .badge-gray {
+  background: rgba(148, 163, 184, 0.16);
+  color: #CBD5E1;
+}
+
+/* ========================================================
+   FORTRESS — BUTTONS
+   ======================================================== */
+
+.btn-primary {
+  background: var(--primary);
+  color: white;
+  height: 38px;
+  padding: 0 16px;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 600;
+  border: none;
+  cursor: pointer;
+  transition: background-color 150ms ease, opacity 150ms ease;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.btn-primary:hover {
+  background: var(--primary-hover);
+}
+
+.btn-secondary {
+  background: var(--surface);
+  color: var(--heading);
+  height: 38px;
+  padding: 0 16px;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 600;
+  border: 1px solid var(--border);
+  cursor: pointer;
+  transition: background-color 150ms ease, border-color 150ms ease, color 150ms ease;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.btn-secondary:hover {
+  background: var(--surface-soft);
+  border-color: var(--border-strong);
+}
+
+/* ========================================================
+   FORTRESS — TABLES
+   ======================================================== */
+
+.fortress-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+  color: var(--text-body);
+}
+
+.fortress-table th {
+  background: var(--surface-soft);
+  font-size: 11.5px;
+  font-weight: 650;
+  color: var(--text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  padding: 8px 12px;
+  text-align: left;
+  border-bottom: 1px solid var(--border);
+}
+
+.fortress-table td {
+  padding: 8px 12px;
+  border-bottom: 1px solid var(--border-soft);
+  height: 36px;
+  font-variant-numeric: tabular-nums;
+  color: var(--text-body);
+}
+
+.fortress-table tr:last-child td {
+  border-bottom: none;
+}
+
+.fortress-table tr:hover td {
+  background: var(--surface-soft);
+}
+
+/* ========================================================
+   FORTRESS — TAILWIND EXTENSIONS
+   ======================================================== */
+
+@layer utilities {
+  .font-650 {
+    font-weight: 650;
+  }
+
+  .shadow-fortress {
+    box-shadow: 0 1px 2px rgba(15, 39, 71, 0.04);
+  }
+
+  .shadow-fortress-hover {
+    box-shadow: 0 4px 14px rgba(15, 39, 71, 0.07);
+  }
+
+  /* Override any inadvertent blur */
+  .no-blur {
+    filter: none !important;
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+  }
+}
+
+/* ========================================================
+   FORTRESS — MOUSE TEXT SELECTION & CURSOR HIGHLIGHT
+   ======================================================== */
+
+/* Universal text selection highlight */
+::selection {
+  background-color: #1677B8 !important;
+  color: #FFFFFF !important;
+}
+
+::-moz-selection {
+  background-color: #1677B8 !important;
+  color: #FFFFFF !important;
+}
+
+[data-theme="dark"] ::selection {
+  background-color: #38A9E0 !important;
+  color: #071923 !important;
+}
+
+[data-theme="dark"] ::-moz-selection {
+  background-color: #38A9E0 !important;
+  color: #071923 !important;
+}
+
+/* Enable text selection on all content elements */
+body, div, p, span, h1, h2, h3, h4, h5, h6, table, tr, td, th, label, section, article {
+  -webkit-user-select: text;
+  -moz-user-select: text;
+  -ms-user-select: text;
+  user-select: text;
+}
+
+/* Interactive elements get pointer cursor and smooth hover highlight */
+button, a, select, [role="button"], input[type="checkbox"], input[type="radio"], input[type="submit"] {
+  cursor: pointer;
+}
+
+/* Card hover highlighting when mouse cursor enters */
+.fortress-card, [style*="border: 1px solid #DDE8E4"], [style*="border: 1px solid var(--border)"] {
+  transition: transform 0.15s ease, box-shadow 0.15s ease, border-color 0.15s ease;
+}
+
+.fortress-card:hover {
+  border-color: var(--primary) !important;
+  box-shadow: 0 4px 16px rgba(22, 119, 184, 0.12) !important;
+}
+
+[data-theme="dark"] .fortress-card:hover {
+  border-color: var(--primary) !important;
+  box-shadow: 0 4px 18px rgba(56, 169, 224, 0.20) !important;
+}
+
+/* Interactive table row mouse hover highlighting */
+tr:hover td {
+  background-color: var(--surface-soft);
+  transition: background-color 0.1s ease;
+}
+
+/* Leaflet interactive vectors pointer cursor & hover */
+.leaflet-interactive {
+  cursor: pointer !important;
+}
+

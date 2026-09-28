@@ -1,40 +1,59 @@
-# Raw / large weather data
+# ========================================================
+# FORTRESS — GIT IGNORE CONFIGURATION
+# ========================================================
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+.venv/
+venv/
+ENV/
+env/
+
+# Node & Frontend
+node_modules/
+frontend/node_modules/
+dist/
+frontend/dist/
+.vite/
+.cache/
+
+# Raw / Large Weather Datasets (GEFS / ERA5 GRIB2 & NetCDF)
 data/raw/
 data/interim/
 data/phase11/
-
-
-# Weather data formats
 *.grib
 *.grib2
 *.grb2
 *.nc
 *.zarr
 
-# Python cache
-__pycache__/
-*.pyc
-
-# Conda / virtual environments
-.venv/
-venv/
-
-# Node / JS
-node_modules/
-dist/
-frontend/node_modules/
-frontend/dist/
-
-# Jupyter
-.ipynb_checkpoints/
-
-# Environment / secrets
+# Environment & Secrets
 .env
+.env.*
+!.env.example
 
-# VS Code / IDE
+# OS & Editors
+.DS_Store
+Thumbs.db
+desktop.ini
 .vscode/
 .idea/
 
-# Windows / Mac junk
-Thumbs.db
-.DS_Store
+# Logs & Temporary Files
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+tmp/
+temp/
+scratch/
+*.tmp
+*.bak

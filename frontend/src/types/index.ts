@@ -17,8 +17,17 @@ export interface MapPoint {
   latitude: number;
   longitude: number;
   value: number;
-  reliability_band: 'GREEN' | 'YELLOW' | 'RED';
+  reliability_band: 'GREEN' | 'YELLOW' | 'RED' | string;
   self_audit_status: string;
+  rainfall?: number;
+  bust_probability?: number;
+  ffd?: number;
+  fragility_auc?: number;
+  trust_index?: number;
+  ood_score?: number;
+  ensemble_disagreement_score?: number;
+  region?: string;
+  region_id?: string;
 }
 
 export type GridPointMap = MapPoint;

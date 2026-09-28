@@ -83,9 +83,6 @@ def calc_calibration_bins(y_true, probs, n_bins=10):
 
 def log_prog(msg):
     print(msg, flush=True)
-    with open("scratch/progress.txt", "a") as f:
-        f.write(msg + "\n")
-        f.flush()
 
 def evaluate_calibration_split(y_true, probs):
     roc = safe_round(roc_auc_score(y_true, probs), 4)
@@ -108,9 +105,6 @@ def evaluate_calibration_split(y_true, probs):
     }
 
 def main():
-    with open("scratch/progress.txt", "w") as f:
-        f.write("MAIN STARTED\n")
-
     log_prog("============================================")
     log_prog("FORTRESS PHASE 12D + 12E + 12F SUITE BUILDER")
     log_prog("============================================")

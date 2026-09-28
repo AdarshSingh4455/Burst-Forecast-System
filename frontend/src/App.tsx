@@ -3,6 +3,7 @@ import { Header } from './components/Header';
 import { Sidebar } from './components/Sidebar';
 import { AiAssistantPopup } from './components/AiAssistantPopup';
 import { OverviewView } from './views/OverviewView';
+import { ValidationResearchView } from './views/ValidationResearchView';
 import { StressLabView } from './views/StressLabView';
 import { FailureIntelligenceView } from './views/FailureIntelligenceView';
 import { IndependentEvidenceView } from './views/IndependentEvidenceView';
@@ -175,6 +176,13 @@ export const App: React.FC = () => {
       .catch((err) => console.error('Passport fetch error:', err));
   }, [selectedRun, selectedLat, selectedLon, selectedLead]);
 
+  useEffect(() => {
+    if (activeTab === 'ai_assistant') {
+      setIsAiOpen(true);
+      setActiveTab('overview');
+    }
+  }, [activeTab]);
+
   const handlePointSelect = (lat: number, lon: number) => {
     setSelectedLat(lat);
     setSelectedLon(lon);
@@ -183,37 +191,28 @@ export const App: React.FC = () => {
   const renderActiveView = () => {
     switch (activeTab) {
       case 'india_map':
+      case 'spatial_explorer':
+      case 'explorer':
+      case 'forecast_explorer':
+      case 'forecast-explorer':
         return (
-          <div className="h-full w-full flex flex-col overflow-hidden bg-[#EEF9F4] select-none p-3 space-y-3">
-            <div className="flex-1 grid grid-cols-12 gap-3 min-h-0 overflow-hidden">
-              <div className="col-span-8 flex flex-col gap-3 h-full min-h-0 overflow-hidden">
-                <div className="flex-1 min-h-[300px] rounded-xl overflow-hidden shadow-sm border border-[#C8EAD9]">
-                  <MapView
-                    mapPoints={gridPoints}
-                    selectedMetric={selectedMetric}
-                    selectedLat={selectedLat ?? 26.75}
-                    selectedLon={selectedLon ?? 83.25}
-                    onSelectPoint={handlePointSelect}
-                  />
-                </div>
-                <div className="h-[220px] rounded-xl overflow-hidden shadow-sm flex-shrink-0">
-                  <TrendChart
-                    trendData={trendData}
-                    selectedLat={selectedLat}
-                    selectedLon={selectedLon}
-                    selectedMetric={selectedMetric}
-                    onNavigateTab={(tab) => setActiveTab(tab)}
-                  />
-                </div>
-              </div>
-              <div className="col-span-4 h-full min-h-0 rounded-xl overflow-hidden shadow-sm border border-[#C8EAD9]">
-                <RightPanel
-                  pointDetail={selectedPointDetail}
-                  regionalSummary={regionalSummary}
-                  onOpenPassport={() => setActiveTab('passport')}
-                />
-              </div>
-            </div>
+          <div className="h-full w-full overflow-hidden p-0 relative bg-[#021520]">
+            <MapView
+              mapPoints={gridPoints}
+              selectedMetric={selectedMetric}
+              setSelectedMetric={setSelectedMetric}
+              selectedLat={selectedLat ?? 26.75}
+              selectedLon={selectedLon ?? 83.25}
+              onSelectPoint={handlePointSelect}
+              selectedRegion={selectedRegion}
+              setSelectedRegion={setSelectedRegion}
+              selectedLead={selectedLead}
+              setSelectedLead={setSelectedLead}
+              selectedRun={selectedRun}
+              setSelectedRun={setSelectedRun}
+              runsList={metadata?.forecast_init_dates || []}
+              onOpenPassport={() => setActiveTab('passport')}
+            />
           </div>
         );
       case 'overview':
@@ -302,14 +301,23 @@ export const App: React.FC = () => {
         );
       case 'ai_assistant':
         return (
-          <AIAssistantView
-            pointDetail={selectedPointDetail}
+          <OverviewView
             selectedRun={selectedRun}
             selectedLead={selectedLead}
+            selectedMetric={selectedMetric}
+            gridPoints={gridPoints}
             selectedLat={selectedLat}
             selectedLon={selectedLon}
+            onSelectPoint={handlePointSelect}
+            regionalSummary={regionalSummary}
+            trendData={trendData}
+            pointDetail={selectedPointDetail}
+            onOpenPassport={() => setActiveTab('passport')}
+            onNavigateTab={(tab) => setActiveTab(tab)}
           />
         );
+      case 'validation_research':
+        return <ValidationResearchView />;
       case 'settings':
         return <SettingsView />;
       case 'about':
@@ -335,8 +343,8 @@ export const App: React.FC = () => {
   };
 
   return (
-    <div className="flex h-screen w-screen overflow-hidden bg-[#EEF9F4] text-[#033A2B] font-sans select-none relative">
-      {/* Light Mint Sidebar */}
+    <div className="flex h-screen w-screen overflow-hidden bg-[var(--app-bg)] text-[var(--text-body)] font-sans relative transition-colors">
+      {/* Sidebar */}
       <Sidebar 
         activeTab={activeTab} 
         setActiveTab={setActiveTab} 
@@ -345,7 +353,7 @@ export const App: React.FC = () => {
 
       {/* Main Content Area */}
       <div className="flex-1 flex flex-col min-w-0 overflow-hidden h-full">
-        {/* Top Header - Ultra Light Green */}
+        {/* Top Header */}
         <Header
           metadata={metadata}
           selectedRun={selectedRun}
@@ -360,11 +368,11 @@ export const App: React.FC = () => {
         />
 
         {/* Active View Container */}
-        <div className="flex-1 overflow-hidden h-full min-h-0 bg-[#EEF9F4]">
+        <div className="flex-1 overflow-hidden h-full min-h-0 bg-[var(--app-bg)] transition-colors">
           {error ? (
-            <div className="p-8 text-center text-red-600 bg-red-50 m-6 border border-red-200 rounded-xl shadow-md">
+            <div className="p-8 text-center text-red-600 bg-red-50 dark:bg-red-950/30 m-6 border border-red-200 dark:border-red-800 rounded-xl shadow-md">
               <p className="font-bold text-lg mb-2">Backend Connection Error</p>
-              <p className="text-sm text-red-800 font-mono">{error}</p>
+              <p className="text-sm text-red-800 dark:text-red-400 font-mono">{error}</p>
             </div>
           ) : (
             renderActiveView()
@@ -387,7 +395,7 @@ export const App: React.FC = () => {
       {/* Floating Bottom-Right Launcher Button */}
       <button
         onClick={() => setIsAiOpen(!isAiOpen)}
-        className="fixed bottom-5 right-5 z-[9990] bg-[#059669] hover:bg-[#047857] text-white px-4 py-3 rounded-full shadow-2xl transition-transform hover:scale-105 flex items-center gap-2 font-bold text-xs cursor-pointer border border-[#A7F3D0]"
+        className="fixed bottom-5 right-5 z-[9990] bg-[var(--primary)] hover:bg-[var(--primary-hover)] text-white px-4 py-3 rounded-full shadow-lg transition-colors flex items-center gap-2 font-bold text-xs cursor-pointer border border-[var(--primary-border)]"
         title="Open AI Assistant Side Popup"
       >
         <Bot className="w-5 h-5 text-white" />

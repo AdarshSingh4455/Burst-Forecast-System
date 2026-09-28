@@ -14,7 +14,7 @@ export const BreakingPointView: React.FC<BreakingPointViewProps> = ({ trustHoriz
   const leadDays = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
 
   return (
-    <div className="h-full w-full overflow-y-auto p-4 space-y-4 bg-[#EEF9F4] text-[#033A2B] select-none">
+    <div className="h-full w-full overflow-y-auto p-4 space-y-4 bg-[#EEF9F4] text-[#033A2B]">
       {/* Top Ultra Light Green Banner Header */}
       <div className="bg-[#F4FAF6] border border-[#C8EAD9] rounded-xl p-4 shadow-xs flex items-center justify-between">
         <div>
@@ -27,7 +27,7 @@ export const BreakingPointView: React.FC<BreakingPointViewProps> = ({ trustHoriz
           </p>
         </div>
 
-        <div className="flex items-center gap-3 text-xs bg-rose-50 border border-rose-200 px-3 py-1.5 rounded-lg text-rose-900 font-bold">
+        <div className="flex items-center gap-3 text-xs bg-rose-50 border border-rose-200 px-3 py-1.5 rounded-lg text-rose-900 font-bold" title="First sustained RED diagnostic transition; not confirmed forecast failure onset.">
           <span>Breaking Point: <strong className="text-rose-600">D{breakingDay}</strong></span>
           <span>|</span>
           <span>Rule: <strong>First RED + Consecutive RED</strong></span>
@@ -36,7 +36,7 @@ export const BreakingPointView: React.FC<BreakingPointViewProps> = ({ trustHoriz
 
       {/* Top Summary Cards */}
       <div className="grid grid-cols-3 gap-4">
-        <div className="bg-white border border-[#C8EAD9] p-4 rounded-xl shadow-xs text-center space-y-1">
+        <div className="bg-white border border-[#C8EAD9] p-4 rounded-xl shadow-xs text-center space-y-1" title="First sustained RED diagnostic transition; not confirmed forecast failure onset.">
           <span className="text-xs font-extrabold text-[#047857] uppercase">First Sustained RED Day</span>
           <p className="text-3xl font-black text-rose-600">D{breakingDay}</p>
           <span className="text-[10px] font-bold text-rose-700 bg-rose-50 px-2 py-0.5 rounded">Breaking Boundary</span>

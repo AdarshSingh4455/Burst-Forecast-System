@@ -488,39 +488,39 @@ export const DecisionSupportView: React.FC<DecisionSupportViewProps> = ({
   };
 
   return (
-    <div className="h-full w-full overflow-y-auto p-4 space-y-4 bg-[#EEF9F4] text-[#033A2B]">
-      {/* Top Ultra Light Green Banner Header */}
-      <div className="bg-[#F4FAF6] border border-[#C8EAD9] rounded-xl p-4 shadow-xs flex flex-wrap items-center justify-between gap-3">
+    <div className="h-full w-full overflow-y-auto p-4 space-y-4 bg-[#F7FAF9] text-[#334155]">
+      {/* Header Banner */}
+      <div className="bg-white border border-[#DDE8E4] rounded-[10px] shadow-[0_1px_2px_rgba(15,39,71,0.04)] p-4 flex flex-wrap items-center justify-between gap-3">
         <div>
           <div className="flex items-center gap-2">
-            <span className="text-[10px] font-extrabold text-[#059669] uppercase tracking-wider">
-              {activeSector === 'dam' 
-                ? 'FORTRESS PHASE 9A — RESERVOIR DECISION SUPPORT' 
-                : activeSector === 'agri' 
-                ? 'FORTRESS PHASE 9B — AGRICULTURE DECISION SUPPORT' 
-                : activeSector === 'disaster' 
-                ? 'FORTRESS PHASE 9C — DISASTER MANAGEMENT DECISION SUPPORT' 
-                : 'FORTRESS PHASE 9D — RENEWABLE GRID DECISION SUPPORT'}
+            <span style={{ fontSize: 11, fontWeight: 600, color: '#64748B', letterSpacing: '0.08em', textTransform: 'uppercase' }}>
+              {activeSector === 'dam'
+                ? 'FORTRESS DECISION SUPPORT — RESERVOIR & DAM'
+                : activeSector === 'agri'
+                ? 'FORTRESS DECISION SUPPORT — AGRICULTURE & CROPS'
+                : activeSector === 'disaster'
+                ? 'FORTRESS DECISION SUPPORT — DISASTER MANAGEMENT'
+                : 'FORTRESS DECISION SUPPORT — RENEWABLE ENERGY & GRID'}
             </span>
-            <span className="bg-emerald-100 border border-emerald-300 text-emerald-800 text-[10px] font-bold px-2 py-0.5 rounded-full flex items-center gap-1">
-              <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
-              {activeSector === 'dam' ? 'DEMO SCENARIO DATA' : activeSector === 'agri' ? 'DEMO AGRICULTURE SCENARIO' : activeSector === 'disaster' ? 'DEMO DISASTER SCENARIO' : 'DEMO RENEWABLE SCENARIO'}
+            <span className="bg-[#ECFDF5] border border-[#A7F3D0] text-[#047857]" style={{ fontSize: 10, fontWeight: 600, padding: '2px 8px', borderRadius: 10, display: 'flex', alignItems: 'center', gap: 4 }}>
+              <span className="w-1.5 h-1.5 rounded-full bg-[#22C55E] animate-pulse inline-block"></span>
+              DECISION ADVISORY
             </span>
           </div>
-          <h1 className="text-xl font-extrabold text-[#044E3A] mt-0.5 tracking-tight flex items-center gap-2">
+          <h1 style={{ fontSize: 22, fontWeight: 700, color: '#0F2747', marginTop: 4, display: 'flex', alignItems: 'center', gap: 8 }}>
             {activeSector === 'dam' ? <Waves className="w-6 h-6 text-[#059669]" /> : activeSector === 'agri' ? <Sprout className="w-6 h-6 text-[#059669]" /> : activeSector === 'disaster' ? <AlertTriangle className="w-6 h-6 text-[#059669]" /> : <Zap className="w-6 h-6 text-[#059669]" />}
             <span>
-              {activeSector === 'dam' 
-                ? 'Reservoir & Dam Decision Support System' 
-                : activeSector === 'agri' 
-                ? 'Agriculture Decision Support System' 
-                : activeSector === 'disaster' 
-                ? 'Disaster Management Decision Support System' 
+              {activeSector === 'dam'
+                ? 'Reservoir & Dam Decision Support System'
+                : activeSector === 'agri'
+                ? 'Agriculture Decision Support System'
+                : activeSector === 'disaster'
+                ? 'Disaster Management Decision Support System'
                 : 'Renewable Grid Decision Support System'}
             </span>
           </h1>
-          <p className="text-xs text-[#065F46] mt-0.5 font-medium">
-            {activeSector === 'dam' 
+          <p style={{ fontSize: 13, color: '#64748B', marginTop: 2, lineHeight: 1.5 }}>
+            {activeSector === 'dam'
               ? 'Hydrometeorological reliability context translation for dam safety monitoring and flood risk mitigation.'
               : activeSector === 'agri'
               ? 'Forecast reliability context for crop-stage and field-operation planning.'
@@ -531,52 +531,52 @@ export const DecisionSupportView: React.FC<DecisionSupportViewProps> = ({
         </div>
 
         <div className="flex items-center gap-2">
-          <span className="bg-[#059669]/10 border border-[#059669]/30 text-[#044E3A] text-xs font-bold px-3 py-1 rounded-lg">
-            Mode B: Field Forecast Context
+          <span className="bg-[#ECFDF5] border border-[#A7F3D0] text-[#047857] text-xs font-semibold px-3 py-1 rounded-lg">
+            Operational Reliability Context
           </span>
-          <span className="bg-slate-100 border border-slate-300 text-slate-700 text-xs font-bold px-3 py-1 rounded-lg">
-            Eastern UP Pilot (24.5-28.5 N, 80.0-84.5 E)
+          <span className="bg-white border border-[#DDE8E4] text-[#334155] text-xs font-semibold px-3 py-1 rounded-lg">
+            Eastern UP Domain (24.5°–28.5°N, 80.0°–84.5°E)
           </span>
         </div>
       </div>
 
       {/* Sector Tabs */}
-      <div className="flex border-b border-[#C8EAD9] bg-white rounded-t-xl p-1 gap-1 text-xs font-bold shadow-xs">
+      <div className="flex border border-[#DDE8E4] bg-white rounded-[10px] p-1 gap-1 text-xs font-semibold shadow-xs">
         <button
           onClick={() => setActiveSector('dam')}
-          className={`flex-1 py-2 px-3 rounded-lg flex items-center justify-center gap-2 transition-colors ${
-            activeSector === 'dam' ? 'bg-[#059669] text-white shadow-xs' : 'text-[#065F46] hover:bg-[#EEF9F4]'
+          className={`flex-1 py-2 px-3 rounded-[8px] flex items-center justify-center gap-2 transition-colors cursor-pointer ${
+            activeSector === 'dam' ? 'bg-[#059669] text-white shadow-xs font-bold' : 'text-[#334155] hover:bg-[#F1F5F4]'
           }`}
         >
           <Waves className="w-4 h-4" />
-          <span>Dam / Reservoir (Phase 9A Active)</span>
+          <span>Dam / Reservoir</span>
         </button>
         <button
           onClick={() => setActiveSector('agri')}
-          className={`flex-1 py-2 px-3 rounded-lg flex items-center justify-center gap-2 transition-colors ${
-            activeSector === 'agri' ? 'bg-[#059669] text-white shadow-xs' : 'text-[#065F46] hover:bg-[#EEF9F4]'
+          className={`flex-1 py-2 px-3 rounded-[8px] flex items-center justify-center gap-2 transition-colors cursor-pointer ${
+            activeSector === 'agri' ? 'bg-[#059669] text-white shadow-xs font-bold' : 'text-[#334155] hover:bg-[#F1F5F4]'
           }`}
         >
           <Sprout className="w-4 h-4" />
-          <span>Agriculture (Phase 9B Active)</span>
+          <span>Agriculture</span>
         </button>
         <button
           onClick={() => setActiveSector('disaster')}
-          className={`flex-1 py-2 px-3 rounded-lg flex items-center justify-center gap-2 transition-colors ${
-            activeSector === 'disaster' ? 'bg-[#059669] text-white shadow-xs' : 'text-[#065F46] hover:bg-[#EEF9F4]'
+          className={`flex-1 py-2 px-3 rounded-[8px] flex items-center justify-center gap-2 transition-colors cursor-pointer ${
+            activeSector === 'disaster' ? 'bg-[#059669] text-white shadow-xs font-bold' : 'text-[#334155] hover:bg-[#F1F5F4]'
           }`}
         >
           <AlertTriangle className="w-4 h-4" />
-          <span>Disaster Management (Phase 9C Active)</span>
+          <span>Disaster Management</span>
         </button>
         <button
           onClick={() => setActiveSector('grid')}
-          className={`flex-1 py-2 px-3 rounded-lg flex items-center justify-center gap-2 transition-colors ${
-            activeSector === 'grid' ? 'bg-[#059669] text-white shadow-xs' : 'text-[#065F46] hover:bg-[#EEF9F4]'
+          className={`flex-1 py-2 px-3 rounded-[8px] flex items-center justify-center gap-2 transition-colors cursor-pointer ${
+            activeSector === 'grid' ? 'bg-[#059669] text-white shadow-xs font-bold' : 'text-[#334155] hover:bg-[#F1F5F4]'
           }`}
         >
           <Zap className="w-4 h-4" />
-          <span>Renewable Grid (Phase 9D Active)</span>
+          <span>Renewable Grid</span>
         </button>
       </div>
 

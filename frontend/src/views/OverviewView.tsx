@@ -456,7 +456,7 @@ export const OverviewView: React.FC<OverviewViewProps> = ({
           {[
             { icon: Waves, sector: 'Reservoirs', text: 'Normal rule curve through D4; pre-release planning advised from D5.' },
             { icon: Leaf,  sector: 'Agriculture', text: 'Window safe for field operations D1–D3; prepare drainage D5+.' },
-            { icon: Zap,   sector: 'Grid', text: 'Solar irradiance stable; anticipate ramping fluctuations D6–D8.' },
+            { icon: Zap,   sector: 'Grid', text: 'Wind forecast reliability stable; anticipate ramping fluctuations D6–D8.' },
           ].map(({ icon: Icon, sector, text }) => (
             <span key={sector} style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 12, color: '#334155', flexShrink: 0 }}>
               <Icon style={{ width: 13, height: 13, color: '#059669', flexShrink: 0 }} />

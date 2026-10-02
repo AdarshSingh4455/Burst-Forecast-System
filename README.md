@@ -119,16 +119,19 @@ The agreement between the primary AI signal and independent evidence streams res
 
 ## Validation & Benchmarks
 
-The multi-region model was evaluated across historical forecast initializations with chronologically separated training and testing splits:
+The multi-region model was evaluated across selected initialization samples spanning 2017–2019 (not a continuous full 3-year climatology) with chronologically separated training and testing splits:
 
 * **Total Dataset**: 348,840 forecast state rows
 * **Held-out Test Sample**: 116,280 rows (evaluated on unseen initialization dates across all three prototype regions)
-* **Calibrated Held-out Test Metrics**:
-  - **ROC-AUC**: `0.8561`
-  - **PR-AUC**: `0.6408`
-  - **Brier Score**: `0.1178`
+* **Model Evaluation Metrics on Held-out Test Data**:
 
-*Note on Calibration*: Isotonic calibration aligns predicted probabilities with observed empirical frequencies; it is not claimed to arbitrarily minimize Brier score over raw uncalibrated predictions.
+| Metric | Raw Uncalibrated Model | Calibrated Model (Isotonic) |
+| :--- | :---: | :---: |
+| **ROC-AUC** | 0.8567 | 0.8561 |
+| **PR-AUC** | 0.6408 | 0.6408 |
+| **Brier Score** | 0.1173 | 0.1178 |
+
+*Note on Calibration*: Isotonic calibration aligns predicted probabilities with observed empirical frequencies for probability reliability and interpretability; it does not claim to arbitrarily minimize Brier score over raw uncalibrated predictions.
 
 ---
 
@@ -165,7 +168,7 @@ FORTRESS/
 │       ├── reservoir_service.py        # Dam & reservoir decision logic
 │       ├── agriculture_service.py      # Agro-advisory recommendation logic
 │       ├── disaster_service.py         # Disaster preparedness advisory logic
-│       ├── renewable_service.py        # Wind & solar grid impact logic
+│       ├── renewable_service.py        # Wind reliability & renewable/grid decision-support logic
 │       ├── phase11_service.py          # Multi-region data provider
 │       ├── assistant_service.py        # Multilingual explanation provider
 │       └── schemas.py                  # Pydantic request/response schemas
@@ -189,7 +192,8 @@ FORTRESS/
 │   ├── tsconfig.json
 │   └── vite.config.ts
 ├── models/
-│   ├── fortress_bust_model_phase11.pkl # Calibrated multi-region Random Forest model
+│   ├── fortress_bust_model_phase11.pkl # Production calibrated multi-region model
+│   ├── fortress_bust_model.pkl         # Pilot baseline model
 │   └── fortress_ood_model.pkl          # IsolationForest novelty detection model
 ├── scripts/
 │   ├── train_bust_risk_ai_phase11.py   # Multi-region model training script
@@ -290,7 +294,7 @@ FORTRESS provides operational risk interpretation across four key sectors:
 1. **Reservoir & Dam Management**: Monitored pre-release advisories and inflow uncertainty assessments.
 2. **Agriculture & Farmers**: Sowing and harvesting vulnerability windows based on rainfall reliability.
 3. **Disaster Preparedness**: Pre-positioning warnings and lead-time alert reliability for state relief agencies.
-4. **Renewable Energy Grid**: Wind generation and solar irradiance forecast confidence indices.
+4. **Renewable Energy Grid**: Surface wind speed reliability and grid stability decision-support indices (Note: direct solar irradiance forecasting is not integrated in the prototype).
 
 > **Operational Guardrail**: All advisories are for decision-support and risk context only. FORTRESS does not issue official weather warnings and does not perform automatic operational control or physical actuation.
 

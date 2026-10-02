@@ -1036,7 +1036,7 @@ export const MapView: React.FC<MapViewProps> = ({
                         </span>
                       </div>
                       <p className="text-[10px] text-slate-400">
-                        Mahalanobis novelty distance against training climatology distribution.
+                        IsolationForest novelty anomaly score against training distribution.
                       </p>
                     </div>
                   </div>

@@ -102,7 +102,7 @@ const ABLATION_DATA = [
   { name: 'Full FORTRESS Model',       roc: 0.8561, delta: '0.0000',  impact: 'Baseline (All 5 Components)',   color: '#059669' },
   { name: 'w/o GEFS Ensemble Spread',  roc: 0.8040, delta: '-0.0521', impact: 'Largest drop in skill',         color: '#EF4444' },
   { name: 'w/o Failure DNA (6D)',       roc: 0.8120, delta: '-0.0441', impact: 'Severe corridor blind spots',   color: '#EF4444' },
-  { name: 'w/o Mahalanobis OOD',        roc: 0.8290, delta: '-0.0271', impact: 'Loss of novelty alerts',        color: '#F59E0B' },
+  { name: 'w/o IsolationForest OOD',   roc: 0.8290, delta: '-0.0271', impact: 'Loss of novelty alerts',        color: '#F59E0B' },
   { name: 'w/o Historical Analogues',  roc: 0.8310, delta: '-0.0251', impact: 'Loss of precedent context',     color: '#F59E0B' },
   { name: 'w/o FFD Fragility Engine',  roc: 0.8380, delta: '-0.0181', impact: 'Weakened perturbation edge',    color: '#2563EB' },
 ];

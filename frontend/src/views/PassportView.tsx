@@ -311,7 +311,7 @@ export const PassportView: React.FC<PassportViewProps> = ({ passport }) => {
             {[
               { label: 'P(Bust) Model Output', val: `${bustPct}%`, sub: 'Calibrated Random Forest + Isotonic Calibration — lead-specific Q95' },
               { label: 'FFD Score', val: `${ffd}`, sub: 'Forecast Failure Distance — perturbation metric' },
-              { label: 'OOD Score', val: p ? `${p?.trust_index || 42}` : '42.5', sub: 'Mahalanobis novelty distance' },
+              { label: 'OOD Score', val: p ? `${p?.trust_index || 42}` : '42.5', sub: 'IsolationForest novelty score' },
               { label: 'Ensemble Disagreement', val: '38%', sub: 'GEFS variance — uncertainty indicator' },
               { label: 'Analogue Bust Rate', val: '71%', sub: '14 matched reforecast cases' },
               { label: 'DNA Similarity', val: '0.78', sub: 'Fingerprint cluster match score' },

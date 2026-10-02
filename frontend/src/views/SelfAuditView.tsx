@@ -571,7 +571,7 @@ export const SelfAuditView: React.FC<SelfAuditViewProps> = ({ selfAudit, pointDe
                   { label: 'P(Bust) Model Confidence', val: `${(pBust * 100).toFixed(0)}%`, color: '#EF4444' },
                   { label: 'Analogue Mean Bust Rate', val: '71%', color: '#059669' },
                   { label: 'GEFS Disagreement Variance', val: `${(ensDisag * 100).toFixed(0)}%`, color: '#F59E0B' },
-                  { label: 'Mahalanobis OOD Score', val: oodSc.toFixed(1), color: '#2563EB' },
+                  { label: 'IsolationForest OOD Score', val: oodSc.toFixed(1), color: '#2563EB' },
                   { label: 'DNA Fingerprint Similarity', val: '0.78', color: '#7C3AED' }
                 ].map((item, i) => (
                   <div key={i} className="flex justify-between items-center bg-[#F7FAF9] border border-[#DDE8E4] p-2.5 rounded-lg">

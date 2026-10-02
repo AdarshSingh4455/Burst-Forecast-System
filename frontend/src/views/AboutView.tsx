@@ -36,7 +36,7 @@ export const AboutView: React.FC = () => {
           </h3>
           <ul className="space-y-1.5 text-[#065F46]">
             <li>• <strong>Data Pipeline:</strong> GEFSv12 Reforecast &amp; ERA5 Atmospheric Predictor Processing</li>
-            <li>• <strong>Ground Truth Engine:</strong> Historical Forecast Verification &amp; Lead-wise Bust Labeling</li>
+            <li>• <strong>Reference Verification Engine:</strong> Historical Forecast Verification &amp; Lead-wise Bust Labeling</li>
             <li>• <strong>Reliability Engine:</strong> Calibrated Random Forest Bust Probability Modeling</li>
             <li>• <strong>Diagnostic Lab:</strong> Meteorological Stress Testing &amp; Forecast Failure Distance (FFD)</li>
             <li>• <strong>Corridor Detection:</strong> Synoptic Failure Clustering &amp; 6D Failure Fingerprinting</li>

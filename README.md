@@ -163,42 +163,42 @@ The multi-region model was evaluated across selected initialization samples span
 FORTRESS/
 ├── backend/
 │   └── app/
-│       ├── main.py                     # FastAPI application entry point & routing
-│       ├── data_service.py             # Forecast data loader & query engine
-│       ├── reservoir_service.py        # Dam & reservoir decision logic
-│       ├── agriculture_service.py      # Agro-advisory recommendation logic
-│       ├── disaster_service.py         # Disaster preparedness advisory logic
-│       ├── renewable_service.py        # Wind reliability & renewable/grid decision-support logic
-│       ├── phase11_service.py          # Multi-region data provider
-│       ├── assistant_service.py        # Multilingual explanation provider
-│       └── schemas.py                  # Pydantic request/response schemas
+│       ├── main.py
+│       ├── data_service.py
+│       ├── reservoir_service.py
+│       ├── agriculture_service.py
+│       ├── disaster_service.py
+│       ├── renewable_service.py
+│       ├── phase11_service.py
+│       ├── assistant_service.py
+│       └── schemas.py
 ├── configs/
-│   └── regions.json                    # Geospatial bounding boxes for prototype domains
+│   └── regions.json
 ├── data/
-│   └── processed/                      # Parquet datasets, matrices, and metadata manifests
+│   └── processed/
 ├── docs/
-│   ├── figures/                        # Validation plots, calibration curves, distributions
-│   ├── final_feature_inventory.md      # Complete dictionary of computed metrics
-│   ├── final_judge_qa.md               # Evaluator questions and scientific explanations
-│   └── final_research_references.md    # Meteorological & ML literature bibliography
+│   ├── figures/
+│   ├── final_feature_inventory.md
+│   ├── final_judge_qa.md
+│   └── final_research_references.md
 ├── frontend/
 │   ├── src/
-│   │   ├── components/                 # MapView, Header, Sidebar, TrustStrip, etc.
-│   │   ├── context/                    # ThemeContext (Light/Dark mode)
-│   │   ├── views/                      # Dashboard, Analytics, StressLab, Passport, etc.
-│   │   ├── lib/api.ts                  # Typed API client
-│   │   └── types/index.ts              # TypeScript interface definitions
+│   │   ├── components/
+│   │   ├── context/
+│   │   ├── views/
+│   │   ├── lib/api.ts
+│   │   └── types/index.ts
 │   ├── package.json
 │   ├── tsconfig.json
 │   └── vite.config.ts
 ├── models/
-│   ├── fortress_bust_model_phase11.pkl # Production calibrated multi-region model
-│   ├── fortress_bust_model.pkl         # Pilot baseline model
-│   └── fortress_ood_model.pkl          # IsolationForest novelty detection model
+│   ├── fortress_bust_model_phase11.pkl
+│   ├── fortress_bust_model.pkl
+│   └── fortress_ood_model.pkl
 ├── scripts/
-│   ├── train_bust_risk_ai_phase11.py   # Multi-region model training script
-│   ├── run_stress_lab.py               # Perturbation stress-testing generator
-│   └── validate_phase12_final.py       # Automated regression test & invariant suite
+│   ├── train_bust_risk_ai_phase11.py
+│   ├── run_stress_lab.py
+│   └── validate_phase12_final.py
 ├── tests/
 │   ├── test_agriculture_decision_support.py
 │   ├── test_disaster_decision_support.py

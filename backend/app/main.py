@@ -328,7 +328,7 @@ def get_passport(
     return passport
 
 # ============================================================
-# PHASE 9A — RESERVOIR DECISION SUPPORT ENDPOINTS
+# RESERVOIR DECISION SUPPORT ENDPOINTS
 # ============================================================
 
 @app.get("/api/reservoirs")
@@ -384,7 +384,7 @@ def post_reservoir_scenario(
     return res
 
 # ============================================================
-# PHASE 9B — AGRICULTURE DECISION SUPPORT ENDPOINTS
+# AGRICULTURE DECISION SUPPORT ENDPOINTS
 # ============================================================
 
 @app.get("/api/agriculture")
@@ -443,7 +443,7 @@ def post_agriculture_scenario(
     return res
 
 # ============================================================
-# PHASE 9C — DISASTER MANAGEMENT DECISION SUPPORT ENDPOINTS
+# DISASTER MANAGEMENT DECISION SUPPORT ENDPOINTS
 # ============================================================
 
 @app.get("/api/disaster")
@@ -502,7 +502,7 @@ def post_disaster_scenario(
     return res
 
 # ============================================================
-# PHASE 9D — RENEWABLE ENERGY / GRID DECISION SUPPORT ENDPOINTS
+# RENEWABLE ENERGY / GRID DECISION SUPPORT ENDPOINTS
 # ============================================================
 
 @app.get("/api/renewable")
@@ -560,7 +560,7 @@ def post_renewable_scenario(
     return res
 
 # ============================================================
-# PHASE 10A — MULTILINGUAL ASSISTANT ENDPOINT
+# MULTILINGUAL ASSISTANT ENDPOINT
 # ============================================================
 
 @app.post("/api/assistant/explain", response_model=AssistantExplainResponse)
@@ -579,7 +579,7 @@ def post_assistant_explain(body: AssistantExplainRequest):
     return res
 
 # ============================================================
-# PHASE 11I — MULTI-REGION API ENDPOINTS
+# MULTI-REGION API ENDPOINTS
 # ============================================================
 
 @app.get("/api/phase11/regions")

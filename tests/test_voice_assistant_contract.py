@@ -82,7 +82,7 @@ class TestVoiceAssistantContract(unittest.TestCase):
         self.assertIn("issue grid dispatch instructions", res["answer"])
 
     def test_11_text_assistant_unchanged(self):
-        # Ensure Phase 10A text functionality works 100% identically
+        # Verify text assistant functionality works identically
         res = assistant_service.explain("What is FFD?", language="en", forecast_init=self.init_run)
         self.assertEqual(res["intent"], "FFD_STRESS")
         self.assertIn("experimental diagnostic", res["answer"])

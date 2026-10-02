@@ -250,7 +250,7 @@ export interface TrustHorizonResponse {
   stability_status: string;
 }
 
-// Phase 9A Reservoir Decision Support Interfaces
+// Reservoir Decision Support Interfaces
 export interface ReservoirSummary {
   reservoir_id: string;
   name: string;
@@ -343,7 +343,7 @@ export interface ReservoirScenarioResponse {
   data_mode: string;
 }
 
-// Phase 9B Agriculture Decision Support Interfaces
+// Agriculture Decision Support Interfaces
 export interface AgricultureSummary {
   agri_id: string;
   name: string;
@@ -458,7 +458,7 @@ export interface AgricultureScenarioResponse {
   data_mode: string;
 }
 
-// Phase 9C Disaster Management Decision Support Interfaces
+// Disaster Management Decision Support Interfaces
 export interface DisasterSummary {
   scenario_id: string;
   name: string;
@@ -573,7 +573,7 @@ export interface DisasterScenarioResponse {
   data_mode: string;
 }
 
-// Phase 9D Renewable Energy / Grid Decision Support Interfaces
+// Renewable Energy / Grid Decision Support Interfaces
 export interface RenewableSummary {
   scenario_id: string;
   name: string;

@@ -215,7 +215,7 @@ class ReservoirScenarioResponse(BaseModel):
     data_mode: str
 
 # ============================================================
-# PHASE 9B — AGRICULTURE DECISION SUPPORT SCHEMAS
+# AGRICULTURE DECISION SUPPORT SCHEMAS
 # ============================================================
 
 class AgricultureSummary(BaseModel):
@@ -344,7 +344,7 @@ class AgricultureScenarioResponse(BaseModel):
     reasons: List[str]
     data_mode: str
 
-# Phase 9C Disaster Management Decision Support Schemas
+# Disaster Management Decision Support Schemas
 class DisasterSummary(BaseModel):
     scenario_id: str
     name: str
@@ -468,7 +468,7 @@ class DisasterScenarioResponse(BaseModel):
     data_mode: str
 
 # ============================================================
-# PHASE 9D — RENEWABLE ENERGY / GRID DECISION SUPPORT SCHEMAS
+# RENEWABLE ENERGY / GRID DECISION SUPPORT SCHEMAS
 # ============================================================
 
 class RenewableSummary(BaseModel):
@@ -593,7 +593,7 @@ class RenewableScenarioResponse(BaseModel):
     data_mode: str
 
 # ============================================================
-# PHASE 10A — MULTILINGUAL ASSISTANT SCHEMAS
+# MULTILINGUAL ASSISTANT SCHEMAS
 # ============================================================
 
 class AssistantExplainRequest(BaseModel):

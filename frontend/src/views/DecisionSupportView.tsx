@@ -60,7 +60,7 @@ export const DecisionSupportView: React.FC<DecisionSupportViewProps> = ({
   const [forecastInit, setForecastInit] = useState<string>('');
   const [leadDay, setLeadDay] = useState<number>(1);
 
-  // State for Dam Decision Support (Phase 9A)
+  // State for Dam Decision Support
   const [reservoirs, setReservoirs] = useState<ReservoirSummary[]>([]);
   const [selectedReservoirId, setSelectedReservoirId] = useState<string>('RES_MEJA');
   const [reservoirScenarioKey, setReservoirScenarioKey] = useState<string>('NORMAL');
@@ -70,7 +70,7 @@ export const DecisionSupportView: React.FC<DecisionSupportViewProps> = ({
   const [whatIfInflow, setWhatIfInflow] = useState<number>(300);
   const [whatIfDamResult, setWhatIfDamResult] = useState<ReservoirScenarioResponse | null>(null);
 
-  // State for Agriculture Decision Support (Phase 9B)
+  // State for Agriculture Decision Support
   const [agricultureScenarios, setAgricultureScenarios] = useState<AgricultureSummary[]>([]);
   const [selectedAgriId, setSelectedAgriId] = useState<string>('AGRI_EUP_01');
   const [agriCrop, setAgriCrop] = useState<string>('Rice');
@@ -83,7 +83,7 @@ export const DecisionSupportView: React.FC<DecisionSupportViewProps> = ({
   const [agriForecastContext, setAgriForecastContext] = useState<AgricultureForecastContextResponse | null>(null);
   const [whatIfAgriResult, setWhatIfAgriResult] = useState<AgricultureScenarioResponse | null>(null);
 
-  // State for Disaster Management Decision Support (Phase 9C)
+  // State for Disaster Management Decision Support
   const [disasterScenarios, setDisasterScenarios] = useState<DisasterSummary[]>([]);
   const [selectedDisasterId, setSelectedDisasterId] = useState<string>('DISASTER_EUP_01');
   const [disasterHazard, setDisasterHazard] = useState<string>('FLOOD_PREPAREDNESS');
@@ -96,7 +96,7 @@ export const DecisionSupportView: React.FC<DecisionSupportViewProps> = ({
   const [disasterForecastContext, setDisasterForecastContext] = useState<DisasterForecastContextResponse | null>(null);
   const [whatIfDisasterResult, setWhatIfDisasterResult] = useState<DisasterScenarioResponse | null>(null);
 
-  // State for Renewable Energy / Grid Decision Support (Phase 9D)
+  // State for Renewable Energy / Grid Decision Support
   const [renewableScenarios, setRenewableScenarios] = useState<RenewableSummary[]>([]);
   const [selectedRenewableId, setSelectedRenewableId] = useState<string>('RENEW_EUP_01');
   const [renewableTech, setRenewableTech] = useState<string>('WIND');

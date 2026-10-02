@@ -189,7 +189,7 @@ export async function fetchPassport(forecastInit: string, leadDay: number, lat: 
   return fetchPassportData(forecastInit, lat, lon, leadDay);
 }
 
-// Phase 9A Reservoir API Functions
+// Reservoir API Functions
 export async function fetchReservoirs(): Promise<ReservoirSummary[]> {
   return apiFetch<ReservoirSummary[]>('/reservoirs');
 }
@@ -245,7 +245,7 @@ export async function postReservoirScenario(
   return res.json();
 }
 
-// Phase 9B Agriculture API Functions
+// Agriculture API Functions
 export async function fetchAgricultureScenarios(): Promise<AgricultureSummary[]> {
   return apiFetch<AgricultureSummary[]>('/agriculture');
 }
@@ -307,7 +307,7 @@ export async function postAgricultureScenario(
   return res.json();
 }
 
-// Phase 9C Disaster Management API Functions
+// Disaster Management API Functions
 export async function fetchDisasterScenarios(): Promise<DisasterSummary[]> {
   return apiFetch<DisasterSummary[]>('/disaster');
 }
@@ -369,7 +369,7 @@ export async function postDisasterScenario(
   return res.json();
 }
 
-// Phase 9D Renewable Energy / Grid Decision Support API Functions
+// Renewable Energy / Grid Decision Support API Functions
 export async function fetchRenewableScenarios(): Promise<RenewableSummary[]> {
   return apiFetch<RenewableSummary[]>('/renewable');
 }

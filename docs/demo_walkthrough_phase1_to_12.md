@@ -44,7 +44,7 @@ This document details the step-by-step live demonstration flow for judging prese
 
 ### Step 9: Trust Horizon Timeline
 - **Action**: Inspect the Trust Horizon bar (D1–D10).
-- **Explain**: Show how FORTRESS identifies the contiguous safe forecast window before model degradation.
+- **Explain**: Show how FORTRESS identifies the contiguous reliable forecast window before model degradation.
 
 ### Step 10: Breaking Point Identification
 - **Action**: Highlight the Breaking Point lead day warning indicator.

@@ -93,7 +93,7 @@ def main():
 
     try:
         branch = subprocess.check_output(["git", "rev-parse", "--abbrev-ref", "HEAD"], text=True).strip()
-        check(branch in ["phase12-scientific-validation", "main"], "Check 29: Git branch expected")
+        check(branch in ["phase12-scientific-validation", "main", "final-repo-cleanup"], "Check 29: Git branch expected")
     except Exception:
         check(False, "Check 29: Git branch expected")
 

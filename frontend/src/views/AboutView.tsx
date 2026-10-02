@@ -3,7 +3,7 @@ import { Info } from 'lucide-react';
 
 export const AboutView: React.FC = () => {
   return (
-    <div className="h-full w-full overflow-y-auto p-4 space-y-4 bg-[#EEF9F4] text-[#033A2B] select-none">
+    <div className="h-full w-full overflow-y-auto p-4 space-y-4 bg-[#EEF9F4] text-[#033A2B]">
       {/* Top Ultra Light Green Banner Header */}
       <div className="bg-[#F4FAF6] border border-[#C8EAD9] rounded-xl p-4 shadow-xs flex items-center justify-between">
         <div>
@@ -13,12 +13,12 @@ export const AboutView: React.FC = () => {
             About FORTRESS
           </h1>
           <p className="text-xs text-[#065F46] mt-0.5 font-medium">
-            Forecast Reliability Stress-Testing & Self-Audit System (SIH26079)
+            Forecast Reliability Stress-Testing & Self-Audit System
           </p>
         </div>
 
         <div className="bg-[#D4F0E2] border border-[#C8EAD9] px-3 py-1.5 rounded-lg text-xs font-bold text-[#044E3A]">
-          Team Cyber Greecks // SIH26079
+          Team Cyber Greecks
         </div>
       </div>
 
@@ -35,14 +35,14 @@ export const AboutView: React.FC = () => {
             System Architecture Overview
           </h3>
           <ul className="space-y-1.5 text-[#065F46]">
-            <li>• <strong>Phase 1:</strong> GEFSv12 Reforecast Data Pipeline & Atmospheric Predictor Processing</li>
-            <li>• <strong>Phase 2:</strong> Historical Forecast Error Calculation & Lead-wise Bust Labeling</li>
-            <li>• <strong>Phase 3:</strong> Bust Risk AI Engine (XGBoost / LightGBM)</li>
-            <li>• <strong>Phase 4:</strong> Meteorological Stress Testing Lab & Forecast Failure Distance (FFD)</li>
-            <li>• <strong>Phase 5:</strong> Failure Corridor Clustering & 6D Failure Fingerprinting</li>
-            <li>• <strong>Phase 6:</strong> Independent Evidence Layer (KNN Analogues & Cosine Failure DNA)</li>
-            <li>• <strong>Phase 7:</strong> AI Self-Audit & Trust Horizon Sequence Engine</li>
-            <li>• <strong>Phase 8:</strong> FastAPI Backend & Full Green Geographical Interactive Dashboard</li>
+            <li>• <strong>Data Pipeline:</strong> GEFSv12 Reforecast &amp; ERA5 Atmospheric Predictor Processing</li>
+            <li>• <strong>Reference Verification Engine:</strong> Historical Forecast Verification &amp; Lead-wise Bust Labeling</li>
+            <li>• <strong>Reliability Engine:</strong> Calibrated Random Forest Bust Probability Modeling</li>
+            <li>• <strong>Diagnostic Lab:</strong> Meteorological Stress Testing &amp; Forecast Failure Distance (FFD)</li>
+            <li>• <strong>Corridor Detection:</strong> Synoptic Failure Clustering &amp; 6D Failure Fingerprinting</li>
+            <li>• <strong>Independent Evidence:</strong> Spatial KNN Analogues &amp; Cosine Failure DNA Matching</li>
+            <li>• <strong>Safety Verification:</strong> AI Self-Audit &amp; Trust Horizon Sequence Engine</li>
+            <li>• <strong>Operational UI:</strong> FastAPI Architecture &amp; Geospatial Decision Intelligence Dashboard</li>
           </ul>
         </div>
 

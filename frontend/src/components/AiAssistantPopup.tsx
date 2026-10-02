@@ -104,9 +104,10 @@ export const AiAssistantPopup: React.FC<AiAssistantPopupProps> = ({
     }
     return [
       'Why is this forecast risky?',
-      'How reliable is D5?',
-      'Why is FFD small?',
-      'When does reliability deteriorate?'
+      'Explain the Self-Audit result.',
+      'What is the Trust Horizon?',
+      'Summarize this forecast for an operator.',
+      'D5 pe forecast risky kyun hai?'
     ];
   };
 
@@ -204,23 +205,17 @@ export const AiAssistantPopup: React.FC<AiAssistantPopupProps> = ({
       />
 
       {/* Side Slide-Over Drawer */}
-      <div className="fixed top-0 right-0 h-full w-[440px] max-w-[95vw] bg-white border-l border-[#C8EAD9] shadow-2xl z-[9999] flex flex-col flex-shrink-0 select-none animate-in slide-in-from-right duration-300">
+      <div className="fixed top-0 right-0 h-full w-[440px] max-w-[95vw] bg-white border-l border-[#C8EAD9] shadow-2xl z-[9999] flex flex-col flex-shrink-0 animate-in slide-in-from-right duration-300">
         
         {/* Header */}
-        <div className="p-3.5 bg-[#F4FAF6] border-b border-[#C8EAD9] flex items-center justify-between flex-shrink-0">
-          <div className="flex items-center gap-2.5">
-            <div className="w-9 h-9 rounded-xl bg-[#059669] text-white flex items-center justify-center shadow-xs">
-              <Bot className="w-5 h-5" />
+        <div className="p-3 bg-[#F4FAF6] border-b border-[#C8EAD9] flex items-center justify-between flex-shrink-0">
+          <div className="flex items-center gap-2">
+            <div className="w-8 h-8 rounded-lg bg-[#059669] text-white flex items-center justify-center shadow-xs">
+              <Bot className="w-4 h-4" />
             </div>
-            <div>
-              <h2 className="font-extrabold text-[#044E3A] text-sm flex items-center gap-1.5">
-                FORTRESS Assistant — Prototype
-                <span className="text-[9px] bg-[#D4F0E2] text-[#047857] px-1.5 py-0.5 rounded font-extrabold">Phase 10B Voice</span>
-              </h2>
-              <p className="text-[10px] text-[#065F46] font-medium">
-                Context-grounded forecast reliability explanation
-              </p>
-            </div>
+            <h2 className="font-extrabold text-[#044E3A] text-sm">
+              FORTRESS Assistant
+            </h2>
           </div>
 
           <div className="flex items-center gap-1">
@@ -266,7 +261,7 @@ export const AiAssistantPopup: React.FC<AiAssistantPopupProps> = ({
             </div>
           </div>
 
-          {/* Auto-Speak Toggle */}
+          {/* Voice Assistance (Auto-Speak Toggle) */}
           {isSpeechSynthesisSupported && (
             <button
               onClick={toggleAutoSpeak}
@@ -281,22 +276,6 @@ export const AiAssistantPopup: React.FC<AiAssistantPopupProps> = ({
               <span>{autoSpeak ? 'Auto-Speak ON' : 'Auto-Speak OFF'}</span>
             </button>
           )}
-        </div>
-
-        {/* Active Context Card */}
-        <div className="mx-3.5 mt-2.5 p-2 bg-[#EEF9F4] border border-[#C8EAD9] rounded-xl text-[11px] space-y-1">
-          <div className="flex items-center justify-between text-[#044E3A] font-bold border-b border-[#C8EAD9]/60 pb-1">
-            <span className="uppercase text-[9.5px] tracking-wider text-[#059669] font-extrabold flex items-center gap-1">
-              <CheckCircle2 className="w-3 h-3" /> CURRENT CONTEXT
-            </span>
-            <span className="text-[10px] text-[#065F46] font-semibold">{activeView || 'Overview'}</span>
-          </div>
-          <div className="grid grid-cols-2 gap-1 text-[#065F46]">
-            <div><span className="font-semibold text-[#044E3A]">Run:</span> {selectedRun.split(' ')[0]}</div>
-            <div><span className="font-semibold text-[#044E3A]">Lead:</span> D{selectedLead}</div>
-            <div><span className="font-semibold text-[#044E3A]">Grid:</span> {currentLat.toFixed(2)}°N, {currentLon.toFixed(2)}°E</div>
-            <div><span className="font-semibold text-[#044E3A]">Domain:</span> {((24.5 <= currentLat && currentLat <= 28.5) && (80.0 <= currentLon && currentLon <= 84.5)) ? 'Eastern UP Pilot' : 'Outside Pilot'}</div>
-          </div>
         </div>
 
         {/* Speech Error Banner if any */}
